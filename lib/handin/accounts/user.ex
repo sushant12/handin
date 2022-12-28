@@ -139,4 +139,8 @@ defmodule Handin.Accounts.User do
       add_error(changeset, :current_password, "is not valid")
     end
   end
+
+  def verified?(%Handin.Accounts.User{} = user) do
+    if user.confirmed_at, do: user
+  end
 end

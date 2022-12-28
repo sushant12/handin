@@ -3,7 +3,6 @@ defmodule HandinWeb.UserRegistrationController do
 
   alias Handin.Accounts
   alias Handin.Accounts.User
-  alias HandinWeb.UserAuth
 
   def new(conn, _params) do
     changeset = Accounts.change_user_registration(%User{})
@@ -20,8 +19,8 @@ defmodule HandinWeb.UserRegistrationController do
           )
 
         conn
-        |> put_flash(:info, "User created successfully.")
-        |> UserAuth.log_in_user(user)
+        |> put_flash(:info, "Please verify your account before signing in.")
+        |> redirect(to: Routes.user_session_path(conn, :new))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
