@@ -8,6 +8,7 @@ defmodule Handin.Accounts.User do
     field :password_confirmation, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+    field :role, :string, default: "student"
 
     timestamps()
   end

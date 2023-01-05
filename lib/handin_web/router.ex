@@ -1,4 +1,5 @@
 defmodule HandinWeb.Router do
+  alias HandinWeb.Plugs.CheckAdmin
   use HandinWeb, :router
 
   import HandinWeb.UserAuth
@@ -15,6 +16,10 @@ defmodule HandinWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  pipeline :admin do
+    plug CheckAdmin
   end
 
   scope "/", HandinWeb do
@@ -88,5 +93,16 @@ defmodule HandinWeb.Router do
     post "/users/confirm", UserConfirmationController, :create
     get "/users/confirm/:token", UserConfirmationController, :edit
     post "/users/confirm/:token", UserConfirmationController, :update
+  end
+
+  scope "/admin", HandinWeb.Admin, as: :admin do
+    pipe_through [:browser, :admin]
+
+    # something will happen at "/"
+    resources "/", PageController, except: [:show]
+
+    get "/log_in", UserSessionController, :new
+    post "/log_in", UserSessionController, :create
+
   end
 end
