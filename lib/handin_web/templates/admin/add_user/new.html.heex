@@ -1,0 +1,18 @@
+<h1>Add user</h1>
+<.form let={f} for={@conn} action={Routes.admin_add_user_path(@conn, :create)}>
+  <%= if @error_message do %>
+    <div class="alert alert-danger">
+      <p><%= @error_message %></p>
+    </div>
+  <% end %>
+
+  <%= label f, :email %>
+  <%= email_input f, :email, required: true %>
+
+  <%= label f, :select_role %>
+  <%= select f, :role, ["admin", "student", "course_admin", "teaching_assistant"], required: :true %>
+
+  <div>
+    <%= submit "Add user" %>
+  </div>
+</.form>

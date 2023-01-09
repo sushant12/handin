@@ -302,7 +302,7 @@ defmodule Handin.Accounts do
   """
   def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)
       when is_function(reset_password_url_fun, 1) do
-    {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
+        {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
     Repo.insert!(user_token)
     UserNotifier.deliver_reset_password_instructions(user, reset_password_url_fun.(encoded_token))
   end
@@ -342,6 +342,7 @@ defmodule Handin.Accounts do
   """
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
+    |> Ecto.Multi.update(:user_confirm, User.confirm_changeset(user))
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
     |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
     |> Repo.transaction()
@@ -349,5 +350,11 @@ defmodule Handin.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  def register_user_by_admin(attrs) do
+    %User{}
+    |> User.registration_by_admin_changeset(attrs)
+    |> Repo.insert()
   end
 end

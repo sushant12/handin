@@ -37,6 +37,13 @@ defmodule Handin.Accounts.User do
     |> validate_password(opts)
   end
 
+  def registration_by_admin_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :role])
+    |> cast(%{hashed_password: Bcrypt.hash_pwd_salt("")}, [:hashed_password])
+    |> validate_email()
+  end
+
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])

@@ -104,5 +104,8 @@ defmodule HandinWeb.Router do
     get "/log_in", UserSessionController, :new
     post "/log_in", UserSessionController, :create
 
+    get "/add_user", AddUserController, :new
+    post "/add_user", AddUserController, :create
+
   end
 end
