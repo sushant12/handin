@@ -6,6 +6,7 @@ defmodule HandinWeb.AdminSessionControllerTest do
   describe "POST /admin/log_in" do
     test "log the admin in", %{conn: conn} do
       admin = insert(:admin)
+
       conn =
         conn
         |> post(Routes.admin_user_session_path(conn, :create), %{

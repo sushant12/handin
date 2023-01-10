@@ -12,12 +12,13 @@ defmodule HandinWeb.Admin.AddUserController do
         user,
         &Routes.user_reset_password_url(conn, :edit, &1)
       )
+
       conn
-      |> put_resp_header("cross-origin-window-policy","deny")
       |> put_session(:user_return_to, "/admin")
       |> redirect(to: Routes.admin_page_path(conn, :index))
     else
-      {:error, %{errors: _errors} = changeset} -> render(conn, "new.html", error_message: "Email already taken")
+      {:error, %{errors: _errors} = changeset} ->
+        render(conn, "new.html", error_message: "Email already taken")
     end
   end
 end
