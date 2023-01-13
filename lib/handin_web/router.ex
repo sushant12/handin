@@ -107,5 +107,6 @@ defmodule HandinWeb.Router do
     get "/add_user", AddUserController, :new
     post "/add_user", AddUserController, :create
 
+    resources "/courses", CourseController
   end
 end

@@ -302,7 +302,7 @@ defmodule Handin.Accounts do
   """
   def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)
       when is_function(reset_password_url_fun, 1) do
-        {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
+    {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
     Repo.insert!(user_token)
     UserNotifier.deliver_reset_password_instructions(user, reset_password_url_fun.(encoded_token))
   end
@@ -356,5 +356,10 @@ defmodule Handin.Accounts do
     %User{}
     |> User.registration_by_admin_changeset(attrs)
     |> Repo.insert()
+  end
+
+  def add_course(user, course_id) do
+    user
+    |> Ecto.Changeset.change(course_id: course_id)
   end
 end

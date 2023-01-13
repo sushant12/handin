@@ -21,36 +21,44 @@ defmodule HandinWeb.AddUserControllerTest do
   end
 
   describe "POST /admin/add_user" do
-    test "creates admin user",%{conn: conn, admin: admin} do
+    test "creates admin user", %{conn: conn, admin: admin} do
       email = unique_user_email()
+
       conn =
         conn
         |> log_in_user(admin)
-        |> post(Routes.admin_add_user_path(conn, :create, %{
-          "email" => email,
-          "role" => "admin"
-        }))
+        |> post(
+          Routes.admin_add_user_path(conn, :create, %{
+            "email" => email,
+            "role" => "admin"
+          })
+        )
 
-        user = Handin.Repo.get_by(Handin.Accounts.User, email: email)
-        assert user.role == "admin"
+      user = Handin.Repo.get_by(Handin.Accounts.User, email: email)
+      assert user.role == "admin"
     end
 
-    test "email already taken error if a user already added",%{conn: conn, admin: admin} do
+    test "email already taken error if a user already added", %{conn: conn, admin: admin} do
       email = unique_user_email()
+
       conn =
         conn
         |> log_in_user(admin)
-        |> post(Routes.admin_add_user_path(conn, :create, %{
-          "email" => email,
-          "role" => "course_admin"
-        }))
-        |> post(Routes.admin_add_user_path(conn, :create, %{
-          "email" => email,
-          "role" => "student"
-        }))
+        |> post(
+          Routes.admin_add_user_path(conn, :create, %{
+            "email" => email,
+            "role" => "course_admin"
+          })
+        )
+        |> post(
+          Routes.admin_add_user_path(conn, :create, %{
+            "email" => email,
+            "role" => "student"
+          })
+        )
 
-        response = html_response(conn, 200)
-        assert response =~ "<p>Email already taken</p>"
+      response = html_response(conn, 200)
+      assert response =~ "<p>Email already taken</p>"
     end
   end
 end
