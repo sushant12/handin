@@ -68,8 +68,9 @@ defmodule HandinWeb.CourseControllerTest do
             "directors" => [Integer.to_string(course_admin.id)]
           })
         )
-        response = html_response(conn, 200)
-        assert response =~  "<p>Course already exists</p>"
+
+      response = html_response(conn, 200)
+      assert response =~ "<p>Course already exists</p>"
     end
   end
 end

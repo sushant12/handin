@@ -6,6 +6,7 @@ defmodule Handin.Courses.Course do
     field :code, :integer
     field :name, :string
     has_many :users, Handin.Accounts.User
+    many_to_many :modules, Handin.Modules.Module, join_through: "modules_courses"
 
     timestamps()
   end

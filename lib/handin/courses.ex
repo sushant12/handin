@@ -7,6 +7,7 @@ defmodule Handin.Courses do
   alias Handin.Repo
 
   alias Handin.Courses.Course
+  alias Handin.Accounts.User
 
   @doc """
   Returns the list of courses.
@@ -110,5 +111,12 @@ defmodule Handin.Courses do
     else
       {:not_found, course}
     end
+  end
+
+  def fetch_all_course_admins() do
+    User
+    |> where(role: "course_admin")
+    |> select([c], {c.email, c.id})
+    |> Repo.all()
   end
 end

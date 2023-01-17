@@ -8,8 +8,10 @@ defmodule Handin.Accounts.User do
     field :password_confirmation, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+
     field :role, :string, default: "student"
     belongs_to :course, Handin.Courses.Course
+    many_to_many :modules, Handin.Modules.Module, join_through: "modules_students"
 
     timestamps()
   end
