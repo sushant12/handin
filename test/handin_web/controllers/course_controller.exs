@@ -44,5 +44,32 @@ defmodule HandinWeb.CourseControllerTest do
       {:ok, course} = Handin.Courses.get_course_by_code(course.code)
       assert user.course_id == course.id
     end
+
+    test "adding courses with same course code gives course already exists error", %{
+      conn: conn,
+      admin: admin,
+      course_admin: course_admin,
+      course: course
+    } do
+      conn =
+        conn
+        |> log_in_user(admin)
+        |> post(
+          Routes.admin_course_path(conn, :create, %{
+            "name" => course.name,
+            "code" => course.code,
+            "directors" => [Integer.to_string(course_admin.id)]
+          })
+        )
+        |> post(
+          Routes.admin_course_path(conn, :create, %{
+            "name" => "Something else",
+            "code" => course.code,
+            "directors" => [Integer.to_string(course_admin.id)]
+          })
+        )
+        response = html_response(conn, 200)
+        assert response =~  "<p>Course already exists</p>"
+    end
   end
 end
