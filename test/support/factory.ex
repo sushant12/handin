@@ -2,6 +2,7 @@ defmodule HandinWeb.Factory do
   use ExMachina.Ecto, repo: Handin.Repo
   alias Handin.Accounts.User
   alias Handin.Courses.Course
+  alias Handin.Modules.Module
 
   defp valid_user_password, do: "hello world!"
 
@@ -31,6 +32,12 @@ defmodule HandinWeb.Factory do
     %Course{
       name: sequence(:name, &"course name #{&1}"),
       code: sequence(:code, fn x -> x end)
+    }
+  end
+
+  def module_factory do
+    %Module{
+      name: sequence(:name, &"M#{&1}")
     }
   end
 end
