@@ -20,3 +20,12 @@ admin = %Handin.Accounts.User{
 }
 
 Handin.Repo.insert(admin)
+
+user = %Handin.Accounts.User{
+  email: "student@studentmail.ul.ie",
+  hashed_password: Bcrypt.hash_pwd_salt("unique password"),
+  confirmed_at: now,
+  role: "student"
+}
+
+Handin.Repo.insert(user)
