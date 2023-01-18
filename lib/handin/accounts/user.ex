@@ -8,7 +8,10 @@ defmodule Handin.Accounts.User do
     field :password_confirmation, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+
     field :role, :string, default: "student"
+    belongs_to :course, Handin.Courses.Course
+    many_to_many :modules, Handin.Modules.Module, join_through: "modules_students"
 
     timestamps()
   end
@@ -47,7 +50,9 @@ defmodule Handin.Accounts.User do
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@studentmail.ul.ie$/, message: "must have correct domain and no spaces")
+    |> validate_format(:email, ~r/^[^\s]+@studentmail.ul.ie$/,
+      message: "must have correct domain and no spaces"
+    )
     |> validate_length(:email, max: 160)
     |> unsafe_validate_unique(:email, Handin.Repo)
     |> unique_constraint(:email)

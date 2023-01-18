@@ -1,0 +1,19 @@
+<h2>Add new course</h2>
+<.form let={f} for={@conn} action={Routes.admin_course_path(@conn, :create)}>
+  <%= if @error_message do %>
+    <div class="alert alert-danger">
+      <p><%= @error_message %></p>
+    </div>
+  <% end %>
+
+  <%= label f, :course_name %>
+  <%= text_input f, :name, required: :true %>
+
+  <%= label f, :course_code %>
+  <%= text_input f, :code, required: :true %>
+
+  <%= label f, :directors %>
+  <%= multiple_select f, :directors, @course_admins %>
+
+  <%= submit "Add Course" %>
+</.form>

@@ -9,3 +9,14 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+admin = %Handin.Accounts.User{
+  email: "admin@admin.com",
+  hashed_password: Bcrypt.hash_pwd_salt("admin"),
+  confirmed_at: now,
+  role: "admin"
+}
+
+Handin.Repo.insert(admin)

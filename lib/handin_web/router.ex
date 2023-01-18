@@ -1,4 +1,5 @@
 defmodule HandinWeb.Router do
+  alias HandinWeb.ModuleRegistrationController
   alias HandinWeb.Plugs.CheckAdmin
   use HandinWeb, :router
 
@@ -83,6 +84,9 @@ defmodule HandinWeb.Router do
     get "/users/settings", UserSettingsController, :edit
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/confirm_email/:token", UserSettingsController, :confirm_email
+
+    get "/module/cs:module_id/register", StudentEnrollmentController, :new
+    post "/module/cs:module_id/register", StudentEnrollmentController, :create
   end
 
   scope "/", HandinWeb do
@@ -107,5 +111,6 @@ defmodule HandinWeb.Router do
     get "/add_user", AddUserController, :new
     post "/add_user", AddUserController, :create
 
+    resources "/courses", CourseController
   end
 end

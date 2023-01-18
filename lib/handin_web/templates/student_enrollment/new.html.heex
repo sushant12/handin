@@ -1,0 +1,7 @@
+<h3>Join Module: <b> <%= @module_name %> </b> </h3>
+
+<.form let={_f} for={@conn} action={Routes.student_enrollment_path(@conn, :create, @module_id)}>
+  <div>
+    <%= submit "Join Module?" %>
+  </div>
+</.form>
