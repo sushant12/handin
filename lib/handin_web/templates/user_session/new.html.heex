@@ -1,27 +1,35 @@
-<h1>Log in</h1>
-
-<.form let={f} for={@conn} action={Routes.user_session_path(@conn, :create)} as={:user}>
-  <%= if @error_message do %>
-    <div class="alert alert-danger">
-      <p><%= @error_message %></p>
-    </div>
-  <% end %>
-
-  <%= label f, :email %>
-  <%= email_input f, :email, required: true %>
-
-  <%= label f, :password %>
-  <%= password_input f, :password, required: true %>
-
-  <%= label f, :remember_me, "Keep me logged in for 60 days" %>
-  <%= checkbox f, :remember_me %>
-
-  <div>
-    <%= submit "Log in" %>
+<div class="mt-8 pt-1 mb-5 pb-9 container mx-auto bg-violet-300 drop-shadow-2xl rounded-lg text-zinc-100" style="width: 600px">
+  <div class="mx-10 text-center mt-9">
+    <h1 class="font-medium text-3xl">Handin Login</h1>
   </div>
-</.form>
 
-<p>
-  <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
-  <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
-</p>
+  <div class="grid grid-cols-1 mt-5 mx-auto">
+    <.form let={f} for={@conn} action={Routes.user_session_path(@conn, :create)} as={:user}>
+      <%= if @error_message do %>
+        <div class="alert alert-danger">
+          <p><%= @error_message %></p>
+        </div>
+      <% end %>
+
+      <div class="px-14">
+        <div class="px-3 mt-3 ">
+          <%= label f, :email, class: "font-medium text-lg " %><br>
+          <%= email_input f, :email, required: true, class: "w-full mt-3 rounded-lg bg-slate-100 border-0 text-gray-600 hover:bg-slate-50 hover:outline outline-pink-400 outline-1 transition duration-500 " %>
+        </div>
+
+        <div class="px-3 mt-7">
+          <%= label f, :password, class: "font-medium text-lg " %><br>
+          <%= password_input f, :password, required: true, class: "w-full mt-3 rounded-lg bg-slate-100 border-0 text-gray-600 hover:bg-slate-50 hover:outline outline-pink-400 outline-1 transition duration-500 " %>
+        </div>
+
+        <div class="px-3 grid grid-cols-2 grid-rows-4 text-center">
+          <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new), class: "col-start-2 justify-self-end text-xs mt-1 text-neutral-50 hover:text-slate-500 transition duration-500" %>
+          <%= submit "Log in", class: "font-medium hover:bg-blue-500 w-3/5 h-9 mx-auto row-start-2 col-span-2 my-1 rounded-xl text-slate-100 bg-cyan-500 transition-all duration-500 hover:text-inherit" %>
+          <p class="col-span-2 mt-2 h-9">OR</p>
+          <%= link "Create an account?", to: Routes.user_registration_path(@conn, :new), class: "font-medium hover:bg-blue-500 w-3/5 h-9 mx-auto row-start-4 col-span-2 my-1 rounded-xl pt-1 text-slate-100 bg-cyan-500 transition-all duration-500 hover:text-inherit" %>
+        </div>
+      </div>
+    </.form>
+
+  </div>
+</div>
