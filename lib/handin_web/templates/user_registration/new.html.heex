@@ -1,30 +1,41 @@
-<h1>Register</h1>
-
-<.form let={f} for={@changeset} action={Routes.user_registration_path(@conn, :create)}>
-  <%= if @changeset.action do %>
-    <div class="alert alert-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
-    </div>
-  <% end %>
-
-  <%= label f, :email %>
-  <%= email_input f, :email, required: true %>
-  <%= error_tag f, :email %>
-
-  <%= label f, :password %>
-  <%= password_input f, :password, required: true %>
-  <%= error_tag f, :password %>
-
-  <%= label f, :confirm_password %>
-  <%= password_input f, :password_confirmation, required: true %>
-  <%= error_tag f, :password_confirmation %>
-
-  <div>
-    <%= submit "Register" %>
+<div class="mt-5 pt-1 mb-4 pb-6 container mx-auto bg-violet-300 drop-shadow-2xl rounded-lg text-zinc-100" style="width: 600px">
+  <div class="mx-10 text-center mt-9">
+    <h1 class="font-medium text-3xl">Handin Register</h1>
   </div>
-</.form>
 
-<p>
-  <%= link "Log in", to: Routes.user_session_path(@conn, :new) %> |
-  <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
-</p>
+  <div class="grid grid-cols-1 mt-5 mx-auto">
+    <.form let={f} for={@changeset} action={Routes.user_registration_path(@conn, :create)}>
+      <%= if @changeset.action do %>
+        <div class="alert alert-danger">
+          <p>Oops, something went wrong! Please check the errors below.</p>
+        </div>
+      <% end %>
+
+      <div class="px-14">
+        <div class="px-3 mt-3 ">
+          <%= label f, :email, class: "font-medium text-lg " %><br>
+          <%= email_input f, :email, required: true, class: "w-full mt-3 rounded-lg bg-slate-100 border-0 text-gray-600 hover:bg-slate-50 hover:outline outline-pink-400 outline-1 transition duration-500 " %>
+          <%= error_tag f, :email %>
+        </div>
+
+        <div class="px-3 mt-7">
+          <%= label f, :password, class: "font-medium text-lg " %><br>
+          <%= password_input f, :password, required: true, class: "w-full mt-3 rounded-lg bg-slate-100 border-0 text-gray-600 hover:bg-slate-50 hover:outline outline-pink-400 outline-1 transition duration-500 " %>
+          <%= error_tag f, :password %>
+        </div>
+
+        <div class="px-3 mt-7">
+          <%= label f, :confirm_password, class: "font-medium text-lg " %><br>
+          <%= password_input f, :password_confirmation, required: true, class: "w-full mt-3 rounded-lg bg-slate-100 border-0 text-gray-600 hover:bg-slate-50 hover:outline outline-pink-400 outline-1 transition duration-500 " %>
+          <%= error_tag f, :password_confirmation %>
+        </div>
+
+        <div class="grid grid-cols-1 grid-rows-3 text-center px-3 mt-5">
+          <%= submit "Register", class: "font-medium hover:bg-blue-500 w-3/5 h-9 mx-auto row-start-1 my-1 rounded-xl text-slate-100 bg-cyan-500 transition-all duration-500 hover:text-inherit" %>
+          <p class="mt-2 h-9 row-start-2">OR</p>
+          <%= link "Already have an account?", to: Routes.user_session_path(@conn, :new), class: "pt-1 font-medium hover:bg-blue-500 w-3/5 h-9 mx-auto row-start-3 my-1 rounded-xl text-slate-100 bg-cyan-500 transition-all duration-500 hover:text-inherit" %>
+        </div>
+      </div>
+    </.form>
+  </div>
+</div>
