@@ -5,6 +5,7 @@ defmodule Handin.Modules do
 
   import Ecto.Query, warn: false
   import Ecto.Changeset
+  alias Handin.ModulesCourses
   alias Handin.ModulesStudents
   alias Handin.Repo
 
@@ -116,5 +117,17 @@ defmodule Handin.Modules do
     %ModulesStudents{}
     |> ModulesStudents.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def add_module_to_course(attrs) do
+    %ModulesCourses{}
+    |> ModulesCourses.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def fetch_module_names() do
+    Module
+    |> select([m], m.name)
+    |> Repo.all()
   end
 end

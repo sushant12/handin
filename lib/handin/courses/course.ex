@@ -17,5 +17,6 @@ defmodule Handin.Courses.Course do
     course
     |> cast(attrs, [:name, :code])
     |> validate_required([:name, :code])
+    |> unique_constraint([:name, :code])
   end
 end

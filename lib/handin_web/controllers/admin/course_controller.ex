@@ -6,7 +6,10 @@ defmodule HandinWeb.Admin.CourseController do
   use HandinWeb, :controller
 
   def new(conn, _) do
-    render(conn, "new.html", error_message: nil, course_admins: Courses.fetch_all_course_admins())
+    render(conn, "new.html",
+      error_message: nil,
+      course_admins: Accounts.fetch_all_course_admins_email_and_id()
+    )
   end
 
   def create(
@@ -28,7 +31,7 @@ defmodule HandinWeb.Admin.CourseController do
       _ ->
         render(conn, "new.html",
           error_message: "Course already exists",
-          course_admins: Courses.fetch_all_course_admins()
+          course_admins: Accounts.fetch_all_course_admins_email_and_id()
         )
     end
   end
