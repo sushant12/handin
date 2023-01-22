@@ -3,7 +3,7 @@ defmodule Handin.Repo.Migrations.UserHasCourses do
 
   def change do
     alter table(:users) do
-      add :course_id, references(:courses)
+      add :course_id, references(:courses, on_delete: :delete_all)
     end
   end
 end
