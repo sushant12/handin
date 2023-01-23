@@ -1,7 +1,6 @@
 defmodule HandinWeb.Admin.CourseController do
   alias Handin.Accounts
   alias Handin.Courses
-  alias Handin.Repo
 
   use HandinWeb, :controller
 
@@ -21,7 +20,6 @@ defmodule HandinWeb.Admin.CourseController do
       for id <- director_ids do
         Accounts.get_user!(String.to_integer(id))
         |> Accounts.add_course(course.id)
-        |> Repo.update()
       end
 
       conn

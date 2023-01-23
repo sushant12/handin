@@ -13,7 +13,7 @@ defmodule Handin.Accounts.User do
     field :role, :string, default: "student"
     belongs_to :course, Handin.Courses.Course
     many_to_many :modules, Module, join_through: "modules_students"
-    belongs_to :subject, Module
+    belongs_to :module, Module
 
     timestamps()
   end

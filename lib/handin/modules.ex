@@ -4,7 +4,6 @@ defmodule Handin.Modules do
   """
 
   import Ecto.Query, warn: false
-  import Ecto.Changeset
   alias Handin.ModulesCourses
   alias Handin.ModulesStudents
   alias Handin.Repo

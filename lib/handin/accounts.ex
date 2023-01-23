@@ -361,6 +361,13 @@ defmodule Handin.Accounts do
   def add_course(user, course_id) do
     user
     |> Ecto.Changeset.change(course_id: course_id)
+    |> Repo.update()
+  end
+
+  def add_module(user, module_id) do
+    user
+    |> Ecto.Changeset.change(module_id: module_id)
+    |> Repo.update()
   end
 
   def fetch_all_course_admins_email_and_id() do

@@ -40,13 +40,18 @@ defmodule HandinWeb.ModuleController do
           mode: "create",
           courses: Courses.fetch_course_names_and_id(),
           modules: Modules.fetch_module_names(),
-          teachers: Accounts.fetch_all_teaher_names()
+          teachers: Accounts.fetch_all_teaher_emails()
         )
     end
   end
 
   def create_module(conn, params) do
-    with {:ok, module} <- Modules.create_module(params) do
+    with {:ok, module} <- Modules.create_module(params),
+         {:ok, _} <-
+           Accounts.add_module(
+             Accounts.get_user_by_email(params["teacher"]),
+             module.id
+           ) do
       if courses_ids = params["courses"] do
         for id <- courses_ids do
           Modules.add_module_to_course(%{module_id: module.id, course_id: id})
@@ -64,7 +69,7 @@ defmodule HandinWeb.ModuleController do
           mode: "create",
           courses: Courses.fetch_course_names_and_id(),
           modules: Modules.fetch_module_names(),
-          teachers: Accounts.fetch_all_teaher_names()
+          teachers: Accounts.fetch_all_teaher_emails()
         )
     end
   end
