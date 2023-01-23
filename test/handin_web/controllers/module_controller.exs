@@ -51,7 +51,6 @@ defmodule HandinWeb.ModuleControllerTest do
       conn: conn,
       user: user,
       course: course,
-      teacher: teacher,
       module: module
     } do
       conn =
@@ -71,13 +70,15 @@ defmodule HandinWeb.ModuleControllerTest do
     test "creates a new module without course", %{
       conn: conn,
       user: user,
-      module_struct: module_struct
+      module_struct: module_struct,
+      teacher: teacher
     } do
       conn =
         conn
         |> log_in_user(user)
         |> post(Routes.module_path(conn, :create_module), %{
-          "name" => module_struct.name
+          "name" => module_struct.name,
+          "teacher" => teacher.email
         })
 
       %{"info" => info} = get_flash(conn)
@@ -85,6 +86,96 @@ defmodule HandinWeb.ModuleControllerTest do
 
       assert info == "Module created successfully"
       assert inserted_module.name == module_struct.name
+    end
+
+    test "creates a module with course", %{
+      conn: conn,
+      user: user,
+      module_struct: module_struct,
+      teacher: teacher,
+      course: course
+    } do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> post(Routes.module_path(conn, :create_module), %{
+          "name" => module_struct.name,
+          "teacher" => teacher.email,
+          "courses" => [course.id]
+        })
+
+      %{"info" => info} = get_flash(conn)
+      inserted_module = Handin.Repo.get_by(Module, name: module_struct.name)
+      %{teacher: inserted_teacher} = Handin.Repo.preload(inserted_module, :teacher)
+
+      assert info == "Module created successfully"
+      assert inserted_module.name == module_struct.name
+      assert inserted_teacher.id == teacher.id
+    end
+
+    test "creating existing module gives error", %{
+      conn: conn,
+      user: user,
+      module: module,
+      teacher: teacher,
+      course: course
+    } do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> post(Routes.module_path(conn, :create_module), %{
+          "name" => module.name,
+          "teacher" => teacher.email,
+          "courses" => [course.id]
+        })
+
+      %{"error" => error} = get_flash(conn)
+
+      assert error == "Module already exists"
+    end
+
+    test "add an existing module to course", %{
+      conn: conn,
+      user: user,
+      module: module,
+      course: course
+    } do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> post(Routes.module_path(conn, :add_existing), %{
+          "modules" => module.name,
+          "courses" => [course.id]
+        })
+
+      %{"info" => info} = get_flash(conn)
+      inserted_module = Handin.Repo.get_by(Module, name: module.name)
+      %{courses: courses} = Handin.Repo.preload(inserted_module, :courses)
+
+      assert course in courses
+      assert info == "Module added successfully"
+    end
+
+    test "add an module to already added course", %{
+      conn: conn,
+      user: user,
+      module: module,
+      course: course
+    } do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> post(Routes.module_path(conn, :add_existing), %{
+          "modules" => module.name,
+          "courses" => [course.id]
+        })|> post(Routes.module_path(conn, :add_existing), %{
+          "modules" => module.name,
+          "courses" => [course.id]
+        })
+
+      %{"error" => error} = get_flash(conn)
+
+      assert error == "Module was already added"
     end
   end
 end

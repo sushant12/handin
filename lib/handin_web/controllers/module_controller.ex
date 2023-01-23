@@ -1,6 +1,7 @@
 defmodule HandinWeb.ModuleController do
   use HandinWeb, :controller
 
+  alias Handin.ModulesCourses
   alias Handin.Accounts
   alias Handin.Courses
   alias Handin.Modules
@@ -24,11 +25,11 @@ defmodule HandinWeb.ModuleController do
 
     with courses <-
            Enum.map(courses_ids, fn id ->
-             unless Courses.get_course!(id) do
+            unless ModulesCourses.check_exists?(module.id, id) do
                Modules.add_module_to_course(%{module_id: module.id, course_id: id})
              end
            end),
-         false <- Enum.empty?(courses) do
+         false <- Enum.empty?(Enum.filter(courses, fn item -> item != nil end)) do
       conn
       |> put_flash(:info, "Module added successfully")
       |> redirect(to: Routes.module_path(conn, :index))
@@ -37,7 +38,7 @@ defmodule HandinWeb.ModuleController do
         conn
         |> put_flash(:error, "Module was already added")
         |> render("new.html",
-          mode: "create",
+          mode: "add_existing",
           courses: Courses.fetch_course_names_and_id(),
           modules: Modules.fetch_module_names(),
           teachers: Accounts.fetch_all_teaher_emails()
