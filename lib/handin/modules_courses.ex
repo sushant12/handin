@@ -1,4 +1,5 @@
 defmodule Handin.ModulesCourses do
+  alias Handin.ModulesCourses
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -13,5 +14,13 @@ defmodule Handin.ModulesCourses do
     module_course
     |> cast(attrs, [:module_id, :course_id])
     |> validate_required([:module_id, :course_id])
+  end
+
+  def check_exists?(module_id, course_id) do
+    if Handin.Repo.get_by(ModulesCourses, module_id: module_id, course_id: course_id) do
+      true
+    else
+      false
+    end
   end
 end

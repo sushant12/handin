@@ -113,10 +113,9 @@ defmodule Handin.Courses do
     end
   end
 
-  def fetch_all_course_admins() do
-    User
-    |> where(role: "course_admin")
-    |> select([c], {c.email, c.id})
+  def fetch_course_names_and_id() do
+    Course
+    |> select([c], {c.name, c.id})
     |> Repo.all()
   end
 end

@@ -1,4 +1,5 @@
 defmodule Handin.Accounts.User do
+  alias Handin.Modules.Module
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -11,7 +12,8 @@ defmodule Handin.Accounts.User do
 
     field :role, :string, default: "student"
     belongs_to :course, Handin.Courses.Course
-    many_to_many :modules, Handin.Modules.Module, join_through: "modules_students"
+    many_to_many :modules, Module, join_through: "modules_students"
+    belongs_to :module, Module
 
     timestamps()
   end

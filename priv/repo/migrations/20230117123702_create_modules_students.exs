@@ -3,8 +3,8 @@ defmodule Handin.Repo.Migrations.CreateModulesStudents do
 
   def change do
     create table(:modules_students) do
-      add :module_id, references(:modules)
-      add :user_id, references(:users)
+      add :module_id, references(:modules, on_delete: :delete_all)
+      add :user_id, references(:users, on_delete: :delete_all)
 
       timestamps()
     end
