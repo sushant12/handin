@@ -9,7 +9,7 @@ defmodule HandinWeb.AdminSessionControllerTest do
 
       conn =
         conn
-        |> post(Routes.admin_user_session_path(conn, :create), %{
+        |> post(~p"/admin/log_in", %{
           "user" => %{
             "email" => "admin@admin.com",
             "password" => "admin"

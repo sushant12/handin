@@ -8,12 +8,14 @@ defmodule Handin.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the Ecto repository
-      Handin.Repo,
       # Start the Telemetry supervisor
       HandinWeb.Telemetry,
+      # Start the Ecto repository
+      Handin.Repo,
       # Start the PubSub system
       {Phoenix.PubSub, name: Handin.PubSub},
+      # Start Finch
+      {Finch, name: Handin.Finch},
       # Start the Endpoint (http/https)
       HandinWeb.Endpoint
       # Start a worker by calling: Handin.Worker.start_link(arg)

@@ -23,9 +23,8 @@ config :handin, HandinWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "Ca2n5MXS6IFLXLHJM0ZZ61yWOt6YY/Ch+xdy3KAyxpZalhxsduMkwOjCjxND/pnb",
+  secret_key_base: "4B2OwpZdby/LuO1z4qneL7RTDs9PsFlJMo+8BnoLyURsk+B8ZlY45gg3PT8ovep9",
   watchers: [
-    # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
@@ -38,7 +37,6 @@ config :handin, HandinWeb.Endpoint,
 #
 #     mix phx.gen.cert
 #
-# Note that this task requires Erlang/OTP 20 or later.
 # Run `mix help phx.gen.cert` for more information.
 #
 # The `http:` config above can be replaced with:
@@ -60,10 +58,12 @@ config :handin, HandinWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/handin_web/(live|views)/.*(ex)$",
-      ~r"lib/handin_web/templates/.*(eex)$"
+      ~r"lib/handin_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
+
+# Enable dev routes for dashboard and mailbox
+config :handin, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
@@ -74,3 +74,6 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Disable swoosh api client as it is only required for production adapters.
+config :swoosh, :api_client, false

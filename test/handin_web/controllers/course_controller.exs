@@ -13,7 +13,7 @@ defmodule HandinWeb.CourseControllerTest do
       conn =
         conn
         |> log_in_user(admin)
-        |> get(Routes.admin_course_path(conn, :new))
+        |> get(~p"/admin/courses/new")
 
       response = html_response(conn, 200)
       assert response =~ "<h2>Add new course</h2>"
@@ -33,11 +33,12 @@ defmodule HandinWeb.CourseControllerTest do
         conn
         |> log_in_user(admin)
         |> post(
-          Routes.admin_course_path(conn, :create, %{
+          ~p"/admin/courses",
+          %{
             "name" => course.name,
             "code" => course.code,
             "directors" => [Integer.to_string(course_admin.id)]
-          })
+          }
         )
 
       user = Handin.Accounts.get_user!(course_admin.id)
@@ -55,18 +56,20 @@ defmodule HandinWeb.CourseControllerTest do
         conn
         |> log_in_user(admin)
         |> post(
-          Routes.admin_course_path(conn, :create, %{
+          ~p"/admin/courses",
+          %{
             "name" => course.name,
             "code" => course.code,
             "directors" => [Integer.to_string(course_admin.id)]
-          })
+          }
         )
         |> post(
-          Routes.admin_course_path(conn, :create, %{
+          ~p"/admin/courses",
+          %{
             "name" => "Something else",
             "code" => course.code,
             "directors" => [Integer.to_string(course_admin.id)]
-          })
+          }
         )
 
       response = html_response(conn, 200)

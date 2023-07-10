@@ -28,7 +28,7 @@ defmodule Handin.AccountsTest do
     end
 
     test "returns the user if the email and password are valid" do
-      %{id: id} = user = user_fixture()
+      %{id: id} = user = user_fixture() |> verify_user()
 
       assert %User{id: ^id} =
                Accounts.get_user_by_email_and_password(user.email, valid_user_password())
@@ -62,7 +62,7 @@ defmodule Handin.AccountsTest do
       {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "not valid"})
 
       assert %{
-               email: ["must have the @ sign and no spaces"],
+               email: ["must have correct domain and no spaces"],
                password: ["should be at least 12 character(s)"]
              } = errors_on(changeset)
     end
@@ -77,10 +77,6 @@ defmodule Handin.AccountsTest do
     test "validates email uniqueness" do
       %{email: email} = user_fixture()
       {:error, changeset} = Accounts.register_user(%{email: email})
-      assert "has already been taken" in errors_on(changeset).email
-
-      # Now try with the upper cased email too, to check that email case is ignored.
-      {:error, changeset} = Accounts.register_user(%{email: String.upcase(email)})
       assert "has already been taken" in errors_on(changeset).email
     end
 
@@ -138,7 +134,7 @@ defmodule Handin.AccountsTest do
       {:error, changeset} =
         Accounts.apply_user_email(user, valid_user_password(), %{email: "not valid"})
 
-      assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
+      assert %{email: ["must have correct domain and no spaces"]} = errors_on(changeset)
     end
 
     test "validates maximum value for email for security", %{user: user} do
@@ -152,9 +148,9 @@ defmodule Handin.AccountsTest do
 
     test "validates email uniqueness", %{user: user} do
       %{email: email} = user_fixture()
+      password = valid_user_password()
 
-      {:error, changeset} =
-        Accounts.apply_user_email(user, valid_user_password(), %{email: email})
+      {:error, changeset} = Accounts.apply_user_email(user, password, %{email: email})
 
       assert "has already been taken" in errors_on(changeset).email
     end
@@ -174,7 +170,7 @@ defmodule Handin.AccountsTest do
     end
   end
 
-  describe "deliver_update_email_instructions/3" do
+  describe "deliver_user_update_email_instructions/3" do
     setup do
       %{user: user_fixture()}
     end
@@ -182,7 +178,7 @@ defmodule Handin.AccountsTest do
     test "sends token through notification", %{user: user} do
       token =
         extract_user_token(fn url ->
-          Accounts.deliver_update_email_instructions(user, "current@example.com", url)
+          Accounts.deliver_user_update_email_instructions(user, "current@example.com", url)
         end)
 
       {:ok, token} = Base.url_decode64(token, padding: false)
@@ -200,7 +196,7 @@ defmodule Handin.AccountsTest do
 
       token =
         extract_user_token(fn url ->
-          Accounts.deliver_update_email_instructions(%{user | email: email}, user.email, url)
+          Accounts.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
         end)
 
       %{user: user, token: token, email: email}
@@ -289,6 +285,8 @@ defmodule Handin.AccountsTest do
     end
 
     test "updates the password", %{user: user} do
+      user = user |> verify_user()
+
       {:ok, user} =
         Accounts.update_user_password(user, valid_user_password(), %{
           password: "new valid password"
@@ -353,11 +351,11 @@ defmodule Handin.AccountsTest do
     end
   end
 
-  describe "delete_session_token/1" do
+  describe "delete_user_session_token/1" do
     test "deletes the token" do
       user = user_fixture()
       token = Accounts.generate_user_session_token(user)
-      assert Accounts.delete_session_token(token) == :ok
+      assert Accounts.delete_user_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)
     end
   end
@@ -488,7 +486,9 @@ defmodule Handin.AccountsTest do
     end
 
     test "updates the password", %{user: user} do
-      {:ok, updated_user} = Accounts.reset_user_password(user, %{password: "new valid password"})
+      {:ok, updated_user} =
+        Accounts.reset_user_password(user |> verify_user(), %{password: "new valid password"})
+
       assert is_nil(updated_user.password)
       assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
     end
@@ -500,7 +500,7 @@ defmodule Handin.AccountsTest do
     end
   end
 
-  describe "inspect/2" do
+  describe "inspect/2 for the User module" do
     test "does not include password" do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end

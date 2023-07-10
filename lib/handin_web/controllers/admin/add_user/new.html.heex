@@ -1,0 +1,48 @@
+<div class="container mx-auto text-zinc-700" style="width: 600px">
+  <div class="mx-10 text-center mt-9">
+    <h1 class="font-medium text-3xl">Add User</h1>
+  </div>
+
+  <div class="mt-5 mx-auto">
+    <.form :let={f} for={@conn} action={~p"/admin/add_user"}>
+      <.error :if={@error_message}><%= @error_message %></.error>
+
+      <div class="px-14">
+        <div class="px-3 mt-3 relative">
+          <%= label(f, :email) %>
+          <img src="/images/user-icon.png" class="absolute top-11 left-5 opacity-60" />
+          <.input
+            field={f[:email]}
+            type="email"
+            placeholder="example@studentmail.ul.ie"
+            class="w-full mt-3 rounded-sm bg-slate-100 border border-gray-400 pl-10"
+            required
+          />
+        </div>
+
+        <div class="px-3 mt-3 relative">
+          <%= label(f, :role, "Select role") %>
+          <br />
+          <img src="/images/user-team.png" class="absolute top-11 left-5 opacity-60" />
+          <.input
+            type="select"
+            name="role"
+            class="w-full mt-3 rounded-sm bg-slate-100 border border-gray-400 pl-10"
+            prompt="Choose your role"
+            options={["admin", "student", "course_admin", "teaching_assistant", "teacher"]}
+          />
+        </div>
+
+        <div class="px-3 mt-6 grid grid-cols-1">
+          <.button
+            type="submit"
+            phx-disable-with="Adding user..."
+            class="font-medium hover:bg-green-600 hover:pt-1.5 hover:pl-0.5 w-3/5 h-9 mx-auto row-start-2 col-span-2 my-1 rounded-sm text-zinc-100 bg-green-700 transition-all duration-300"
+          >
+            Add user
+          </.button>
+        </div>
+      </div>
+    </.form>
+  </div>
+</div>

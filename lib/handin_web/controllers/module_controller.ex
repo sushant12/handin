@@ -2,17 +2,15 @@ defmodule HandinWeb.ModuleController do
   use HandinWeb, :controller
 
   alias Handin.ModulesCourses
-  alias Handin.Accounts
-  alias Handin.Courses
-  alias Handin.Modules
+  alias Handin.{Accounts, Courses, Modules, Repo}
   alias Handin.Modules.Module
 
-  def index(conn, _) do
-    render(conn, "index.html")
+  def home(conn, _) do
+    render(conn, :home)
   end
 
   def new(conn, %{"mode" => mode} = _params) do
-    render(conn, "new.html",
+    render(conn, :new,
       mode: mode,
       courses: Courses.fetch_course_names_and_id(),
       modules: Modules.fetch_module_names(),
@@ -21,23 +19,23 @@ defmodule HandinWeb.ModuleController do
   end
 
   def add_existing(conn, %{"courses" => courses_ids, "modules" => module_name} = _params) do
-    module = Handin.Repo.get_by(Module, name: module_name)
+    module = Repo.get_by(Module, name: module_name)
 
     with courses <-
            Enum.map(courses_ids, fn id ->
-            unless ModulesCourses.check_exists?(module.id, id) do
+             unless ModulesCourses.check_exists?(module.id, id) do
                Modules.add_module_to_course(%{module_id: module.id, course_id: id})
              end
            end),
          false <- Enum.empty?(Enum.filter(courses, fn item -> item != nil end)) do
       conn
       |> put_flash(:info, "Module added successfully")
-      |> redirect(to: Routes.module_path(conn, :index))
+      |> redirect(to: ~p"/module")
     else
       _ ->
         conn
         |> put_flash(:error, "Module was already added")
-        |> render("new.html",
+        |> render(:new,
           mode: "add_existing",
           courses: Courses.fetch_course_names_and_id(),
           modules: Modules.fetch_module_names(),
@@ -50,7 +48,7 @@ defmodule HandinWeb.ModuleController do
     with {:ok, module} <- Modules.create_module(params),
          {:ok, _} <-
            Accounts.add_module(
-             Accounts.get_user_by_email(params["teacher"]),
+             Accounts.get_user_by_email(params["teachers"]),
              module.id
            ) do
       if courses_ids = params["courses"] do
@@ -61,7 +59,7 @@ defmodule HandinWeb.ModuleController do
 
       conn
       |> put_flash(:info, "Module created successfully")
-      |> redirect(to: Routes.module_path(conn, :index))
+      |> redirect(to: ~p"/module")
     else
       {:error, _changeset} ->
         conn

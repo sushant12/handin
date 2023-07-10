@@ -4,22 +4,21 @@ defmodule Handin.Modules do
   """
 
   import Ecto.Query, warn: false
-  alias Handin.ModulesCourses
-  alias Handin.ModulesStudents
   alias Handin.Repo
 
   alias Handin.Modules.Module
+  alias Handin.{ModulesCourses, ModulesStudents}
 
   @doc """
-  Returns the list of modules.
+  Returns the list of module.
 
   ## Examples
 
-      iex> list_modules()
+      iex> list_module()
       [%Module{}, ...]
 
   """
-  def list_modules do
+  def list_module do
     Repo.all(Module)
   end
 
@@ -37,15 +36,7 @@ defmodule Handin.Modules do
       ** (Ecto.NoResultsError)
 
   """
-  def get_module(id) do
-    module = Repo.get(Module, id)
-
-    if module do
-      {:ok, module}
-    else
-      {:error, "Module does not exist"}
-    end
-  end
+  def get_module!(id), do: Repo.get(Module, id)
 
   @doc """
   Creates a module.

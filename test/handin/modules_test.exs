@@ -3,16 +3,16 @@ defmodule Handin.ModulesTest do
 
   alias Handin.Modules
 
-  describe "modules" do
+  describe "module" do
     alias Handin.Modules.Module
 
     import Handin.ModulesFixtures
 
     @invalid_attrs %{name: nil}
 
-    test "list_modules/0 returns all modules" do
+    test "list_module/0 returns all module" do
       module = module_fixture()
-      assert Modules.list_modules() == [module]
+      assert Modules.list_module() == [module]
     end
 
     test "get_module!/1 returns the module with given id" do

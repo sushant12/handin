@@ -3,16 +3,16 @@ defmodule Handin.CoursesTest do
 
   alias Handin.Courses
 
-  describe "courses" do
+  describe "course" do
     alias Handin.Courses.Course
 
     import Handin.CoursesFixtures
 
     @invalid_attrs %{code: nil, name: nil}
 
-    test "list_courses/0 returns all courses" do
+    test "list_course/0 returns all course" do
       course = course_fixture()
-      assert Courses.list_courses() == [course]
+      assert Courses.list_course() == [course]
     end
 
     test "get_course!/1 returns the course with given id" do

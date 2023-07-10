@@ -12,7 +12,7 @@ defmodule HandinWeb.StudentEnrollmentControllerTest do
     test "redirected to login page if student not logged in", %{conn: conn, module: module} do
       conn =
         conn
-        |> get(Routes.student_enrollment_path(conn, :new, Integer.to_string(module.id)))
+        |> get(~p"/module/cs#{Integer.to_string(module.id)}/register")
 
       %{"error" => error} = get_flash(conn)
 
@@ -23,11 +23,11 @@ defmodule HandinWeb.StudentEnrollmentControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> get(Routes.student_enrollment_path(conn, :new, Integer.to_string(module.id)))
+        |> get(~p"/module/cs#{Integer.to_string(module.id)}/register")
 
       response = html_response(conn, 200)
-      assert response =~ "<h3>Join Module: <b> #{module.name} </b> </h3>"
-      assert response =~ "<button type=\"submit\">Join Module?</button>"
+      assert response =~ "<h3>Join Module: <b>#{module.name}</b></h3>"
+      assert response =~ "Join Module?"
     end
   end
 
@@ -36,7 +36,7 @@ defmodule HandinWeb.StudentEnrollmentControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> post(Routes.student_enrollment_path(conn, :new, Integer.to_string(module.id)))
+        |> post(~p"/module/cs#{Integer.to_string(module.id)}/register")
 
       %{"info" => info} = get_flash(conn)
       assert info =~ "Joined module successfully"

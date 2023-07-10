@@ -1,5 +1,4 @@
 defmodule Handin.ModulesCourses do
-  alias Handin.ModulesCourses
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -17,7 +16,7 @@ defmodule Handin.ModulesCourses do
   end
 
   def check_exists?(module_id, course_id) do
-    if Handin.Repo.get_by(ModulesCourses, module_id: module_id, course_id: course_id) do
+    if Handin.Repo.get_by(__MODULE__, module_id: module_id, course_id: course_id) do
       true
     else
       false

@@ -1,13 +1,17 @@
 defmodule Handin.Courses.Course do
   use Ecto.Schema
   import Ecto.Changeset
+
+  alias Handin.Accounts.User
+  alias Handin.Modules.Module
   alias Handin.ModulesCourses
 
-  schema "courses" do
+  schema "course" do
     field :code, :integer
     field :name, :string
-    has_many :users, Handin.Accounts.User
-    many_to_many :modules, Handin.Modules.Module, join_through: ModulesCourses
+
+    has_many :users, User
+    many_to_many :modules, Module, join_through: ModulesCourses
 
     timestamps()
   end
@@ -15,8 +19,7 @@ defmodule Handin.Courses.Course do
   @doc false
   def changeset(course, attrs) do
     course
-    |> cast(attrs, [:name, :code])
-    |> validate_required([:name, :code])
-    |> unique_constraint([:name, :code])
+    |> cast(attrs, [:code, :name])
+    |> validate_required([:code, :name])
   end
 end

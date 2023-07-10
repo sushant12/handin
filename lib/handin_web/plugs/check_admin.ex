@@ -1,6 +1,5 @@
 defmodule HandinWeb.Plugs.CheckAdmin do
   import Phoenix.Controller
-  alias HandinWeb.Router.Helpers, as: Routes
 
   def init(default), do: default
 
@@ -8,11 +7,11 @@ defmodule HandinWeb.Plugs.CheckAdmin do
     if admin?(conn) do
       conn
     else
-      if conn.request_path == Routes.admin_user_session_path(conn, :new) do
+      if conn.request_path == "/admin/log_in" do
         conn
       else
         conn
-        |> redirect(to: Routes.admin_user_session_path(conn, :new))
+        |> redirect(to: "/admin/log_in")
       end
     end
   end

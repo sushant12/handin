@@ -7,7 +7,8 @@ defmodule HandinWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_handin_key",
-    signing_salt: "u2vq65iW"
+    signing_salt: "BNBwvlCV",
+    same_site: "Lax"
   ]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
@@ -20,7 +21,7 @@ defmodule HandinWeb.Endpoint do
     at: "/",
     from: :handin,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only: HandinWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

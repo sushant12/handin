@@ -20,14 +20,17 @@ config :handin, Handin.Repo,
 # you can enable the server option below.
 config :handin, HandinWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "3dQPjOQuibiGgMRzNSswxZG8Ud4UYDl5MwwqlfkGU17Cl7NGEW6xqtnsKJjKToLw",
+  secret_key_base: "I4lJPLiupv/pMsE2Ugt7pAqPMqdYQNfWdwmFZ7aufyDv4LmfTbqVwBBSS5H0ca6p",
   server: false
 
 # In test we don't send emails.
 config :handin, Handin.Mailer, adapter: Swoosh.Adapters.Test
 
+# Disable swoosh api client as it is only required for production adapters.
+config :swoosh, :api_client, false
+
 # Print only warnings and errors during test
-config :logger, level: :warn
+config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
