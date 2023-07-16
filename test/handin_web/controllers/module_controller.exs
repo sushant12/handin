@@ -20,7 +20,7 @@ defmodule HandinWeb.ModuleControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> get(Routes.module_path(conn, :index))
+        |> get(~p"/module")
 
       response = html_response(conn, 200)
       assert response =~ "Create a module"
@@ -38,7 +38,7 @@ defmodule HandinWeb.ModuleControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> get(Routes.module_path(conn, :new, "create"))
+        |> get(~p"/module/create")
 
       response = html_response(conn, 200)
       assert response =~ "<h1 class=\"font-medium text-3xl\">Create Module</h1>"
@@ -56,7 +56,7 @@ defmodule HandinWeb.ModuleControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> get(Routes.module_path(conn, :new, "add_existing"))
+        |> get(~p"/module/add_existing")
 
       response = html_response(conn, 200)
       assert response =~ "Add Module to Courses"
@@ -76,7 +76,7 @@ defmodule HandinWeb.ModuleControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> post(Routes.module_path(conn, :create_module), %{
+        |> post(~p"/module/create", %{
           "name" => module_struct.name,
           "teacher" => teacher.email
         })
@@ -98,7 +98,7 @@ defmodule HandinWeb.ModuleControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> post(Routes.module_path(conn, :create_module), %{
+        |> post(~p"/module/create", %{
           "name" => module_struct.name,
           "teacher" => teacher.email,
           "courses" => [course.id]
@@ -123,7 +123,7 @@ defmodule HandinWeb.ModuleControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> post(Routes.module_path(conn, :create_module), %{
+        |> post(~p"/module/create", %{
           "name" => module.name,
           "teacher" => teacher.email,
           "courses" => [course.id]
@@ -143,7 +143,7 @@ defmodule HandinWeb.ModuleControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> post(Routes.module_path(conn, :add_existing), %{
+        |> post(~p"/module/add_existing", %{
           "modules" => module.name,
           "courses" => [course.id]
         })
@@ -165,10 +165,11 @@ defmodule HandinWeb.ModuleControllerTest do
       conn =
         conn
         |> log_in_user(user)
-        |> post(Routes.module_path(conn, :add_existing), %{
+        |> post(~p"/module/add_existing", %{
           "modules" => module.name,
           "courses" => [course.id]
-        })|> post(Routes.module_path(conn, :add_existing), %{
+        })
+        |> post(~p"/module/add_existing", %{
           "modules" => module.name,
           "courses" => [course.id]
         })

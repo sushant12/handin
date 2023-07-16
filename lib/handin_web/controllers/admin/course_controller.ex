@@ -5,7 +5,7 @@ defmodule HandinWeb.Admin.CourseController do
   use HandinWeb, :controller
 
   def new(conn, _) do
-    render(conn, "new.html",
+    render(conn, :new,
       error_message: nil,
       course_admins: Accounts.fetch_all_course_admins_email_and_id()
     )
@@ -24,10 +24,10 @@ defmodule HandinWeb.Admin.CourseController do
 
       conn
       |> put_flash(:info, "Course created successfully")
-      |> redirect(to: Routes.admin_page_path(conn, :index))
+      |> redirect(to: ~p"/admin")
     else
       _ ->
-        render(conn, "new.html",
+        render(conn, :new,
           error_message: "Course already exists",
           course_admins: Accounts.fetch_all_course_admins_email_and_id()
         )

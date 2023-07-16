@@ -1,4 +1,6 @@
 # Handin
+## **What  Handin does?**
+The handin system allows the setup of multiple modules on which lecturers (or other users like Teaching Assistant's) can create programming assignments that students can submit code to.
 
 ## **Environment Setup**
 

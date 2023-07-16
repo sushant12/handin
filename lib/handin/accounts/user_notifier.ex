@@ -29,7 +29,7 @@ defmodule Handin.Accounts.UserNotifier do
 
     You can confirm your account by visiting the URL below:
 
-    <a href="#{url}">Confirm</a>
+    #{url}
 
     If you didn't create an account with us, please ignore this.
 

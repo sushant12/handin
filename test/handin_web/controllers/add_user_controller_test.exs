@@ -13,10 +13,10 @@ defmodule HandinWeb.AddUserControllerTest do
       conn =
         conn
         |> log_in_user(admin)
-        |> get(Routes.admin_add_user_path(conn, :new))
+        |> get(~p"/admin/add_user")
 
       response = html_response(conn, 200)
-      assert response =~ "<h1>Add user</h1>"
+      assert response =~ "Add User</h1>"
     end
   end
 
@@ -28,10 +28,11 @@ defmodule HandinWeb.AddUserControllerTest do
         conn
         |> log_in_user(admin)
         |> post(
-          Routes.admin_add_user_path(conn, :create, %{
+          ~p"/admin/add_user",
+          %{
             "email" => email,
             "role" => "admin"
-          })
+          }
         )
 
       user = Handin.Repo.get_by(Handin.Accounts.User, email: email)
@@ -45,20 +46,22 @@ defmodule HandinWeb.AddUserControllerTest do
         conn
         |> log_in_user(admin)
         |> post(
-          Routes.admin_add_user_path(conn, :create, %{
+          ~p"/admin/add_user",
+          %{
             "email" => email,
             "role" => "course_admin"
-          })
+          }
         )
         |> post(
-          Routes.admin_add_user_path(conn, :create, %{
+          ~p"/admin/add_user",
+          %{
             "email" => email,
             "role" => "student"
-          })
+          }
         )
 
       response = html_response(conn, 200)
-      assert response =~ "<p>Email already taken</p>"
+      assert response =~ "Email already taken"
     end
   end
 end

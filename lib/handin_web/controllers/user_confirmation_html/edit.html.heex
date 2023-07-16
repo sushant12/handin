@@ -1,0 +1,25 @@
+<div class="mx-auto max-w-sm">
+  <.header class="text-center">Confirm account</.header>
+
+  <.simple_form for={@conn.params["user"]} as={:user} action={~p"/users/confirm/#{@token}"}>
+    <:actions>
+      <.button class="font-medium hover:bg-green-600 hover:pt-1.5 hover:pl-0.5 w-3/5 h-9 mx-auto my-1 rounded-sm text-zinc-100 bg-green-700 transition-all duration-300">Confirm my account</.button>
+    </:actions>
+  </.simple_form>
+
+  <div class="pt-6 px-3 grid grid-cols-3 grid-rows-1 text-center">
+    <.link
+      href={~p"/users/register"}
+      class="pt-1 font-medium hover:bg-green-600 hover:pt-1.5 hover:pl-0.5 w-full h-9 mx-auto my-1 rounded-sm text-zinc-100 bg-green-700 transition-all duration-300"
+    >
+      Register
+    </.link>
+    <p class="mt-2 h-9">OR</p>
+    <.link
+      href={~p"/users/log_in"}
+      class="pt-1 font-medium hover:bg-green-600 hover:pt-1.5 hover:pl-0.5 w-full h-9 mx-auto my-1 rounded-sm text-zinc-100 bg-green-700 transition-all duration-300"
+    >
+    Log in
+    </.link>
+  </div>
+</div>

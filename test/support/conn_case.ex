@@ -19,15 +19,15 @@ defmodule HandinWeb.ConnCase do
 
   using do
     quote do
+      # The default endpoint for testing
+      @endpoint HandinWeb.Endpoint
+
+      use HandinWeb, :verified_routes
+
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
       import HandinWeb.ConnCase
-
-      alias HandinWeb.Router.Helpers, as: Routes
-
-      # The default endpoint for testing
-      @endpoint HandinWeb.Endpoint
     end
   end
 

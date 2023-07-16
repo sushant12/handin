@@ -7,18 +7,17 @@ defmodule Handin.Courses do
   alias Handin.Repo
 
   alias Handin.Courses.Course
-  alias Handin.Accounts.User
 
   @doc """
-  Returns the list of courses.
+  Returns the list of course.
 
   ## Examples
 
-      iex> list_courses()
+      iex> list_course()
       [%Course{}, ...]
 
   """
-  def list_courses do
+  def list_course do
     Repo.all(Course)
   end
 
