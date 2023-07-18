@@ -2,7 +2,6 @@ defmodule Handin.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
   alias Handin.Modules.Module
-  alias Handin.Courses.Course
 
   schema "users" do
     field :email, :string
@@ -12,7 +11,6 @@ defmodule Handin.Accounts.User do
     field :role, :string, default: "student"
     field :admin, :boolean, default: false
 
-    belongs_to :course, Course
     belongs_to :module, Module
 
     many_to_many :modules, Module, join_through: "modules_students"

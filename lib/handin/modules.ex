@@ -7,7 +7,7 @@ defmodule Handin.Modules do
   alias Handin.Repo
 
   alias Handin.Modules.Module
-  alias Handin.{ModulesCourses, ModulesStudents}
+  alias Handin.ModulesStudents
 
   @doc """
   Returns the list of module.
@@ -106,12 +106,6 @@ defmodule Handin.Modules do
   def register_user_into_module(attrs) do
     %ModulesStudents{}
     |> ModulesStudents.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  def add_module_to_course(attrs) do
-    %ModulesCourses{}
-    |> ModulesCourses.changeset(attrs)
     |> Repo.insert()
   end
 
