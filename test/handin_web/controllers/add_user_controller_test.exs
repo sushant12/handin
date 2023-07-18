@@ -49,7 +49,7 @@ defmodule HandinWeb.AddUserControllerTest do
           ~p"/admin/add_user",
           %{
             "email" => email,
-            "role" => "course_admin"
+            "role" => "lecturer"
           }
         )
         |> post(

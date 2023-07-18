@@ -1,7 +1,6 @@
 defmodule HandinWeb.Factory do
   use ExMachina.Ecto, repo: Handin.Repo
   alias Handin.Accounts.User
-  alias Handin.Courses.Course
   alias Handin.Modules.Module
 
   defp valid_user_password, do: "hello world!"
@@ -13,22 +12,6 @@ defmodule HandinWeb.Factory do
       hashed_password: Bcrypt.hash_pwd_salt("admin"),
       confirmed_at: @now,
       role: "admin"
-    }
-  end
-
-  def course_admin_factory do
-    %User{
-      email: sequence(:email, &"course admin#{&1}@studentmail.ul.ie"),
-      hashed_password: Bcrypt.hash_pwd_salt(valid_user_password()),
-      confirmed_at: @now,
-      role: "course_admin"
-    }
-  end
-
-  def course_factory do
-    %Course{
-      name: sequence(:name, &"course name #{&1}"),
-      code: sequence(:code, fn x -> x end)
     }
   end
 

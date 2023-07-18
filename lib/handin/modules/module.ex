@@ -1,15 +1,13 @@
 defmodule Handin.Modules.Module do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Handin.Courses.Course
   alias Handin.Accounts.User
-  alias Handin.{ModulesCourses, ModulesStudents}
+  alias Handin.ModulesStudents
 
   schema "module" do
     field :name, :string
 
     has_one :teacher, User
-    many_to_many :courses, Course, join_through: ModulesCourses
     many_to_many :students, User, join_through: ModulesStudents
 
     timestamps()
