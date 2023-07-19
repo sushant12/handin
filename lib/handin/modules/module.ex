@@ -18,8 +18,8 @@ defmodule Handin.Modules.Module do
   @doc false
   def changeset(module, attrs) do
     module
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
-    |> unique_constraint([:name])
+    |> cast(attrs, [:name, :code])
+    |> validate_required([:name, :code])
+    |> unique_constraint([:name, :code])
   end
 end

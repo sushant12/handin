@@ -74,10 +74,7 @@ defmodule HandinWeb.Router do
     get "/module/cs:module_id/register", StudentEnrollmentController, :new
     post "/module/cs:module_id/register", StudentEnrollmentController, :create
 
-    get "/module", ModuleController, :home
-    get "/module/:mode", ModuleController, :new
-    post "/module/add_existing", ModuleController, :add_existing
-    post "/module/create", ModuleController, :create_module
+    live "/modules", ModulesLive, :home
   end
 
   scope "/", HandinWeb do
