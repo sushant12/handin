@@ -9,7 +9,7 @@ defmodule Handin.Modules.Module do
     field :code, :string
     field :deleted_at, :utc_datetime
 
-    has_one :teacher, User
+    has_one :lecturer, User
     many_to_many :students, User, join_through: ModulesStudents
 
     timestamps()

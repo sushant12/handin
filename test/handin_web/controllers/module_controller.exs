@@ -8,7 +8,7 @@ defmodule HandinWeb.ModuleControllerTest do
   setup do
     %{
       user: user_fixture(),
-      teacher: insert(:teacher),
+      lecturer: insert(:lecturer),
       module: insert(:module),
       module_struct: build(:module)
     }

@@ -363,9 +363,9 @@ defmodule Handin.Accounts do
     |> Repo.update()
   end
 
-  def fetch_all_teaher_emails() do
+  def fetch_all_lecturer_emails() do
     User
-    |> where(role: "teacher")
+    |> where(role: "lecturer")
     |> select([t], t.email)
     |> Repo.all()
   end

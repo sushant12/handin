@@ -1,4 +1,4 @@
-defmodule Handin.Repo.Migrations.ModuleHasTeacher do
+defmodule Handin.Repo.Migrations.ModuleHasLecturer do
   use Ecto.Migration
 
   def change do

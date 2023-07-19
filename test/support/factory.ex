@@ -21,12 +21,12 @@ defmodule HandinWeb.Factory do
     }
   end
 
-  def teacher_factory do
+  def lecturer_factory do
     %User{
-      email: sequence(:email, &"teacher#{&1}@studentmail.ul.ie"),
+      email: sequence(:email, &"lecturer#{&1}@studentmail.ul.ie"),
       hashed_password: Bcrypt.hash_pwd_salt(valid_user_password()),
       confirmed_at: @now,
-      role: "teacher"
+      role: "lecturer"
     }
   end
 end

@@ -27,11 +27,11 @@ lecturer = %Handin.Accounts.User{
 
 Handin.Repo.insert(lecturer)
 
-teacher = %Handin.Accounts.User{
-  email: "teacher@studentmail.ul.ie",
+lecturer = %Handin.Accounts.User{
+  email: "lecturer@studentmail.ul.ie",
   hashed_password: Bcrypt.hash_pwd_salt("unique password"),
   confirmed_at: now,
-  role: "teacher"
+  role: "lecturer"
 }
 
-Handin.Repo.insert(teacher)
+Handin.Repo.insert(lecturer)
