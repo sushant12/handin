@@ -21,12 +21,6 @@ defmodule HandinWeb.Router do
     plug HandinWeb.Plugs.CheckAdmin
   end
 
-  scope "/", HandinWeb do
-    pipe_through :browser
-
-    get "/", PageController, :home
-  end
-
   # Other scopes may use custom stacks.
   # scope "/api", HandinWeb do
   #   pipe_through :api
@@ -66,6 +60,8 @@ defmodule HandinWeb.Router do
 
   scope "/", HandinWeb do
     pipe_through [:browser, :require_authenticated_user]
+
+    get "/", PageController, :home
 
     get "/users/settings", UserSettingsController, :edit
     put "/users/settings", UserSettingsController, :update
