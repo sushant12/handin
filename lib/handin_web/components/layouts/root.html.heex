@@ -11,29 +11,20 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
   </head>
-  <body
-    class="bg-white antialiased"
-    x-data="{ page: 'profile', 'loaded': true, 'darkMode': true, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
-    x-init="
-          darkMode = JSON.parse(localStorage.getItem('darkMode'));
-          $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
-  >
+  <body>
     <%= if @current_user do %>
-      <div class="flex h-screen overflow-hidden">
-        <.sidebar />
-        <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          <.topbar />
-          <main>
-            <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-              <div class="mx-auto max-w-242.5">
-                <%= @inner_content %>
-              </div>
-            </div>
-          </main>
+      <.sidebar />
+      <div class="p-4 sm:ml-64">
+        <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+          <%= @inner_content %>
         </div>
       </div>
     <% else %>
-      <%= @inner_content %>
+      <section class="bg-gray-50 dark:bg-gray-900">
+        <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+          <%= @inner_content %>
+        </div>
+      </section>
     <% end %>
   </body>
 </html>
