@@ -51,18 +51,29 @@ defmodule HandinWeb.Router do
   end
 
   scope "/admin", HandinWeb.Admin, as: :admin do
-    pipe_through [:browser, :admin]
+    pipe_through [:browser, :require_authenticated_user, :admin]
 
-    resources "/", PageController, except: [:show]
+    live_session :require_authenticated_admin,
+      on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}] do
+      live "/universities", UniversityLive.Index, :index
+      live "/universities/new", UniversityLive.Index, :new
+      live "/universities/:id/edit", UniversityLive.Index, :edit
 
-    get "/log_in", UserSessionController, :new
-    post "/log_in", UserSessionController, :create
-
-    get "/add_user", AddUserController, :new
-    post "/add_user", AddUserController, :create
+      live "/universities/:id", UniversityLive.Show, :show
+      live "/universities/:id/show/edit", UniversityLive.Show, :edit
+    end
   end
 
-  ## Authentication routes
+  scope "/admin", HandinWeb.Admin, as: :admin do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    live_session :redirect_if_admin_is_authenticated,
+      on_mount: [{HandinWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      live "/log_in", UserLoginLive, :new
+    end
+
+    post "/log_in", UserSessionController, :create
+  end
 
   scope "/", HandinWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
