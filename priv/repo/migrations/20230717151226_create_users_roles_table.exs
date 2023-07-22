@@ -9,8 +9,8 @@ defmodule Handin.Repo.Migrations.CreateUsersRolesTable do
       timestamps()
     end
 
-    create unique_index(:users_roles, [ :user_id, :role_id])
+    create unique_index(:users_roles, [:user_id, :role_id])
 
-    execute "INSERT INTO roles(name) VALUES ('lecturer'), ('teaching_assistant'), ('student')"
+    execute "INSERT INTO roles(name, inserted_at, updated_at) VALUES ('lecturer', now(), now()), ('teaching_assistant', now(), now()), ('student', now(), now())"
   end
 end

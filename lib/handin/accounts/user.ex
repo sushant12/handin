@@ -1,20 +1,20 @@
 defmodule Handin.Accounts.User do
+  alias Handin.Modules.ModulesUsers
+  alias Handin.Accounts.UsersRoles
+  alias Handin.Modules.Module
+  alias Handin.Accounts.Role
   use Ecto.Schema
   import Ecto.Changeset
-  alias Handin.Modules.Module
 
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
-    field :role, :string, default: "student"
-    field :admin, :boolean, default: false
+    field :admin, :boolean
 
-    belongs_to :module, Module
-
-    many_to_many :modules, Module, join_through: "modules_students"
-
+    many_to_many :roles, Role, join_through: UsersRoles
+    many_to_many :modules, Module, join_through: ModulesUsers
     timestamps()
   end
 
@@ -48,19 +48,10 @@ defmodule Handin.Accounts.User do
     |> validate_password(opts)
   end
 
-  def registration_by_admin_changeset(user, attrs, opts \\ []) do
-    user
-    |> cast(attrs, [:email, :role])
-    |> cast(%{hashed_password: Bcrypt.hash_pwd_salt("")}, [:hashed_password])
-    |> validate_email(opts)
-  end
-
   defp validate_email(changeset, opts) do
     changeset
     |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@studentmail.ul.ie$/,
-      message: "must have correct domain and no spaces"
-    )
+    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> maybe_validate_unique_email(opts)
   end
@@ -170,9 +161,5 @@ defmodule Handin.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
-  end
-
-  def verified?(%Handin.Accounts.User{} = user) do
-    if user.confirmed_at, do: true, else: false
   end
 end

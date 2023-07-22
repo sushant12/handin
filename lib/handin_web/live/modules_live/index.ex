@@ -5,7 +5,11 @@ defmodule HandinWeb.ModulesLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :modules, Modules.list_module())}
+    modules =
+      socket.assigns.current_user.id
+      |> Modules.list_modules_for_user()
+
+    {:ok, stream(socket, :modules, modules)}
   end
 
   @impl true

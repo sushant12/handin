@@ -7,12 +7,12 @@ defmodule HandinWeb.ModulesLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage match records in your database.</:subtitle>
+        <:subtitle>Use this form to manage module records in your database.</:subtitle>
       </.header>
 
       <.simple_form
         for={@form}
-        id="match-form"
+        id="module-form"
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
@@ -20,7 +20,7 @@ defmodule HandinWeb.ModulesLive.FormComponent do
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:code]} type="text" label="Code" />
         <:actions>
-          <.button phx-disable-with="Saving...">Save Match</.button>
+          <.button phx-disable-with="Saving...">Save module</.button>
         </:actions>
       </.simple_form>
     </div>
@@ -28,8 +28,8 @@ defmodule HandinWeb.ModulesLive.FormComponent do
   end
 
   @impl true
-  def update(%{modulee: match} = assigns, socket) do
-    changeset = Modules.change_module(match)
+  def update(%{modulee: module} = assigns, socket) do
+    changeset = Modules.change_module(module)
 
     {:ok,
      socket
@@ -38,27 +38,27 @@ defmodule HandinWeb.ModulesLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"module" => match_params}, socket) do
+  def handle_event("validate", %{"module" => module_params}, socket) do
     changeset =
       socket.assigns.modulee
-      |> Modules.change_module(match_params)
+      |> Modules.change_module(module_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
   end
 
-  def handle_event("save", %{"module" => match_params}, socket) do
-    save_module(socket, socket.assigns.action, match_params)
+  def handle_event("save", %{"module" => module_params}, socket) do
+    save_module(socket, socket.assigns.action, module_params, socket.assigns.current_user.id)
   end
 
-  defp save_module(socket, :edit, match_params) do
-    case Modules.update_module(socket.assigns.modulee, match_params) do
-      {:ok, match} ->
-        notify_parent({:saved, match})
+  defp save_module(socket, :edit, module_params, _user_id) do
+    case Modules.update_module(socket.assigns.modulee, module_params) do
+      {:ok, module} ->
+        notify_parent({:saved, module})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Match updated successfully")
+         |> put_flash(:info, "module updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -66,14 +66,14 @@ defmodule HandinWeb.ModulesLive.FormComponent do
     end
   end
 
-  defp save_module(socket, :new, match_params) do
-    case Modules.create_module(match_params) do
-      {:ok, match} ->
-        notify_parent({:saved, match})
+  defp save_module(socket, :new, module_params, user_id) do
+    case Modules.create_module(module_params, user_id) do
+      {:ok, module} ->
+        notify_parent({:saved, module})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Match created successfully")
+         |> put_flash(:info, "module created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->

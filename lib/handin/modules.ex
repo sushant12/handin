@@ -7,7 +7,14 @@ defmodule Handin.Modules do
   alias Handin.Repo
 
   alias Handin.Modules.Module
-  alias Handin.ModulesStudents
+  alias Handin.Modules.ModulesUsers
+  alias Handin.Accounts.User
+  @spec list_modules_for_user(user_id :: integer) :: list(%Module{})
+  def list_modules_for_user(user_id) do
+    Module
+    |> join(:inner, [m], mu in assoc(m, :users))
+    |> Repo.all()
+  end
 
   @doc """
   Returns the list of module.
@@ -18,7 +25,7 @@ defmodule Handin.Modules do
       [%Module{}, ...]
 
   """
-  def list_module do
+  def list_module() do
     Repo.all(Module)
   end
 
@@ -38,22 +45,22 @@ defmodule Handin.Modules do
   """
   def get_module!(id), do: Repo.get(Module, id)
 
-  @doc """
-  Creates a module.
+  @spec create_module(attrs :: map(), user_id :: integer) :: {:ok, %Module{}}
+  def create_module(attrs \\ %{}, user_id) do
+    Repo.transaction(fn ->
+      module =
+        %Module{}
+        |> Module.changeset(attrs)
+        |> Repo.insert!()
 
-  ## Examples
+      ModulesUsers.changeset(%ModulesUsers{}, %{
+        module_id: module.id,
+        user_id: user_id
+      })
+      |> Repo.insert!()
 
-      iex> create_module(%{field: value})
-      {:ok, %Module{}}
-
-      iex> create_module(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_module(attrs \\ %{}) do
-    %Module{}
-    |> Module.changeset(attrs)
-    |> Repo.insert()
+      module
+    end)
   end
 
   @doc """
@@ -104,8 +111,8 @@ defmodule Handin.Modules do
   end
 
   def register_user_into_module(attrs) do
-    %ModulesStudents{}
-    |> ModulesStudents.changeset(attrs)
+    %ModulesUsers{}
+    |> ModulesUsers.changeset(attrs)
     |> Repo.insert()
   end
 

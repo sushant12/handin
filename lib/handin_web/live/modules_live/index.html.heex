@@ -10,7 +10,11 @@
       </.link>
     </div>
   </div>
-  <.table id="modules" rows={@streams.modules}>
+  <.table
+    id="modules"
+    rows={@streams.modules}
+    row_click={fn {_id, module} -> JS.navigate(~p"/modules/#{module.id}") end}
+  >
     <:col :let={{_, module}} label="Module"><%= "#{module.name} (#{module.code})" %></:col>
     <:col label="Students">0</:col>
     <:col label="Assignments">0</:col>
@@ -36,6 +40,7 @@
     title={@page_title}
     action={@live_action}
     modulee={@module}
+    current_user={@current_user}
     patch={~p"/modules"}
   />
 </.modal>

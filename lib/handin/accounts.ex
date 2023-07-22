@@ -5,7 +5,6 @@ defmodule Handin.Accounts do
 
   import Ecto.Query, warn: false
   alias Handin.Repo
-
   alias Handin.Accounts.{User, UserToken, UserNotifier}
 
   ## Database getters
@@ -22,6 +21,7 @@ defmodule Handin.Accounts do
       nil
 
   """
+
   def get_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, email: email)
   end
@@ -41,7 +41,7 @@ defmodule Handin.Accounts do
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
     user = Repo.get_by(User, email: email)
-    if User.valid_password?(user, password) && User.verified?(user), do: user
+    if User.valid_password?(user, password), do: user
   end
 
   @doc """
@@ -349,24 +349,5 @@ defmodule Handin.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
-  end
-
-  def register_user_by_admin(attrs) do
-    %User{}
-    |> User.registration_by_admin_changeset(attrs)
-    |> Repo.insert()
-  end
-
-  def add_module(user, module_id) do
-    user
-    |> Ecto.Changeset.change(module_id: module_id)
-    |> Repo.update()
-  end
-
-  def fetch_all_lecturer_emails() do
-    User
-    |> where(role: "lecturer")
-    |> select([t], t.email)
-    |> Repo.all()
   end
 end
