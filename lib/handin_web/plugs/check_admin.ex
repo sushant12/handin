@@ -17,10 +17,6 @@ defmodule HandinWeb.Plugs.CheckAdmin do
   end
 
   defp admin?(%Plug.Conn{assigns: %{current_user: user}}) do
-    if user && user.role == "admin" do
-      true
-    else
-      false
-    end
+    user && user.admin
   end
 end

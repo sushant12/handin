@@ -6,5 +6,7 @@ defmodule Handin.Repo.Migrations.AddCodeDeletedAt do
       add :code, :string
       add :deleted_at, :utc_datetime
     end
+
+    create unique_index(:module, [:code])
   end
 end

@@ -1,37 +1,42 @@
+alias Handin.Accounts.Role
+alias Handin.Repo
 now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+role = Role |> Repo.all()
 
-admin = %Handin.Accounts.User{
+%Handin.Accounts.User{
   email: "admin@admin.com",
   hashed_password: Bcrypt.hash_pwd_salt("admin"),
   confirmed_at: now,
-  role: "admin"
+  admin: true
 }
+|> Repo.insert!()
 
-Handin.Repo.insert(admin)
+student_role = role |> Enum.find(&(&1.name == "student"))
 
-student = %Handin.Accounts.User{
+%Handin.Accounts.User{
   email: "student@studentmail.ul.ie",
-  hashed_password: Bcrypt.hash_pwd_salt("unique password"),
+  hashed_password: Bcrypt.hash_pwd_salt("student"),
   confirmed_at: now,
-  role: "student"
+  roles: [student_role]
 }
+|> Repo.insert!()
 
-Handin.Repo.insert(student)
+lecturer_role = role |> Enum.find(&(&1.name == "lecturer"))
 
-lecturer = %Handin.Accounts.User{
-  email: "padmasir@studentmail.ul.ie",
-  hashed_password: Bcrypt.hash_pwd_salt("unique password"),
+%Handin.Accounts.User{
+  email: "paddy@ul.ie",
+  hashed_password: Bcrypt.hash_pwd_salt("paddy"),
   confirmed_at: now,
-  role: "lecturer"
+  roles: [lecturer_role]
 }
+|> Repo.insert!()
 
-Handin.Repo.insert(lecturer)
+ta_role = role |> Enum.find(&(&1.name == "teaching_assistant"))
 
-teacher = %Handin.Accounts.User{
-  email: "teacher@studentmail.ul.ie",
-  hashed_password: Bcrypt.hash_pwd_salt("unique password"),
+%Handin.Accounts.User{
+  email: "ta@studentmail.ul.ie",
+  hashed_password: Bcrypt.hash_pwd_salt("teaching_assistant"),
   confirmed_at: now,
-  role: "teacher"
+  roles: [ta_role]
 }
-
-Handin.Repo.insert(teacher)
+|> Repo.insert!()

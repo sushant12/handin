@@ -3,8 +3,8 @@ defmodule Handin.Accounts.UsersRoles do
   import Ecto.Changeset
 
   schema "users_roles" do
-    belongs_to :users, Handin.Accounts.User
-    belongs_to :roles, Handin.Accounts.Role
+    belongs_to :user, Handin.Accounts.User
+    belongs_to :role, Handin.Accounts.Role
 
     timestamps()
   end

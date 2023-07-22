@@ -7,7 +7,5 @@ defmodule Handin.Repo.Migrations.CreateModule do
 
       timestamps()
     end
-
-    create unique_index(:module, [:name])
   end
 end
