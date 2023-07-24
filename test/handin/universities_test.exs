@@ -36,14 +36,19 @@ defmodule Handin.UniversitiesTest do
       university = university_fixture()
       update_attrs = %{name: "some updated name", config: %{}}
 
-      assert {:ok, %University{} = university} = Universities.update_university(university, update_attrs)
+      assert {:ok, %University{} = university} =
+               Universities.update_university(university, update_attrs)
+
       assert university.name == "some updated name"
       assert university.config == %{}
     end
 
     test "update_university/2 with invalid data returns error changeset" do
       university = university_fixture()
-      assert {:error, %Ecto.Changeset{}} = Universities.update_university(university, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Universities.update_university(university, @invalid_attrs)
+
       assert university == Universities.get_university!(university.id)
     end
 
