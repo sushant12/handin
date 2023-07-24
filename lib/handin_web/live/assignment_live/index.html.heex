@@ -1,0 +1,54 @@
+<.header>
+  Listing Assignments
+  <:actions>
+    <.link patch={~p"/modules/#{@module_id}/assignments/new"}>
+      <.button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0">
+        New Assignment
+      </.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="assignments"
+  rows={@streams.assignments}
+  row_click={fn {_id, assignment} -> JS.navigate(~p"/assignments/#{assignment}") end}
+>
+  <:col :let={{_id, assignment}} label="Name"><%= assignment.name %></:col>
+  <:col :let={{_id, assignment}} label="Total marks"><%= assignment.total_marks %></:col>
+  <:col :let={{_id, assignment}} label="Start date"><%= assignment.start_date %></:col>
+  <:col :let={{_id, assignment}} label="Due date"><%= assignment.due_date %></:col>
+  <:col :let={{_id, assignment}} label="Cutoff date"><%= assignment.cutoff_date %></:col>
+  <:col :let={{_id, assignment}} label="Max attempts"><%= assignment.max_attempts %></:col>
+  <:col :let={{_id, assignment}} label="Penalty per day"><%= assignment.penalty_per_day %></:col>
+  <:action :let={{_id, assignment}}>
+    <div class="sr-only">
+      <.link navigate={~p"/assignments/#{assignment}"}>Show</.link>
+    </div>
+    <.link patch={~p"/assignments/#{assignment}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, assignment}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: assignment.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="assignment-modal"
+  show
+  on_cancel={JS.patch(~p"/assignments")}
+>
+  <.live_component
+    module={HandinWeb.AssignmentLive.FormComponent}
+    id={@assignment.id || :new}
+    title={@page_title}
+    action={@live_action}
+    assignment={@assignment}
+    patch={~p"/assignments"}
+  />
+</.modal>

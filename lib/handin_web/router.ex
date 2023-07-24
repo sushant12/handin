@@ -101,6 +101,15 @@ defmodule HandinWeb.Router do
       live "/modules/:id/edit", ModulesLive.Index, :edit
 
       live "/modules/:id", ModulesLive.Show, :show
+
+      scope "/modules/:id" do
+        live "/assignments", AssignmentLive.Index, :index
+        live "/assignments/new", AssignmentLive.Index, :new
+        live "/assignments/:id/edit", AssignmentLive.Index, :edit
+
+        live "/assignments/:id", AssignmentLive.Show, :show
+        live "/assignments/:id/show/edit", AssignmentLive.Show, :edit
+      end
     end
   end
 
