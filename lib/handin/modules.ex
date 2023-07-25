@@ -9,10 +9,12 @@ defmodule Handin.Modules do
   alias Handin.Modules.Module
   alias Handin.Modules.ModulesUsers
   alias Handin.Accounts.User
+
   @spec list_modules_for_user(user_id :: integer) :: list(%Module{})
   def list_modules_for_user(user_id) do
     Module
     |> join(:inner, [m], mu in assoc(m, :users))
+    |> order_by([m], asc: m.name)
     |> Repo.all()
   end
 
