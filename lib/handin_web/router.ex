@@ -43,13 +43,6 @@ defmodule HandinWeb.Router do
     end
   end
 
-  scope "/", HandinWeb do
-    pipe_through [:browser]
-
-    get "/module/cs:module_id/register", StudentEnrollmentController, :new
-    post "/module/cs:module_id/register", StudentEnrollmentController, :create
-  end
-
   scope "/admin", HandinWeb.Admin, as: :admin do
     pipe_through [:browser, :require_authenticated_user, :admin]
 
@@ -62,17 +55,6 @@ defmodule HandinWeb.Router do
       live "/universities/:id", UniversityLive.Show, :show
       live "/universities/:id/show/edit", UniversityLive.Show, :edit
     end
-  end
-
-  scope "/admin", HandinWeb.Admin, as: :admin do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-    live_session :redirect_if_admin_is_authenticated,
-      on_mount: [{HandinWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/log_in", UserLoginLive, :new
-    end
-
-    post "/log_in", UserSessionController, :create
   end
 
   scope "/", HandinWeb do
@@ -94,6 +76,7 @@ defmodule HandinWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}] do
+      live "/", DashboardLive.Index, :index
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
       live "/modules", ModulesLive.Index, :index

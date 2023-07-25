@@ -1,5 +1,19 @@
 version: '3.9'
 services:
+  web:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    ports:
+      # Docker need to expose ports for you to access your app.
+      - 4000:4000
+    environment:
+      DATABASE_URL: "ecto://postgres:postgres@localhost:5432/handin" # Template : "ecto://db_user:db_password@ip_or_compose_service_name/db_name"
+      SECRET_KEY_BASE: really_long_secret # Can literally be anything, but generally generated randomly by tools like mix phx.gen.secret
+
   db:
     image: postgres:14.1-alpine
     restart: always

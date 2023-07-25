@@ -7,12 +7,8 @@ defmodule HandinWeb.Plugs.CheckAdmin do
     if admin?(conn) do
       conn
     else
-      if conn.request_path == "/admin/log_in" do
-        conn
-      else
-        conn
-        |> redirect(to: "/admin/log_in")
-      end
+      conn
+      |> redirect(to: "/")
     end
   end
 
