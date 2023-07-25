@@ -1,5 +1,5 @@
 defmodule Handin.Modules.ModulesUsers do
-  use Ecto.Schema
+  use Handin.Schema
   import Ecto.Changeset
 
   schema "modules_users" do

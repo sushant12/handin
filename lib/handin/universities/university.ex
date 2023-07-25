@@ -1,5 +1,5 @@
 defmodule Handin.Universities.University do
-  use Ecto.Schema
+  use Handin.Schema
   import Ecto.Changeset
 
   schema "universities" do
