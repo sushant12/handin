@@ -114,7 +114,7 @@ defmodule HandinWeb.ModulesLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "module created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> push_navigate(to: socket.assigns.patch <> "/#{module.id}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
