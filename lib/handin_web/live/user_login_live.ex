@@ -29,6 +29,9 @@ defmodule HandinWeb.UserLoginLive do
             phx-update="ignore"
             class="space-y-4 md:space-y-6"
           >
+            <.error :if={@flash["error"]}>
+              <%= @flash["error"] %>
+            </.error>
             <div>
               <.label>Email</.label>
               <.input
