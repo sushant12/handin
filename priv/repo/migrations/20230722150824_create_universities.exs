@@ -9,5 +9,7 @@ defmodule Handin.Repo.Migrations.CreateUniversities do
 
       timestamps()
     end
+
+    create unique_index(:universities, [:name])
   end
 end
