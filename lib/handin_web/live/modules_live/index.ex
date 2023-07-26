@@ -9,7 +9,7 @@ defmodule HandinWeb.ModulesLive.Index do
       socket.assigns.current_user.id
       |> Modules.list_modules_for_user()
 
-    {:ok, stream(socket, :modules, modules)}
+    {:ok, stream(socket, :modules, modules) |> assign(:current_page, :modules) }
   end
 
   @impl true
