@@ -1,5 +1,5 @@
 defmodule Handin.Accounts.UserToken do
-  use Ecto.Schema
+  use Handin.Schema
   import Ecto.Query
   alias Handin.Accounts.UserToken
 

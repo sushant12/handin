@@ -1,5 +1,5 @@
 defmodule Handin.Accounts.Role do
-  use Ecto.Schema
+  use Handin.Schema
   import Ecto.Changeset
 
   schema "roles" do

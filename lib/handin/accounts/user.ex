@@ -3,7 +3,7 @@ defmodule Handin.Accounts.User do
   alias Handin.Accounts.UsersRoles
   alias Handin.Modules.Module
   alias Handin.Accounts.Role
-  use Ecto.Schema
+  use Handin.Schema
   import Ecto.Changeset
 
   schema "users" do
