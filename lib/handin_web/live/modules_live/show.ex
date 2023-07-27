@@ -9,8 +9,13 @@ defmodule HandinWeb.ModulesLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
-    {:noreply,
-     socket
-     |> assign(:module, Modules.get_module!(id))}
+    user = socket.assigns.current_user |> Handin.Repo.preload(:modules)
+    module = user.modules |> Enum.find(&(&1.id == id))
+
+    if module do
+      {:noreply, assign(socket, :module, module)}
+    else
+      {:noreply, push_navigate(socket, to: "/modules/")}
+    end
   end
 end
