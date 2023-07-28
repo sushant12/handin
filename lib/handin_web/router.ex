@@ -84,6 +84,7 @@ defmodule HandinWeb.Router do
       live "/modules/:id/edit", ModulesLive.Index, :edit
 
       live "/modules/:id", ModulesLive.Show, :show
+      live "/modules/:id/add_:member", ModulesLive.Show, :add_member
     end
   end
 
