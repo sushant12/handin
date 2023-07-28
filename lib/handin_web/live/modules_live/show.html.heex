@@ -28,12 +28,7 @@
           </.link>
         </h2>
         <ul class="max-w-md space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
-          <li>
-            paddy.healy@ul.ie
-          </li>
-          <li>
-            At least one lowercase character
-          </li>
+          <li :for={{_, lecturer} <- @streams.lecturers}><%= lecturer.email %></li>
         </ul>
       </:tab_content>
       <:tab_content label="TAs">
@@ -63,12 +58,7 @@
           </.link>
         </h2>
         <ul class="max-w-md space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
-          <li>
-            paddy.healy@ul.ie
-          </li>
-          <li>
-            At least one lowercase character
-          </li>
+          <li :for={{_, ta} <- @streams.tas}><%= ta.email %></li>
         </ul>
       </:tab_content>
       <:tab_content label="Students">
@@ -98,12 +88,7 @@
           </.link>
         </h2>
         <ul class="max-w-md space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400">
-          <li>
-            paddy.healy@ul.ie
-          </li>
-          <li>
-            At least one lowercase character
-          </li>
+          <li :for={{_, student} <- @streams.students}><%= student.email %></li>
         </ul>
       </:tab_content>
     </.tabs>

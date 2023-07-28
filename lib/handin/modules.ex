@@ -123,4 +123,11 @@ defmodule Handin.Modules do
     |> select([m], m.name)
     |> Repo.all()
   end
+
+  def list_users(module_id) do
+    User
+    |> join(:inner, [u], mu in assoc(u, :modules))
+    |> Repo.all
+    |> Repo.preload(:roles)
+  end
 end

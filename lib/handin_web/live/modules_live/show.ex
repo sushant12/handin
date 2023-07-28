@@ -3,8 +3,12 @@ defmodule HandinWeb.ModulesLive.Show do
   use HandinWeb, :live_view
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, socket}
+  def mount(%{"id" => id} = params, _session, socket) do
+    users = Modules.list_users(id)
+    lecturers = Enum.filter(users, &(Enum.find(&1.roles, fn role -> role.name == "lecturer" end)))
+    tas = Enum.filter(users, &(Enum.find(&1.roles, fn role -> role.name == "teaching_assistant" end)))
+    students = Enum.filter(users, &(Enum.find(&1.roles, fn role -> role.name == "student" end)))
+    {:ok, stream(socket , :lecturers, lecturers) |> stream(:tas, tas) |> stream(:students, students)}
   end
 
   @impl true
