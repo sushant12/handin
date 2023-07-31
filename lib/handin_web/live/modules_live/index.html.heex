@@ -13,7 +13,7 @@
   <.table
     id="modules"
     rows={@streams.modules}
-    row_click={fn {_id, module} -> JS.navigate(~p"/modules/#{module.id}") end}
+    row_click={fn {_id, module} -> JS.navigate(~p"/modules/#{module.id}/assignments") end}
   >
     <:col :let={{_, module}} label="Module"><%= "#{module.name} (#{module.code})" %></:col>
     <:col label="Students">0</:col>

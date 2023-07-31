@@ -4,18 +4,21 @@ defmodule Handin.Modules do
   """
 
   import Ecto.Query, warn: false
+  alias Handin.Accounts.UsersRoles
+  alias Handin.Modules.ModulesInvitations
+  alias Handin.Accounts.User
   alias Handin.Repo
 
   alias Handin.Modules.Module
   alias Handin.Modules.ModulesUsers
-  alias Handin.Accounts.User
 
-  @spec list_modules_for_user(user_id :: integer) :: list(%Module{})
-  def list_modules_for_user(user_id) do
+  @spec get_members(id :: integer) :: list(%User{})
+  def get_members(id) do
     Module
-    |> join(:inner, [m], mu in assoc(m, :users))
-    |> order_by([m], asc: m.name)
-    |> Repo.all()
+    |> where([m], m.id == ^id)
+    |> preload(users: :roles)
+    |> Repo.one()
+    |> Map.get(:users)
   end
 
   @doc """
@@ -31,20 +34,6 @@ defmodule Handin.Modules do
     Repo.all(Module)
   end
 
-  @doc """
-  Gets a single module.
-
-  Raises `Ecto.NoResultsError` if the Module does not exist.
-
-  ## Examples
-
-      iex> get_module!(123)
-      %Module{}
-
-      iex> get_module!(456)
-      ** (Ecto.NoResultsError)
-
-  """
   def get_module!(id), do: Repo.get(Module, id)
 
   @spec create_module(attrs :: map(), user_id :: integer) :: {:ok, %Module{}}
@@ -62,6 +51,15 @@ defmodule Handin.Modules do
       |> Repo.insert!()
 
       module
+    end)
+  end
+
+  @spec add_member(params :: %{user_id: integer, module_id: integer, role_id: integer}) ::
+          {:ok, %User{}}
+  def add_member(params) do
+    Repo.transaction(fn ->
+      UsersRoles.changeset(%UsersRoles{}, params) |> Repo.insert()
+      ModulesUsers.changeset(%ModulesUsers{}, params) |> Repo.insert()
     end)
   end
 
@@ -110,6 +108,10 @@ defmodule Handin.Modules do
   """
   def change_module(%Module{} = module, attrs \\ %{}) do
     Module.changeset(module, attrs)
+  end
+
+  def change_modules_invitations(%ModulesInvitations{} = modules_invitations, attrs \\ %{}) do
+    ModulesInvitations.changeset(modules_invitations, attrs)
   end
 
   def register_user_into_module(attrs) do

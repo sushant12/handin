@@ -1,7 +1,7 @@
-defmodule HandinWeb.ModulesLive.FormComponent do
+defmodule HandinWeb.MembersLive.FormComponent do
+  alias Inspect.Handin.Accounts
   use HandinWeb, :live_component
   alias Handin.Modules
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -14,28 +14,30 @@ defmodule HandinWeb.ModulesLive.FormComponent do
       </div>
       <.simple_form
         for={@form}
-        id="module-form"
+        id="member-form"
         phx-target={@myself}
-        phx-change="validate"
         phx-submit="save"
+        phx-change="validate"
       >
         <div class="grid gap-4 mb-4 sm:grid-cols-1">
           <div>
             <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Name
+              Role
             </label>
             <.input
-              field={@form[:name]}
-              type="text"
+              field={@form[:role]}
+              multiple={false}
+              options={["Lecturer", "Teaching Assistant", "Student"]}
+              type="select"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
             />
           </div>
           <div>
-            <label for="code" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Code
+            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Email
             </label>
             <.input
-              field={@form[:code]}
+              field={@form[:email]}
               type="text"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
             />
@@ -59,7 +61,7 @@ defmodule HandinWeb.ModulesLive.FormComponent do
               >
               </path>
             </svg>
-            Save module
+            Save member
           </.button>
         </:actions>
       </.simple_form>
@@ -68,8 +70,8 @@ defmodule HandinWeb.ModulesLive.FormComponent do
   end
 
   @impl true
-  def update(%{modulee: module} = assigns, socket) do
-    changeset = Modules.change_module(module)
+  def update(%{modules_invitations: modules_invitations} = assigns, socket) do
+    changeset = Modules.change_modules_invitations(modules_invitations)
 
     {:ok,
      socket
@@ -78,47 +80,52 @@ defmodule HandinWeb.ModulesLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"module" => module_params}, socket) do
+  def handle_event("validate", %{"modules_invitations" => modules_invitations_params}, socket) do
     changeset =
-      socket.assigns.modulee
-      |> Modules.change_module(module_params)
+      socket.assigns.modules_invitations
+      |> Modules.change_modules_invitations(modules_invitations_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
   end
 
-  def handle_event("save", %{"module" => module_params}, socket) do
-    save_module(socket, socket.assigns.action, module_params, socket.assigns.current_user.id)
+  def handle_event("save", %{"modules_invitations" => modules_invitations_params}, socket) do
+    save_modules_invitations(
+      socket,
+      socket.assigns.action,
+      modules_invitations_params,
+      socket.assigns.current_user.id
+    )
   end
 
-  defp save_module(socket, :edit, module_params, _user_id) do
-    case Modules.update_module(socket.assigns.modulee, module_params) do
-      {:ok, module} ->
-        notify_parent({:saved, module})
-
-        {:noreply,
-         socket
-         |> put_flash(:info, "module updated successfully")
-         |> push_patch(to: socket.assigns.patch)}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+  defp save_modules_invitations(socket, :new, modules_invitations_params, user_id) do
+    with {:ok, user} <- Accounts.get_user_by_email(modules_invitations_params.email),
+         {:ok, module} <-
+           Modules.add_member(%{
+             user_id: user.id,
+             role_id: modules_invitations_params.role_id,
+             module_id: socket.assigns.module_id
+           }) do
+      notify_parent({:saved, module})
     end
-  end
 
-  defp save_module(socket, :new, module_params, user_id) do
-    case Modules.create_module(module_params, user_id) do
-      {:ok, module} ->
-        notify_parent({:saved, module})
+    # find the user via the email address
+    # if the user is found, add the user to the module
+    # if not found, add the record to the module_invitation table
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "module created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+    # case Modules.create_module(module_params, user_id) do
+    #   {:ok, module} ->
+    #     notify_parent({:saved, module})
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
-    end
+    #     {:noreply,
+    #      socket
+    #      |> put_flash(:info, "module created successfully")
+    #      |> push_patch(to: socket.assigns.patch)}
+
+    #   {:error, %Ecto.Changeset{} = changeset} ->
+    #     {:noreply, assign_form(socket, changeset)}
+    # end
+    {:noreply, socket}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

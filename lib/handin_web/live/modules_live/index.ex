@@ -6,10 +6,11 @@ defmodule HandinWeb.ModulesLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     modules =
-      socket.assigns.current_user.id
-      |> Modules.list_modules_for_user()
+      socket.assigns.current_user |> Handin.Repo.preload(:modules) |> Map.get(:modules)
 
-    {:ok, stream(socket, :modules, modules) |> assign(:current_page, :modules) }
+    {:ok,
+     stream(socket, :modules, modules)
+     |> assign(:current_page, :modules)}
   end
 
   @impl true
