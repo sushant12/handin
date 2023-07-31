@@ -83,8 +83,6 @@ defmodule HandinWeb.Router do
       live "/modules/new", ModulesLive.Index, :new
       live "/modules/:id/edit", ModulesLive.Index, :edit
 
-      live "/modules/:id", ModulesLive.Show, :show
-
       scope "/modules/:id" do
         live "/assignments", AssignmentLive.Index, :index
         live "/assignments/new", AssignmentLive.Index, :new
@@ -92,6 +90,9 @@ defmodule HandinWeb.Router do
 
         live "/assignments/:id", AssignmentLive.Show, :show
         live "/assignments/:id/show/edit", AssignmentLive.Show, :edit
+
+        live "/members", MembersLive.Index, :index
+        live "/members/new", MembersLive.Index, :new
       end
     end
   end

@@ -5,13 +5,14 @@ defmodule Handin.Accounts.UsersRoles do
   schema "users_roles" do
     belongs_to :user, Handin.Accounts.User
     belongs_to :role, Handin.Accounts.Role
+    belongs_to :module, Handin.Modules.Module
 
     timestamps()
   end
 
   def changeset(user_role, attrs) do
     user_role
-    |> cast(attrs, [:role_id, :user_id])
-    |> validate_required([:role_id, :user_id])
+    |> cast(attrs, [:role_id, :user_id, :module_id])
+    |> validate_required([:role_id, :user_id, :module_id])
   end
 end

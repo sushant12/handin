@@ -4,12 +4,13 @@ defmodule Handin.Modules.Module do
   alias Handin.Accounts.User
   alias Handin.Modules.ModulesUsers
   alias Handin.Assignments.Assignment
+  alias Handin.Modules.ModulesInvitations
 
   schema "module" do
     field :name, :string
     field :code, :string
     field :deleted_at, :utc_datetime
-
+    has_many :invitations, ModulesInvitations
     has_many :assignments, Assignment
     many_to_many :users, User, join_through: ModulesUsers
 

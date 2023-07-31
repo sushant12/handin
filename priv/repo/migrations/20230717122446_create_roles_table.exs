@@ -9,5 +9,8 @@ defmodule Handin.Repo.Migrations.CreateRolesTable do
     end
 
     create unique_index(:roles, [:name])
+    execute "CREATE EXTENSION IF NOT EXISTS pgcrypto"
+
+    execute "INSERT INTO roles(id, name, inserted_at, updated_at) VALUES (gen_random_uuid(), 'Lecturer', now(), now()), (gen_random_uuid(),'Teaching Assistant', now(), now()), (gen_random_uuid(),'Student', now(), now())"
   end
 end
