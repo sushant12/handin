@@ -5,7 +5,7 @@ defmodule Handin.Accounts do
 
   import Ecto.Query, warn: false
   alias Handin.Repo
-  alias Handin.Accounts.{User, UserToken, UserNotifier}
+  alias Handin.Accounts.{User, UserToken, UserNotifier, UsersRoles, Role}
 
   ## Database getters
 
@@ -349,5 +349,21 @@ defmodule Handin.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  def add_user_role(attrs) do
+    %UsersRoles{}
+    |> UsersRoles.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def get_role_by_name(name) do
+    Repo.get_by(Role, name: name)
+  end
+
+  def get_users_by_role(role) do
+    Repo.get_by(Role, name: role)
+    |> Repo.preload(:users)
+    |> Map.get(:users)
   end
 end

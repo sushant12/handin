@@ -1,14 +1,16 @@
 defmodule HandinWeb.ModulesLive.Show do
-  alias Handin.Modules
   use HandinWeb, :live_view
+  alias Handin.{Modules, Accounts}
 
   @impl true
   def mount(%{"id" => id} = params, _session, socket) do
     users = Modules.list_users(id)
-    lecturers = Enum.filter(users, &(Enum.find(&1.roles, fn role -> role.name == "lecturer" end)))
-    tas = Enum.filter(users, &(Enum.find(&1.roles, fn role -> role.name == "teaching_assistant" end)))
-    students = Enum.filter(users, &(Enum.find(&1.roles, fn role -> role.name == "student" end)))
-    {:ok, stream(socket , :lecturers, lecturers) |> stream(:tas, tas) |> stream(:students, students)}
+    lecturers = Accounts.get_users_by_role("lecturer")
+    tas = Accounts.get_users_by_role("teaching_assistant")
+    students = Accounts.get_users_by_role("student")
+
+    {:ok,
+     stream(socket, :lecturers, lecturers) |> stream(:tas, tas) |> stream(:students, students)}
   end
 
   @impl true
@@ -27,7 +29,7 @@ defmodule HandinWeb.ModulesLive.Show do
     end
   end
 
-  defp apply_action(socket, :add_member, %{"id" => id, "member" => member}) do
-    {:noreply, assign(socket, :title, member) |> assign(:module, Modules.get_module!(id))}
+  defp apply_action(socket, :add_member, %{"id" => id}) do
+    {:noreply, assign(socket, :module, Modules.get_module!(id))}
   end
 end

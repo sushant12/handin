@@ -6,8 +6,7 @@ defmodule Handin.Modules do
   import Ecto.Query, warn: false
   alias Handin.Repo
 
-  alias Handin.Modules.Module
-  alias Handin.Modules.ModulesUsers
+  alias Handin.Modules.{ModulesUsers, ModulesInvitations, Module}
   alias Handin.Accounts.User
 
   @spec list_modules_for_user(user_id :: integer) :: list(%Module{})
@@ -127,7 +126,13 @@ defmodule Handin.Modules do
   def list_users(module_id) do
     User
     |> join(:inner, [u], mu in assoc(u, :modules))
-    |> Repo.all
+    |> Repo.all()
     |> Repo.preload(:roles)
+  end
+
+  def add_module_invitation(email, role, module) do
+    %ModulesInvitations{}
+    |> ModulesInvitations.changeset(%{email: email, role: role, module_id: module.id})
+    |> Repo.insert()
   end
 end

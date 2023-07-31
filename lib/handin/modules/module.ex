@@ -2,13 +2,14 @@ defmodule Handin.Modules.Module do
   use Handin.Schema
   import Ecto.Changeset
   alias Handin.Accounts.User
-  alias Handin.Modules.ModulesUsers
+  alias Handin.Modules.{ModulesUsers, ModulesInvitations}
 
   schema "module" do
     field :name, :string
     field :code, :string
     field :deleted_at, :utc_datetime
 
+    has_many :invitations, ModulesInvitations
     many_to_many :users, User, join_through: ModulesUsers
 
     timestamps()
