@@ -50,11 +50,11 @@ defmodule HandinWeb.CoreComponents do
       data-cancel={JS.exec(@on_cancel, "phx-remove")}
       tabindex="-1"
       aria-hidden="true"
-      class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
+      class="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full bg-gray-500 bg-opacity-75"
     >
-      <div class="relative w-full max-w-md max-h-full">
+      <div class="m-auto mt-[10%] p-4 w-full max-w-2xl h-full md:h-auto">
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          <div class="px-6 py-6 lg:px-8">
+          <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
             <%= render_slot(@inner_block) %>
           </div>
         </div>
@@ -160,7 +160,7 @@ defmodule HandinWeb.CoreComponents do
     <.form :let={f} for={@for} as={@as} {@rest}>
       <div class="mt-10 space-y-8 bg-white">
         <%= render_slot(@inner_block, f) %>
-        <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
+        <div :for={action <- @actions} class="text-sm text-gray-500 dark:text-gray-300">
           <%= render_slot(action, f) %>
         </div>
       </div>
@@ -248,15 +248,7 @@ defmodule HandinWeb.CoreComponents do
     <div phx-feedback-for={@name}>
       <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
         <input type="hidden" name={@name} value="false" />
-        <input
-          type="checkbox"
-          id={@id}
-          name={@name}
-          value="true"
-          checked={@checked}
-          class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
-          {@rest}
-        />
+        <input type="checkbox" id={@id} name={@name} value="true" checked={@checked} {@rest} />
         <%= @label %>
       </label>
       <.error :for={msg <- @errors}><%= msg %></.error>
@@ -323,16 +315,16 @@ defmodule HandinWeb.CoreComponents do
   Renders a label.
   """
 
-  # attr :for, :string, default: nil
-  # slot :inner_block, required: true
+  attr :for, :string, default: nil
+  slot :inner_block, required: true
 
-  # def label(assigns) do
-  #   ~H"""
-  #   <label for={@for} class="font-medium text-lg">
-  #     <%= render_slot(@inner_block) %>
-  #   </label>
-  #   """
-  # end
+  def label(assigns) do
+    ~H"""
+    <label for={@for} class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+      <%= render_slot(@inner_block) %>
+    </label>
+    """
+  end
 
   @doc """
   Generates a generic error message.

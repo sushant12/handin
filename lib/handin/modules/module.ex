@@ -1,5 +1,5 @@
 defmodule Handin.Modules.Module do
-  use Ecto.Schema
+  use Handin.Schema
   import Ecto.Changeset
   alias Handin.Accounts.User
   alias Handin.Modules.ModulesUsers

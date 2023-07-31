@@ -3,7 +3,7 @@ defmodule Handin.Accounts.User do
   alias Handin.Accounts.UsersRoles
   alias Handin.Modules.Module
   alias Handin.Accounts.Role
-  use Ecto.Schema
+  use Handin.Schema
   import Ecto.Changeset
 
   schema "users" do
@@ -45,7 +45,7 @@ defmodule Handin.Accounts.User do
     user
     |> cast(attrs, [:email, :password])
     |> validate_email(opts)
-    |> validate_password(opts)
+    |> password_changeset(attrs, opts)
   end
 
   defp validate_email(changeset, opts) do

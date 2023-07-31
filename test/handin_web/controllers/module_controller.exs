@@ -13,5 +13,4 @@ defmodule HandinWeb.ModuleControllerTest do
       module_struct: build(:module)
     }
   end
-
 end
