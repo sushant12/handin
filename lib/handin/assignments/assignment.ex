@@ -1,5 +1,6 @@
 defmodule Handin.Assignments.Assignment do
-  use Ecto.Schema
+  use Handin.Schema
+
   import Ecto.Changeset
   alias Handin.Modules.Module
 
