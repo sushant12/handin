@@ -56,7 +56,7 @@ defmodule HandinWeb.CoreComponents do
       aria-hidden="true"
       class="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full bg-gray-500 bg-opacity-75"
     >
-      <div class="m-auto mt-[10%] p-4 w-full max-w-2xl h-full md:h-auto">
+      <div class="m-auto mt-[7%] p-4 w-full max-w-2xl h-full md:h-auto">
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
           <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
             <%= render_slot(@inner_block) %>
@@ -164,7 +164,10 @@ defmodule HandinWeb.CoreComponents do
     <.form :let={f} for={@for} as={@as} {@rest}>
       <div class="mt-10 space-y-8 bg-white">
         <%= render_slot(@inner_block, f) %>
-        <div :for={action <- @actions} class="text-sm text-gray-500 dark:text-gray-300">
+        <div
+          :for={action <- @actions}
+          class="text-sm text-gray-500 dark:text-gray-300 flex justify-between"
+        >
           <%= render_slot(action, f) %>
         </div>
       </div>
@@ -263,11 +266,22 @@ defmodule HandinWeb.CoreComponents do
   def input(%{type: "select"} = assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
-      <select id={@id} name={@name} multiple={@multiple} {@rest}>
-        <option :if={@prompt} value="" disabled selected><%= @prompt %></option>
-        <%= Phoenix.HTML.Form.options_for_select(@options, nil) %>
-      </select>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <div>
+        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+          <%= @label %>
+        </label>
+        <select
+          id={@id}
+          name={@name}
+          multiple={@multiple}
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          {@rest}
+        >
+          <option :if={@prompt} value="" disabled selected><%= @prompt %></option>
+          <%= Phoenix.HTML.Form.options_for_select(@options, nil) %>
+        </select>
+        <.error :for={msg <- @errors}><%= msg %></.error>
+      </div>
     </div>
     """
   end
@@ -295,14 +309,20 @@ defmodule HandinWeb.CoreComponents do
   def input(assigns) do
     ~H"""
     <div phx-feedback-for={@name}>
-      <input
-        type={@type}
-        name={@name}
-        id={@id}
-        value={Phoenix.HTML.Form.normalize_value(@type, @value)}
-        {@rest}
-      />
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <div>
+        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+          <%= @label %>
+        </label>
+        <input
+          type={@type}
+          name={@name}
+          id={@id}
+          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          {@rest}
+        />
+        <.error :for={msg <- @errors}><%= msg %></.error>
+      </div>
     </div>
     """
 
