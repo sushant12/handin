@@ -125,4 +125,21 @@ defmodule Handin.Modules do
     |> select([m], m.name)
     |> Repo.all()
   end
+
+  def check_and_add_new_user_modules_invitations(user) do
+    modules_invitations =
+      ModulesInvitations
+      |> where([mi], mi.email == ^user.email)
+      |> Repo.all()
+
+    if modules_invitations do
+      Enum.each(modules_invitations, fn module_invitation ->
+        Modules.add_member(%{
+          user_id: user.id,
+          role_id: module_invitation.roles.role_id,
+          module_id: module_invitation.module_id
+        })
+      end)
+    end
+  end
 end

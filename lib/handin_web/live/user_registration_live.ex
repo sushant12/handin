@@ -111,6 +111,8 @@ defmodule HandinWeb.UserRegistrationLive do
             &url(~p"/users/confirm/#{&1}")
           )
 
+        Modules.check_and_add_new_user_modules_invitations(user)
+
         changeset = Accounts.change_user_registration(user)
         {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
 
