@@ -53,7 +53,7 @@ defmodule HandinWeb.UserLoginLive do
               />
             </div>
             <:actions>
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between w-full">
                 <div class="flex items-start">
                   <div class="flex items-center h-5">
                     <.input

@@ -39,5 +39,8 @@ defmodule Handin.Assignments.Assignment do
       :max_attempts,
       :penalty_per_day
     ])
+    |> validate_number(:max_attempts, greater_than: 0)
+    |> validate_number(:penalty_per_day, greater_than: 0)
+    |> validate_number(:total_marks, greater_than: 0)
   end
 end
