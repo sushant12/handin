@@ -4,21 +4,20 @@ defmodule Handin.Modules do
   """
 
   import Ecto.Query, warn: false
-  alias Handin.Accounts.UsersRoles
-  alias Handin.Modules.ModulesInvitations
-  alias Handin.Accounts.User
   alias Handin.Repo
-
+  alias Handin.Accounts.User
+  alias Handin.Modules.ModulesInvitations
   alias Handin.Modules.Module
   alias Handin.Modules.ModulesUsers
 
-  @spec get_members(id :: integer) :: list(%User{})
-  def get_members(id) do
+  @spec get_students(id :: integer) :: list(User.t())
+  def get_students(id) do
     Module
     |> where([m], m.id == ^id)
-    |> preload(users: :roles)
+    |> preload([m], [:users])
     |> Repo.one()
     |> Map.get(:users)
+    |> Enum.filter(&(&1.role == "student"))
   end
 
   @doc """
@@ -36,7 +35,7 @@ defmodule Handin.Modules do
 
   def get_module!(id), do: Repo.get(Module, id)
 
-  @spec create_module(attrs :: map(), user_id :: integer) :: {:ok, %Module{}}
+  @spec create_module(attrs :: map(), user_id :: integer) :: {:ok, Module.t()}
   def create_module(attrs \\ %{}, user_id) do
     Repo.transaction(fn ->
       module =
@@ -54,13 +53,10 @@ defmodule Handin.Modules do
     end)
   end
 
-  @spec add_member(params :: %{user_id: integer, module_id: integer, role_id: integer}) ::
-          {:ok, %User{}}
+  @spec add_member(params :: %{user_id: integer, module_id: integer}) ::
+          {:ok, User.t()}
   def add_member(params) do
-    Repo.transaction(fn ->
-      UsersRoles.changeset(%UsersRoles{}, params) |> Repo.insert()
-      ModulesUsers.changeset(%ModulesUsers{}, params) |> Repo.insert()
-    end)
+    ModulesUsers.changeset(%ModulesUsers{}, params) |> Repo.insert()
   end
 
   @doc """
@@ -112,6 +108,12 @@ defmodule Handin.Modules do
 
   def change_modules_invitations(%ModulesInvitations{} = modules_invitations, attrs \\ %{}) do
     ModulesInvitations.changeset(modules_invitations, attrs)
+  end
+
+  @spec add_modules_invitations(params :: %{email: String, module_id: Integer}) ::
+          {:ok, ModulesInvitations.t()}
+  def add_modules_invitations(params) do
+    change_modules_invitations(%ModulesInvitations{}, params) |> Repo.insert()
   end
 
   def register_user_into_module(attrs) do

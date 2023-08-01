@@ -13,7 +13,9 @@
 <.table
   id="assignments"
   rows={@streams.assignments}
-  row_click={fn {_id, assignment} -> JS.navigate(~p"/assignments/#{assignment}") end}
+  row_click={
+    fn {_id, assignment} -> JS.navigate(~p"/modules/#{@module_id}/assignments/#{assignment}") end
+  }
 >
   <:col :let={{_id, assignment}} label="Name"><%= assignment.name %></:col>
   <:col :let={{_id, assignment}} label="Total marks"><%= assignment.total_marks %></:col>
@@ -24,9 +26,9 @@
   <:col :let={{_id, assignment}} label="Penalty per day"><%= assignment.penalty_per_day %></:col>
   <:action :let={{_id, assignment}}>
     <div class="sr-only">
-      <.link navigate={~p"/assignments/#{assignment}"}>Show</.link>
+      <.link navigate={~p"/modules/#{@module_id}/assignments/#{assignment}"}>Show</.link>
     </div>
-    <.link patch={~p"/assignments/#{assignment}/edit"}>Edit</.link>
+    <.link patch={~p"/modules/#{@module_id}/assignments/#{assignment}/edit"}>Edit</.link>
   </:action>
   <:action :let={{id, assignment}}>
     <.link
@@ -42,7 +44,7 @@
   :if={@live_action in [:new, :edit]}
   id="assignment-modal"
   show
-  on_cancel={JS.patch(~p"/assignments")}
+  on_cancel={JS.patch(~p"/modules/#{@module_id}/assignments")}
 >
   <.live_component
     module={HandinWeb.AssignmentLive.FormComponent}
@@ -51,6 +53,6 @@
     action={@live_action}
     module_id={@module_id}
     assignment={@assignment}
-    patch={~p"/assignments"}
+    patch={~p"/modules/#{@module_id}/assignments"}
   />
 </.modal>

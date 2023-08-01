@@ -5,7 +5,6 @@ defmodule Handin.Repo.Migrations.CreateModulesInvitations do
     create table(:modules_invitations, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :email, :string
-      add :role, :string
       add :module_id, references(:module, type: :uuid)
     end
 
