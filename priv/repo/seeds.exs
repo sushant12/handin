@@ -11,7 +11,7 @@ role = Role |> Repo.all()
 }
 |> Repo.insert!()
 
-student_role = role |> Enum.find(&(&1.name == "student"))
+student_role = role |> Enum.find(&(&1.name == "Student"))
 
 %Handin.Accounts.User{
   email: "student@studentmail.ul.ie",
@@ -21,7 +21,7 @@ student_role = role |> Enum.find(&(&1.name == "student"))
 }
 |> Repo.insert!()
 
-lecturer_role = role |> Enum.find(&(&1.name == "lecturer"))
+lecturer_role = role |> Enum.find(&(&1.name == "Lecturer"))
 
 %Handin.Accounts.User{
   email: "paddy@ul.ie",
@@ -31,7 +31,7 @@ lecturer_role = role |> Enum.find(&(&1.name == "lecturer"))
 }
 |> Repo.insert!()
 
-ta_role = role |> Enum.find(&(&1.name == "teaching_assistant"))
+ta_role = role |> Enum.find(&(&1.name == "Teaching Assistant"))
 
 %Handin.Accounts.User{
   email: "ta@studentmail.ul.ie",
