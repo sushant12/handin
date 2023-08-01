@@ -1,11 +1,10 @@
 defmodule HandinWeb.MembersLive.Index do
   use HandinWeb, :live_view
   alias Handin.Modules
-  alias Handin.Accounts.User
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    members = Modules.get_members(id)
+    members = Modules.get_students(id)
 
     {:ok, stream(socket, :members, members) |> assign(:module_id, id)}
   end

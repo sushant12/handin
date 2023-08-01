@@ -1,8 +1,6 @@
 defmodule Handin.Accounts.User do
   alias Handin.Modules.ModulesUsers
-  alias Handin.Accounts.UsersRoles
   alias Handin.Modules.Module
-  alias Handin.Accounts.Role
   use Handin.Schema
   import Ecto.Changeset
 
@@ -11,9 +9,8 @@ defmodule Handin.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
-    field :admin, :boolean
+    field :role, :string
 
-    many_to_many :roles, Role, join_through: UsersRoles
     many_to_many :modules, Module, join_through: ModulesUsers
     timestamps()
   end
