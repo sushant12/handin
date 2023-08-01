@@ -153,9 +153,11 @@
   <.live_component
     module={HandinWeb.MembersLive.FormComponent}
     id={:new}
+    module_id={@module_id}
     title={@page_title}
     action={@live_action}
     modules_invitations={%Handin.Modules.ModulesInvitations{}}
+    current_user={@current_user}
     patch={~p"/modules"}
   />
 </.modal>

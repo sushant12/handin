@@ -1,7 +1,8 @@
 defmodule HandinWeb.MembersLive.FormComponent do
-  alias Inspect.Handin.Accounts
   use HandinWeb, :live_component
-  alias Handin.Modules
+  alias Handin.{Modules, Accounts}
+  alias Handin.Accounts.{Role, User}
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -99,11 +100,12 @@ defmodule HandinWeb.MembersLive.FormComponent do
   end
 
   defp save_modules_invitations(socket, :new, modules_invitations_params, user_id) do
-    with {:ok, user} <- Accounts.get_user_by_email(modules_invitations_params.email),
+    with %User{} = user <- Accounts.get_user_by_email(modules_invitations_params["email"]),
+        %Role{} = role <- Accounts.get_role_by_name(modules_invitations_params["role"]),
          {:ok, module} <-
            Modules.add_member(%{
              user_id: user.id,
-             role_id: modules_invitations_params.role_id,
+             role_id: role.id,
              module_id: socket.assigns.module_id
            }) do
       notify_parent({:saved, module})
