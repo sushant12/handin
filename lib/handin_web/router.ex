@@ -86,10 +86,10 @@ defmodule HandinWeb.Router do
       scope "/modules/:id" do
         live "/assignments", AssignmentLive.Index, :index
         live "/assignments/new", AssignmentLive.Index, :new
-        live "/assignments/:id/edit", AssignmentLive.Index, :edit
+        live "/assignments/:assignment_id/edit", AssignmentLive.Index, :edit
 
-        live "/assignments/:id", AssignmentLive.Show, :show
-        live "/assignments/:id/show/edit", AssignmentLive.Show, :edit
+        live "/assignments/:assignment_id", AssignmentLive.Show, :show
+        live "/assignments/:assignment_id/show/edit", AssignmentLive.Show, :edit
 
         live "/members", MembersLive.Index, :index
         live "/members/new", MembersLive.Index, :new

@@ -92,7 +92,7 @@
         </.link>
       </li>
 
-      <li :if={@current_user.admin}>
+      <li :if={@current_user.role == "admin"}>
         <.link
           navigate={~p"/admin/universities"}
           class={[
