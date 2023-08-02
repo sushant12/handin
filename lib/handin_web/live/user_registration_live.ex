@@ -1,7 +1,7 @@
 defmodule HandinWeb.UserRegistrationLive do
   use HandinWeb, :live_view
 
-  alias Handin.Accounts
+  alias Handin.{Accounts, Modules}
   alias Handin.Accounts.User
 
   def render(assigns) do

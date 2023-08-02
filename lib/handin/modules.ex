@@ -133,15 +133,11 @@ defmodule Handin.Modules do
       ModulesInvitations
       |> where([mi], mi.email == ^user.email)
       |> Repo.all()
-
-    if modules_invitations do
-      Enum.each(modules_invitations, fn module_invitation ->
-        Modules.add_member(%{
+      |> Enum.each(fn module_invitation ->
+        add_member(%{
           user_id: user.id,
-          role_id: module_invitation.roles.role_id,
           module_id: module_invitation.module_id
         })
       end)
-    end
   end
 end
