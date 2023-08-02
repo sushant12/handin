@@ -6,7 +6,9 @@ defmodule HandinWeb.Admin.UniversityLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :universities, Universities.list_universities()) |> assign(:current_page, :universities)}
+    {:ok,
+     stream(socket, :universities, Universities.list_universities())
+     |> assign(:current_page, :universities)}
   end
 
   @impl true

@@ -55,7 +55,11 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
   end
 
   def handle_event("save", %{"assignment" => assignment_params}, socket) do
-    save_assignment(socket, socket.assigns.action, assignment_params)
+    save_assignment(
+      socket,
+      socket.assigns.action,
+      assignment_params |> Map.put("module_id", socket.assigns.module_id)
+    )
   end
 
   defp save_assignment(socket, :edit, assignment_params) do

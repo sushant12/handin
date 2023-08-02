@@ -52,6 +52,7 @@ defmodule Handin.Assignments do
   def create_assignment(attrs \\ %{}) do
     %Assignment{}
     |> Assignment.changeset(attrs)
+    |> Ecto.Changeset.change(module_id: attrs["module_id"])
     |> Repo.insert()
   end
 
