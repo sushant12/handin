@@ -11,8 +11,8 @@ defmodule Handin.Modules.ModulesInvitations do
 
   def changeset(module_invitation, attrs) do
     module_invitation
-    |> cast(attrs, [:email])
-    |> validate_required([:email])
+    |> cast(attrs, [:email, :module_id])
+    |> validate_required([:email, :module_id])
     |> unique_constraint([:email, :module_id])
   end
 end

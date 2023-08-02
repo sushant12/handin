@@ -1,7 +1,7 @@
 defmodule HandinWeb.UserRegistrationLive do
   use HandinWeb, :live_view
 
-  alias Handin.Accounts
+  alias Handin.{Accounts, Modules}
   alias Handin.Accounts.User
 
   def render(assigns) do
@@ -110,6 +110,8 @@ defmodule HandinWeb.UserRegistrationLive do
             user,
             &url(~p"/users/confirm/#{&1}")
           )
+
+        Modules.check_and_add_new_user_modules_invitations(user)
 
         changeset = Accounts.change_user_registration(user)
         {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
