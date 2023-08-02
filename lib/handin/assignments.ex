@@ -4,7 +4,7 @@ defmodule Handin.Assignments do
   """
 
   import Ecto.Query, warn: false
-  alias Handin.Repo
+  alias Handin.{Repo, Modules}
 
   alias Handin.Assignments.Assignment
 
@@ -50,9 +50,11 @@ defmodule Handin.Assignments do
 
   """
   def create_assignment(attrs \\ %{}) do
+    module = Modules.get_module!(attrs["module_id"])
+
     %Assignment{}
     |> Assignment.changeset(attrs)
-    |> Ecto.Changeset.change(module_id: attrs["module_id"])
+    |> Ecto.Changeset.put_assoc(:module, module)
     |> Repo.insert()
   end
 
