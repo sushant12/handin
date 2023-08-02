@@ -19,10 +19,10 @@ defmodule HandinWeb.AssignmentLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
+  defp apply_action(socket, :edit, %{"id" => id, "assignment_id" => assignment_id}) do
     socket
     |> assign(:page_title, "Edit Assignment")
-    |> assign(:assignment, Assignments.get_assignment!(id))
+    |> assign(:assignment, Assignments.get_assignment!(assignment_id))
   end
 
   defp apply_action(socket, :new, _params) do
@@ -35,6 +35,7 @@ defmodule HandinWeb.AssignmentLive.Index do
     socket
     |> assign(:page_title, "Listing Assignments")
     |> assign(:assignment, nil)
+    |> assign(:current_tab, :assignments)
   end
 
   @impl true

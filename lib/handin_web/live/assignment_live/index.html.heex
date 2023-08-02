@@ -1,9 +1,9 @@
-<.module_tabs module_id={@module_id}></.module_tabs>
+<.module_tabs module_id={@module_id} current_tab={assigns[:current_tab]}></.module_tabs>
 
 <.header>
   <:actions>
     <.link patch={~p"/modules/#{@module_id}/assignments/new"}>
-      <.button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0">
+      <.button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3">
         New Assignment
       </.button>
     </.link>
@@ -14,7 +14,9 @@
   id="assignments"
   rows={@streams.assignments}
   row_click={
-    fn {_id, assignment} -> JS.navigate(~p"/modules/#{@module_id}/assignments/#{assignment}") end
+    fn {_id, assignment} ->
+      JS.navigate(~p"/modules/#{@module_id}/assignments/#{assignment.id}")
+    end
   }
 >
   <:col :let={{_id, assignment}} label="Name"><%= assignment.name %></:col>
@@ -26,9 +28,9 @@
   <:col :let={{_id, assignment}} label="Penalty per day"><%= assignment.penalty_per_day %></:col>
   <:action :let={{_id, assignment}}>
     <div class="sr-only">
-      <.link navigate={~p"/modules/#{@module_id}/assignments/#{assignment}"}>Show</.link>
+      <.link navigate={~p"/modules/#{@module_id}/assignments/#{assignment.id}"}>Show</.link>
     </div>
-    <.link patch={~p"/modules/#{@module_id}/assignments/#{assignment}/edit"}>Edit</.link>
+    <.link patch={~p"/modules/#{@module_id}/assignments/#{assignment.id}/edit"}>Edit</.link>
   </:action>
   <:action :let={{id, assignment}}>
     <.link
@@ -53,6 +55,7 @@
     action={@live_action}
     module_id={@module_id}
     assignment={@assignment}
+    module_id={@module_id}
     patch={~p"/modules/#{@module_id}/assignments"}
   />
 </.modal>
