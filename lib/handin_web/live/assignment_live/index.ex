@@ -11,8 +11,7 @@ defmodule HandinWeb.AssignmentLive.Index do
     {:ok,
      socket
      |> stream(:assignments, assignments)
-     |> assign(:module_id, id)
-    }
+     |> assign(:module_id, id)}
   end
 
   @impl true

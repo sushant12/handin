@@ -33,9 +33,9 @@ defmodule HandinWeb.UserLoginLive do
               <%= @flash["error"] %>
             </.error>
             <div>
-              <.label>Email</.label>
               <.input
                 field={@form[:email]}
+                label="Email"
                 type="email"
                 class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 required
@@ -43,9 +43,9 @@ defmodule HandinWeb.UserLoginLive do
               />
             </div>
             <div>
-              <.label>Password</.label>
               <.input
                 field={@form[:password]}
+                label="Password"
                 type="password"
                 class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="••••••••"
@@ -53,7 +53,7 @@ defmodule HandinWeb.UserLoginLive do
               />
             </div>
             <:actions>
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between w-full">
                 <div class="flex items-start">
                   <div class="flex items-center h-5">
                     <.input

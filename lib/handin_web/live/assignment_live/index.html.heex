@@ -51,6 +51,7 @@
     id={@assignment.id || :new}
     title={@page_title}
     action={@live_action}
+    module_id={@module_id}
     assignment={@assignment}
     patch={~p"/modules/#{@module_id}/assignments"}
   />

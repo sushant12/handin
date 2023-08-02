@@ -10,7 +10,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
     ~H"""
     <div>
       <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-        <.header class="text-lg font-semibold text-gray-900 dark:text-white">
+        <.header>
           <%= @title %>
           <:subtitle>Use this form to manage module records in your database.</:subtitle>
         </.header>
@@ -73,6 +73,12 @@ defmodule HandinWeb.MembersLive.FormComponent do
             </svg>
             Save member
           </.button>
+          <.link
+            patch={@patch}
+            class="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
+          >
+            Cancel
+          </.link>
         </:actions>
       </.simple_form>
     </div>
