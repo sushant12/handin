@@ -16,7 +16,7 @@
     row_click={fn {_id, module} -> JS.navigate(~p"/modules/#{module.id}/assignments") end}
   >
     <:col :let={{_, module}} label="Module"><%= "#{module.name} (#{module.code})" %></:col>
-    <:col label="Students">0</:col>
+    <:col :let={{_, module}} label="Students"><%= Modules.get_students_count(module.id) %></:col>
     <:col label="Assignments">0</:col>
     <:action :let={{_, module}}>
       <.link

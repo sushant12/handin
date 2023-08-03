@@ -20,6 +20,14 @@ defmodule Handin.Modules do
     |> Enum.filter(&(&1.role == "student"))
   end
 
+  def get_students_count(id) do
+    Module
+    |> where([m], m.id == ^id)
+    |> join(:inner, [m], u in assoc(m, :users), on: u.role == "student")
+    |> select([m, u], count(u.id))
+    |> Repo.one()
+  end
+
   @doc """
   Returns the list of module.
 
