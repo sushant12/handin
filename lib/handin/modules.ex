@@ -130,6 +130,13 @@ defmodule Handin.Modules do
     |> Repo.insert()
   end
 
+  def remove_user_from_module(user_id, module_id) do
+    ModulesUsers
+    |> where([mu], mu.user_id == ^user_id and mu.module_id == ^module_id)
+    |> Repo.one()
+    |> Repo.delete()
+  end
+
   def fetch_module_names() do
     Module
     |> select([m], m.name)
