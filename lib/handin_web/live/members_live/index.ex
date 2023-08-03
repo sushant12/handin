@@ -1,6 +1,6 @@
 defmodule HandinWeb.MembersLive.Index do
   use HandinWeb, :live_view
-  alias Handin.Modules
+  alias Handin.{Modules, Accounts}
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -29,5 +29,13 @@ defmodule HandinWeb.MembersLive.Index do
   @impl true
   def handle_info({HandinWeb.MembersLive.FormComponent, {:saved, member}}, socket) do
     {:noreply, stream_insert(socket, :members, member)}
+  end
+
+  @impl true
+  def handle_event("delete", %{"id" => id}, socket) do
+    member = Accounts.get_user!(id)
+    Modules.remove_user_from_module(id, socket.assigns.module_id)
+
+    {:noreply, stream_delete(socket, :members, member)}
   end
 end
