@@ -40,9 +40,4 @@ defmodule HandinWeb.ModulesLive.Index do
   def handle_info({HandinWeb.ModulesLive.FormComponent, {:saved, module}}, socket) do
     {:noreply, stream_insert(socket, :modules, module)}
   end
-
-  defp get_students_count(module) do
-    Modules.get_students(module.id)
-    |> Enum.count()
-  end
 end
