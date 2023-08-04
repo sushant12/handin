@@ -11,7 +11,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
     {:ok,
      socket
      |> assign(:uploaded_files, [])
-     |> allow_upload(:csv_file_input, accept: ~w(.csv), max_entries: 1)}
+     |> allow_upload(:csv_file_input, accept: ~w(.csv), max_entries: 1, max_file_size: 1_500_000)}
   end
 
   @impl true
@@ -30,7 +30,6 @@ defmodule HandinWeb.MembersLive.FormComponent do
         phx-target={@myself}
         phx-submit="save"
         phx-change="validate"
-        multipart
       >
         <div class="grid gap-4 mb-4 sm:grid-cols-1">
           <.input field={@form[:email]} label="Email" type="text" />
@@ -84,11 +83,6 @@ defmodule HandinWeb.MembersLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", _, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
   def update(%{modules_invitations: modules_invitations} = assigns, socket) do
     changeset = Modules.change_modules_invitations(modules_invitations)
 
@@ -96,6 +90,11 @@ defmodule HandinWeb.MembersLive.FormComponent do
      socket
      |> assign(assigns)
      |> assign_form(changeset)}
+  end
+
+  @impl true
+  def handle_event("validate", _, socket) do
+    {:noreply, socket}
   end
 
   @impl true
@@ -112,18 +111,18 @@ defmodule HandinWeb.MembersLive.FormComponent do
             |> File.read!()
             |> CSVParser.parse_string()
 
-            {:ok, rows}
-          end)
-          |> List.flatten()
-
-        Enum.each(uploaded_files, fn row ->
-          save_modules_invitations(socket, socket.assigns.action, %{"email" => row})
+          {:ok, rows}
         end)
+        |> List.flatten()
 
-        {:noreply,
-        socket
-        |> put_flash(:info, "member added successfully")
-        |> push_patch(to: socket.assigns.patch)}
+      Enum.each(uploaded_files, fn row ->
+        save_modules_invitations(socket, socket.assigns.action, %{"email" => row})
+      end)
+
+      {:noreply,
+       socket
+       |> put_flash(:info, "member added successfully")
+       |> push_patch(to: socket.assigns.patch)}
     else
       save_modules_invitations(
         socket,
