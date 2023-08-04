@@ -100,7 +100,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
   @impl true
   def handle_event(
         "save",
-        %{"modules_invitations" => modules_invitations_params} = params,
+        %{"modules_invitations" => modules_invitations_params},
         socket
       ) do
     if socket.assigns.uploads.csv_file_input.entries != [] do

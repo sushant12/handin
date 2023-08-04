@@ -1,4 +1,4 @@
-<.module_tabs module_id={@module_id} current_tab={assigns[:current_tab]}></.module_tabs>
+<.module_tabs module_id={@module_id} current_tab={assigns[:current_tab]} />
 
 <.header>
   <:actions>
@@ -53,7 +53,6 @@
     id={@assignment.id || :new}
     title={@page_title}
     action={@live_action}
-    module_id={@module_id}
     assignment={@assignment}
     module_id={@module_id}
     patch={~p"/modules/#{@module_id}/assignments"}

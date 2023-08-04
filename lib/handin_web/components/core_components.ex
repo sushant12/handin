@@ -551,6 +551,7 @@ defmodule HandinWeb.CoreComponents do
   end
 
   attr :module_id, :string, required: true
+  attr :current_tab, :atom, required: true
 
   def module_tabs(assigns) do
     ~H"""
