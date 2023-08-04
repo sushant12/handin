@@ -144,7 +144,7 @@ defmodule Handin.Modules do
   end
 
   def check_and_add_new_user_modules_invitations(user) do
-    modules_invitations =
+
       ModulesInvitations
       |> where([mi], mi.email == ^user.email)
       |> Repo.all()
