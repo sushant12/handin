@@ -144,14 +144,14 @@ defmodule Handin.Modules do
   end
 
   def check_and_add_new_user_modules_invitations(user) do
-      ModulesInvitations
-      |> where([mi], mi.email == ^user.email)
-      |> Repo.all()
-      |> Enum.each(fn module_invitation ->
-        add_member(%{
-          user_id: user.id,
-          module_id: module_invitation.module_id
-        })
-      end)
+    ModulesInvitations
+    |> where([mi], mi.email == ^user.email)
+    |> Repo.all()
+    |> Enum.each(fn module_invitation ->
+      add_member(%{
+        user_id: user.id,
+        module_id: module_invitation.module_id
+      })
+    end)
   end
 end

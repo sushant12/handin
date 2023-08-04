@@ -48,6 +48,8 @@ defmodule HandinWeb.AssignmentLive.Index do
     assignment = Assignments.get_assignment!(id)
     {:ok, _} = Assignments.delete_assignment(assignment)
 
-    {:noreply, stream_delete(socket, :assignments, assignment)}
+    {:noreply,
+     stream_delete(socket, :assignments, assignment)
+     |> put_flash(:info, "Assignment deleted successfully")}
   end
 end

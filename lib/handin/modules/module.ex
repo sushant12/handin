@@ -22,5 +22,6 @@ defmodule Handin.Modules.Module do
     module
     |> cast(attrs, [:name, :code])
     |> validate_required([:name, :code])
+    |> unique_constraint([:code])
   end
 end

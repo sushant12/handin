@@ -105,7 +105,9 @@ defmodule HandinWeb.ModulesLive.FormComponent do
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+        {:noreply,
+         assign_form(socket, changeset)
+         |> put_flash(:error, "An error occured")}
     end
   end
 
