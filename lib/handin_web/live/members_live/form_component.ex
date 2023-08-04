@@ -1,9 +1,18 @@
 defmodule HandinWeb.MembersLive.FormComponent do
   use HandinWeb, :live_component
+  alias NimbleCSV.RFC4180, as: CSVParser
   alias Handin.Modules
   alias Handin.Accounts
   alias Handin.Accounts.User
   alias Handin.Modules.ModulesUsers
+
+  @impl true
+  def mount(socket) do
+    {:ok,
+     socket
+     |> assign(:uploaded_files, [])
+     |> allow_upload(:csv_file_input, accept: ~w(.csv), max_entries: 1)}
+  end
 
   @impl true
   def render(assigns) do
@@ -15,42 +24,31 @@ defmodule HandinWeb.MembersLive.FormComponent do
           <:subtitle>Use this form to manage module records in your database.</:subtitle>
         </.header>
       </div>
-      <.simple_form for={@form} id="member-form" phx-target={@myself} phx-submit="save">
+      <.simple_form
+        for={@form}
+        id="member-form"
+        phx-target={@myself}
+        phx-submit="save"
+        phx-change="validate"
+        multipart
+      >
         <div class="grid gap-4 mb-4 sm:grid-cols-1">
-          <div>
-            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Email
-            </label>
-            <.input
-              field={@form[:email]}
-              type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-            />
-          </div>
+          <.input field={@form[:email]} label="Email" type="text" />
         </div>
         <div class="inline-flex items-center justify-center w-full">
-          <hr class="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+          <hr class="w-64 h-px my-1 bg-gray-200 border-0 dark:bg-gray-700" />
           <span class="absolute px-3 font-medium text-gray-900 -translate-x-1/2 bg-white left-1/2 dark:text-white dark:bg-gray-900">
             or
           </span>
         </div>
         <div class="grid gap-4 mb-4 sm:grid-cols-1">
-          <div>
-            <label
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              for="user_avatar"
-            >
-              Upload file
-            </label>
-            <input
-              class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-              aria-describedby="user_avatar_help"
-              id="user_avatar"
-              type="file"
-            />
-            <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="user_avatar_help">
-              A profile picture is useful to confirm your are logged into your account
-            </div>
+          <.label>Upload file</.label>
+          <.live_file_input
+            upload={@uploads.csv_file_input}
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          />
+          <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="user_avatar_help">
+            A profile picture is useful to confirm your are logged into your account
           </div>
         </div>
         <:actions>
@@ -86,6 +84,11 @@ defmodule HandinWeb.MembersLive.FormComponent do
   end
 
   @impl true
+  def handle_event("validate", _, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
   def update(%{modules_invitations: modules_invitations} = assigns, socket) do
     changeset = Modules.change_modules_invitations(modules_invitations)
 
@@ -96,12 +99,38 @@ defmodule HandinWeb.MembersLive.FormComponent do
   end
 
   @impl true
-  def handle_event("save", %{"modules_invitations" => modules_invitations_params}, socket) do
-    save_modules_invitations(
-      socket,
-      socket.assigns.action,
-      modules_invitations_params
-    )
+  def handle_event(
+        "save",
+        %{"modules_invitations" => modules_invitations_params} = params,
+        socket
+      ) do
+    if socket.assigns.uploads.csv_file_input.entries != [] do
+      uploaded_files =
+        consume_uploaded_entries(socket, :csv_file_input, fn %{path: path}, _entry ->
+          rows =
+            path
+            |> File.read!()
+            |> CSVParser.parse_string()
+
+            {:ok, rows}
+          end)
+          |> List.flatten()
+
+        Enum.each(uploaded_files, fn row ->
+          save_modules_invitations(socket, socket.assigns.action, %{"email" => row})
+        end)
+
+        {:noreply,
+        socket
+        |> put_flash(:info, "member added successfully")
+        |> push_patch(to: socket.assigns.patch)}
+    else
+      save_modules_invitations(
+        socket,
+        socket.assigns.action,
+        modules_invitations_params
+      )
+    end
   end
 
   defp save_modules_invitations(socket, :new, %{"email" => email}) do
@@ -115,7 +144,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
 
       {:noreply,
        socket
-       |> put_flash(:info, "member created successfully")
+       |> put_flash(:info, "member added successfully")
        |> push_patch(to: socket.assigns.patch)}
     else
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -129,7 +158,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "member created successfully")
+         |> put_flash(:info, "member added successfully")
          |> push_patch(to: socket.assigns.patch)}
     end
   end
