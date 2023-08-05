@@ -37,6 +37,8 @@ defmodule Handin.Universities do
   """
   def get_university!(id), do: Repo.get!(University, id)
 
+  def get_university(id), do: Repo.get(University, id)
+
   @doc """
   Creates a university.
 

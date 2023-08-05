@@ -1,4 +1,5 @@
 defmodule Handin.Accounts.User do
+  alias Handin.Universities
   alias Handin.Modules.ModulesUsers
   alias Handin.Modules.Module
   use Handin.Schema
@@ -9,6 +10,7 @@ defmodule Handin.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+    field :university, :string, virtual: true
     field :role, :string, default: "student"
 
     many_to_many :modules, Module, join_through: ModulesUsers
@@ -40,17 +42,28 @@ defmodule Handin.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :university])
+    |> validate_required([:university])
     |> validate_email(opts)
     |> password_changeset(attrs, opts)
   end
 
   defp validate_email(changeset, opts) do
-    changeset
-    |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
-    |> validate_length(:email, max: 160)
-    |> maybe_validate_unique_email(opts)
+    if get_field(changeset, :university) do
+      university = get_field(changeset, :university) |> Universities.get_university()
+      regex = university.student_email_regex |> Regex.compile!()
+
+      changeset
+      |> validate_required([:email])
+      |> validate_format(:email, regex,
+        message: "please use your university student email address"
+      )
+      |> validate_length(:email, max: 160)
+      |> maybe_validate_unique_email(opts)
+    else
+      changeset
+      |> add_error(:email, "select a university")
+    end
   end
 
   defp validate_password(changeset, opts) do

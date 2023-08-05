@@ -16,7 +16,9 @@
   row_click={fn {_id, university} -> JS.navigate(~p"/admin/universities/#{university}") end}
 >
   <:col :let={{_id, university}} label="Name"><%= university.name %></:col>
-  <:col :let={{_id, university}} label="Config"><%= university.config %></:col>
+  <:col :let={{_id, university}} label="student Email Regex">
+    <%= university.student_email_regex %>
+  </:col>
   <:action :let={{_id, university}}>
     <div class="sr-only">
       <.link navigate={~p"/admin/universities/#{university}"}>Show</.link>

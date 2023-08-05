@@ -4,7 +4,6 @@ defmodule Handin.Universities.University do
 
   schema "universities" do
     field :name, :string
-    field :config, :map
     field :student_email_regex, :string
 
     timestamps()
@@ -14,7 +13,7 @@ defmodule Handin.Universities.University do
   @doc false
   def changeset(university, attrs) do
     university
-    |> cast(attrs, [:name, :config, :student_email_regex])
-    |> validate_required([:name, :config, :student_email_regex])
+    |> cast(attrs, [:name, :student_email_regex])
+    |> validate_required([:name, :student_email_regex])
   end
 end

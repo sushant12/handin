@@ -118,10 +118,8 @@ defmodule HandinWeb.UserRegistrationLive do
   end
 
   def handle_event("save", %{"user" => user_params}, socket) do
-    regex = get_regex(user_params["university"])
-
-    with true <- Regex.match?(regex, user_params["email"]),
-         {:ok, user} <- Accounts.register_user(user_params) do
+    with {:ok, user} <-
+           Accounts.register_user(user_params) do
       {:ok, _} =
         Accounts.deliver_user_confirmation_instructions(
           user,
@@ -138,9 +136,6 @@ defmodule HandinWeb.UserRegistrationLive do
        |> assign_form(changeset)
        |> put_flash(:info, "User created successfully")}
     else
-      false ->
-        {:noreply, socket |> put_flash(:error, "Invalid email address")}
-
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply,
          socket
@@ -163,15 +158,5 @@ defmodule HandinWeb.UserRegistrationLive do
     else
       assign(socket, form: form)
     end
-  end
-
-  defp get_regex(university_id) do
-    {:ok, regex} =
-      university_id
-      |> Universities.get_university!()
-      |> Map.get(:student_email_regex)
-      |> Regex.compile()
-
-    regex
   end
 end

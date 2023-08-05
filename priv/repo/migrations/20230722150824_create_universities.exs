@@ -5,7 +5,6 @@ defmodule Handin.Repo.Migrations.CreateUniversities do
     create table(:universities, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :name, :string
-      add :config, :map
       add :student_email_regex, :string
 
       timestamps()
