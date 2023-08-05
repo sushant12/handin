@@ -56,7 +56,8 @@ defmodule Handin.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:ex_machina, "~> 2.7.0", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:nimble_csv, "~> 1.1"}
+      {:nimble_csv, "~> 1.1"},
+      {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
     ]
   end
 

@@ -301,7 +301,7 @@ defmodule HandinWeb.CoreComponents do
           {@rest}
         >
           <option :if={@prompt} value="" disabled selected><%= @prompt %></option>
-          <%= Phoenix.HTML.Form.options_for_select(@options, nil) %>
+          <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
         </select>
         <.error :for={msg <- @errors}><%= msg %></.error>
       </div>
