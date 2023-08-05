@@ -4,6 +4,7 @@ defmodule Handin.Modules do
   """
 
   import Ecto.Query, warn: false
+  alias Handin.Accounts
   alias Handin.Repo
   alias Handin.Accounts.User
   alias Handin.Modules.ModulesInvitations
@@ -45,20 +46,25 @@ defmodule Handin.Modules do
 
   @spec create_module(attrs :: map(), user_id :: integer) :: {:ok, Module.t()}
   def create_module(attrs \\ %{}, user_id) do
-    Repo.transaction(fn ->
-      module =
-        %Module{}
-        |> Module.changeset(attrs)
-        |> Repo.insert!()
+    user = Accounts.get_user!(user_id)
 
-      ModulesUsers.changeset(%ModulesUsers{}, %{
-        module_id: module.id,
-        user_id: user_id
-      })
-      |> Repo.insert!()
+    user
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:modules, [
+      %Module{code: attrs["code"], name: attrs["name"]} | user.modules
+    ])
+    |> Repo.update()
+    |> case do
+      {:ok, user} ->
+        module =
+          user.modules
+          |> Enum.find(&(&1.code == attrs["code"] and &1.name == attrs["name"]))
 
-      module
-    end)
+        {:ok, module}
+
+      err ->
+        err
+    end
   end
 
   @spec add_member(params :: %{user_id: integer, module_id: integer}) ::

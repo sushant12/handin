@@ -152,7 +152,8 @@ defmodule HandinWeb.CoreComponents do
       phx-connected={hide("#disconnected")}
       hidden
     >
-      Internet Error! Attempting to reconnect <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
+      Internet Error! Attempting to reconnect
+      <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
     </.flash>
     """
   end

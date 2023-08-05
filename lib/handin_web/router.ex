@@ -17,10 +17,6 @@ defmodule HandinWeb.Router do
     plug :accepts, ["json"]
   end
 
-  pipeline :admin do
-    plug HandinWeb.Plugs.CheckAdmin
-  end
-
   # Other scopes may use custom stacks.
   # scope "/api", HandinWeb do
   #   pipe_through :api
@@ -44,10 +40,10 @@ defmodule HandinWeb.Router do
   end
 
   scope "/admin", HandinWeb.Admin, as: :admin do
-    pipe_through [:browser, :require_authenticated_user, :admin]
+    pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_admin,
-      on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}, {HandinWeb.Auth, :admin}] do
       live "/universities", UniversityLive.Index, :index
       live "/universities/new", UniversityLive.Index, :new
       live "/universities/:id/edit", UniversityLive.Index, :edit
@@ -74,25 +70,37 @@ defmodule HandinWeb.Router do
   scope "/", HandinWeb do
     pipe_through [:browser, :require_authenticated_user]
 
+    live_session :require_authenticated_admin_or_lecturer,
+      on_mount: [
+        {HandinWeb.UserAuth, :ensure_authenticated},
+        {HandinWeb.Auth, :admin_or_lecturer}
+      ] do
+      live "/modules/new", ModulesLive.Index, :new
+
+      scope "/modules/:id" do
+        live "/edit", ModulesLive.Index, :edit
+        live "/assignments/new", AssignmentLive.Index, :new
+        live "/assignments/:assignment_id/edit", AssignmentLive.Index, :edit
+        live "/assignments/:assignment_id/show/edit", AssignmentLive.Show, :edit
+        live "/members/new", MembersLive.Index, :new
+      end
+    end
+  end
+
+  scope "/", HandinWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
     live_session :require_authenticated_user,
       on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}] do
       live "/", DashboardLive.Index, :index
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
       live "/modules", ModulesLive.Index, :index
-      live "/modules/new", ModulesLive.Index, :new
-      live "/modules/:id/edit", ModulesLive.Index, :edit
 
       scope "/modules/:id" do
         live "/assignments", AssignmentLive.Index, :index
-        live "/assignments/new", AssignmentLive.Index, :new
-        live "/assignments/:assignment_id/edit", AssignmentLive.Index, :edit
-
         live "/assignments/:assignment_id", AssignmentLive.Show, :show
-        live "/assignments/:assignment_id/show/edit", AssignmentLive.Show, :edit
-
         live "/members", MembersLive.Index, :index
-        live "/members/new", MembersLive.Index, :new
       end
     end
   end

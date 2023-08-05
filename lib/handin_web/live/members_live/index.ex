@@ -7,7 +7,10 @@ defmodule HandinWeb.MembersLive.Index do
     members = Modules.get_students(id)
 
     {:ok,
-     stream(socket, :members, members) |> assign(:module_id, id) |> assign(:current_tab, :members)}
+     stream(socket, :members, members)
+     |> assign(:module_id, id)
+     |> assign(:current_tab, :members)
+     |> assign(:current_page, :modules)}
   end
 
   @impl true
