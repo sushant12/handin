@@ -5,7 +5,7 @@ defmodule HandinWeb.UserSessionController do
   alias HandinWeb.UserAuth
 
   def create(conn, %{"_action" => "registered"} = params) do
-    create(conn, params, "Account created successfully!")
+    create(conn, params, "Account created successfully! Please confirm your email before logging in")
   end
 
   def create(conn, %{"_action" => "password_updated"} = params) do
