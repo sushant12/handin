@@ -36,7 +36,7 @@ defmodule HandinWeb.UserAuth do
       |> maybe_write_remember_me_cookie(token, params)
       |> redirect(to: user_return_to || signed_in_path(conn))
     else
-      redirect(conn, to: signed_in_path(conn))
+      redirect(conn, to: ~p"/users/log_in")
     end
   end
 
