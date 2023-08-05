@@ -12,7 +12,6 @@
     </script>
   </head>
   <body>
-    <.flash kind={:info} flash={@flash} />
     <%= if @current_user do %>
       <.sidebar current_user={@current_user} current_page={assigns[:current_page] || nil} />
       <div class="p-4 sm:ml-64">

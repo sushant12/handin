@@ -7,7 +7,6 @@ defmodule HandinWeb.UserRegistrationLive do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-md w-[32rem]">
-      <.flash kind={:error} flash={@flash} />
       <div class="w-full flex justify-center">
         <a
           href="#"
