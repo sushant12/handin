@@ -7,7 +7,10 @@ defmodule HandinWeb.MembersLive.Index do
     members = Modules.get_students(id)
 
     {:ok,
-     stream(socket, :members, members) |> assign(:module_id, id) |> assign(:current_tab, :members)}
+     stream(socket, :members, members)
+     |> assign(:module_id, id)
+     |> assign(:current_tab, :members)
+     |> assign(:current_page, :modules)}
   end
 
   @impl true
@@ -36,6 +39,7 @@ defmodule HandinWeb.MembersLive.Index do
     member = Accounts.get_user!(id)
     Modules.remove_user_from_module(id, socket.assigns.module_id)
 
-    {:noreply, stream_delete(socket, :members, member)}
+    {:noreply,
+     stream_delete(socket, :members, member) |> put_flash(:info, "Member deleted successfully")}
   end
 end

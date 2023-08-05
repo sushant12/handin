@@ -44,6 +44,8 @@ defmodule HandinWeb.Admin.UniversityLive.Index do
     university = Universities.get_university!(id)
     {:ok, _} = Universities.delete_university(university)
 
-    {:noreply, stream_delete(socket, :universities, university)}
+    {:noreply,
+     stream_delete(socket, :universities, university)
+     |> put_flash(:info, "University deleted successfully")}
   end
 end

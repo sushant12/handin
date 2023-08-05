@@ -24,3 +24,15 @@ now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
   role: "lecturer"
 }
 |> Repo.insert!()
+
+%Handin.Universities.University{
+  name: "University Of Limerick",
+  student_email_regex: "^\d+@studentmail\.ul\.ie$"
+}
+|> Repo.insert!()
+
+%Handin.Universities.University{
+  name: "University College Cork",
+  student_email_regex: "^\d+@studentmail\.ucc\.ie$"
+}
+|> Repo.insert!()

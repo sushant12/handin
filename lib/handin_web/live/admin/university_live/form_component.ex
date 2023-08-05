@@ -23,7 +23,7 @@ defmodule HandinWeb.Admin.UniversityLive.FormComponent do
       >
         <div class="grid gap-4 mb-4 sm:grid-cols-1">
           <.input field={@form[:name]} label="Name" type="text" />
-          <.input field={@form[:config]} label="Config" type="text" />
+          <.input field={@form[:student_email_regex]} label="Student Email Regex" type="text" />
         </div>
         <:actions>
           <.button

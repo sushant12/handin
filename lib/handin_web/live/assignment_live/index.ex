@@ -11,7 +11,8 @@ defmodule HandinWeb.AssignmentLive.Index do
     {:ok,
      socket
      |> stream(:assignments, assignments)
-     |> assign(:module_id, id)}
+     |> assign(:module_id, id)
+     |> assign(:current_page, :modules)}
   end
 
   @impl true
@@ -19,7 +20,7 @@ defmodule HandinWeb.AssignmentLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :edit, %{ "assignment_id" => assignment_id}) do
+  defp apply_action(socket, :edit, %{"assignment_id" => assignment_id}) do
     socket
     |> assign(:page_title, "Edit Assignment")
     |> assign(:assignment, Assignments.get_assignment!(assignment_id))
@@ -48,6 +49,8 @@ defmodule HandinWeb.AssignmentLive.Index do
     assignment = Assignments.get_assignment!(id)
     {:ok, _} = Assignments.delete_assignment(assignment)
 
-    {:noreply, stream_delete(socket, :assignments, assignment)}
+    {:noreply,
+     stream_delete(socket, :assignments, assignment)
+     |> put_flash(:info, "Assignment deleted successfully")}
   end
 end

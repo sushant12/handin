@@ -44,7 +44,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
           <.label>Upload file</.label>
           <.live_file_input
             upload={@uploads.csv_file_input}
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           />
           <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="user_avatar_help">
             A profile picture is useful to confirm your are logged into your account
@@ -100,7 +100,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
   @impl true
   def handle_event(
         "save",
-        %{"modules_invitations" => modules_invitations_params} = params,
+        %{"modules_invitations" => modules_invitations_params},
         socket
       ) do
     if socket.assigns.uploads.csv_file_input.entries != [] do
@@ -121,7 +121,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
 
       {:noreply,
        socket
-       |> put_flash(:info, "member added successfully")
+       |> put_flash(:info, "Member added successfully")
        |> push_patch(to: socket.assigns.patch)}
     else
       save_modules_invitations(
@@ -143,11 +143,14 @@ defmodule HandinWeb.MembersLive.FormComponent do
 
       {:noreply,
        socket
-       |> put_flash(:info, "member added successfully")
+       |> put_flash(:info, "Member added successfully")
        |> push_patch(to: socket.assigns.patch)}
     else
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+        {:noreply,
+         assign_form(socket, changeset)
+         |> put_flash(:error, "An error occured")
+         |> push_patch(to: socket.assigns.patch)}
 
       nil ->
         Modules.add_modules_invitations(%{
@@ -157,7 +160,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "member added successfully")
+         |> put_flash(:info, "Member added successfully")
          |> push_patch(to: socket.assigns.patch)}
     end
   end

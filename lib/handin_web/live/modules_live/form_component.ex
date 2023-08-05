@@ -86,7 +86,7 @@ defmodule HandinWeb.ModulesLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "module updated successfully")
+         |> put_flash(:info, "Module updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -101,7 +101,7 @@ defmodule HandinWeb.ModulesLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "module created successfully")
+         |> put_flash(:info, "Module created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
