@@ -24,3 +24,10 @@ now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
   role: "lecturer"
 }
 |> Repo.insert!()
+
+%Handin.Universities.University{
+  name: "TU",
+  config: %{ok: "OK"},
+  student_email_regex: ~S"\w+@studentmail.\w+.\w+"
+}
+|> Repo.insert!()

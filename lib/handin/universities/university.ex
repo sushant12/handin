@@ -10,6 +10,7 @@ defmodule Handin.Universities.University do
     timestamps()
   end
 
+  # need to convert student_email_regex into ~S || non escape string
   @doc false
   def changeset(university, attrs) do
     university

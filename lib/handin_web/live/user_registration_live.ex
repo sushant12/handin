@@ -1,12 +1,13 @@
 defmodule HandinWeb.UserRegistrationLive do
   use HandinWeb, :live_view
 
-  alias Handin.{Accounts, Modules}
+  alias Handin.{Accounts, Modules, Universities}
   alias Handin.Accounts.User
 
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-md w-[32rem]">
+      <.flash kind={:error} flash={@flash} />
       <div class="w-full flex justify-center">
         <a
           href="#"
@@ -42,7 +43,6 @@ defmodule HandinWeb.UserRegistrationLive do
                 field={@form[:email]}
                 label="Email"
                 type="email"
-                class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 required
                 placeholder="email@example.com"
               />
@@ -52,7 +52,6 @@ defmodule HandinWeb.UserRegistrationLive do
                 field={@form[:password]}
                 label="Password"
                 type="password"
-                class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="••••••••"
                 required
               />
@@ -62,8 +61,17 @@ defmodule HandinWeb.UserRegistrationLive do
                 field={@form[:password_confirmation]}
                 label="Confirm password"
                 type="password"
-                class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="••••••••"
+                required
+              />
+            </div>
+            <div>
+              <.input
+                field={@form[:university]}
+                type="select"
+                prompt="Select your university"
+                options={@universities}
+                label="University"
                 required
               />
             </div>
@@ -94,30 +102,38 @@ defmodule HandinWeb.UserRegistrationLive do
   def mount(_params, _session, socket) do
     changeset = Accounts.change_user_registration(%User{})
 
+    universities =
+      Universities.list_universities() |> Enum.map(fn uni -> {:"#{uni.name}", uni.id} end)
+
     socket =
       socket
       |> assign(trigger_submit: false, check_errors: false)
+      |> assign(:universities, universities)
       |> assign_form(changeset)
 
     {:ok, socket, temporary_assigns: [form: nil]}
   end
 
   def handle_event("save", %{"user" => user_params}, socket) do
-    case Accounts.register_user(user_params) do
-      {:ok, user} ->
-        {:ok, _} =
-          Accounts.deliver_user_confirmation_instructions(
-            user,
-            &url(~p"/users/confirm/#{&1}")
-          )
+    regex = get_regex(user_params["university"])
 
-        Modules.check_and_add_new_user_modules_invitations(user)
+    with true <- Regex.match?(regex, user_params["email"]),
+         {:ok, user} <- Accounts.register_user(user_params) do
+      {:ok, _} =
+        Accounts.deliver_user_confirmation_instructions(
+          user,
+          &url(~p"/users/confirm/#{&1}")
+        )
 
-        changeset = Accounts.change_user_registration(user)
-        {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}
+      Modules.check_and_add_new_user_modules_invitations(user)
 
+      changeset = Accounts.change_user_registration(user)
+      {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset) |> put_flash(:info, "User created successfully")}
+    else
+      false ->
+        {:noreply, socket |> put_flash(:error, "Invalid email address")}
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, socket |> assign(check_errors: true) |> assign_form(changeset)}
+        {:noreply, socket |> assign(check_errors: true) |> assign_form(changeset) |> put_flash(:error, "Oops, something went wrong!")}
     end
   end
 
@@ -134,5 +150,15 @@ defmodule HandinWeb.UserRegistrationLive do
     else
       assign(socket, form: form)
     end
+  end
+
+  defp get_regex(university_id) do
+    {:ok, regex} =
+      university_id
+      |> Universities.get_university!()
+      |> Map.get(:student_email_regex)
+      |> Regex.compile()
+
+      regex
   end
 end
