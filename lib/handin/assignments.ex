@@ -52,12 +52,10 @@ defmodule Handin.Assignments do
   """
   def create_assignment(attrs \\ %{}) do
     module = Modules.get_module!(attrs["module_id"])
-    language = ProgrammingLanguages.get_programming_language!(attrs["programming_language_id"])
 
     %Assignment{}
     |> Assignment.changeset(attrs)
     |> Ecto.Changeset.put_assoc(:module, module)
-    |> Ecto.Changeset.put_assoc(:programming_language, language)
     |> Repo.insert()
   end
 

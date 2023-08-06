@@ -20,27 +20,21 @@ defmodule Handin.Assignments.Assignment do
     timestamps()
   end
 
+  @attrs [
+    :name,
+    :total_marks,
+    :start_date,
+    :due_date,
+    :cutoff_date,
+    :max_attempts,
+    :penalty_per_day,
+    :programming_language_id
+  ]
   @doc false
   def changeset(assignment, attrs) do
     assignment
-    |> cast(attrs, [
-      :name,
-      :total_marks,
-      :start_date,
-      :due_date,
-      :cutoff_date,
-      :max_attempts,
-      :penalty_per_day
-    ])
-    |> validate_required([
-      :name,
-      :total_marks,
-      :start_date,
-      :due_date,
-      :cutoff_date,
-      :max_attempts,
-      :penalty_per_day
-    ])
+    |> cast(attrs, @attrs)
+    |> validate_required(@attrs)
     |> validate_number(:max_attempts, greater_than_or_equal_to: 0)
     |> validate_number(:penalty_per_day, greater_than_or_equal_to: 0)
     |> validate_number(:total_marks, greater_than_or_equal_to: 0)

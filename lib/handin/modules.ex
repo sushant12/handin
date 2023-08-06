@@ -42,7 +42,8 @@ defmodule Handin.Modules do
     Repo.all(Module)
   end
 
-  def get_module!(id), do: Repo.get(Module, id)
+  def get_module!(id),
+    do: Repo.get(Module, id) |> Repo.preload(assignments: [:programming_language])
 
   @spec create_module(attrs :: map(), user_id :: integer) :: {:ok, Module.t()}
   def create_module(attrs \\ %{}, user_id) do

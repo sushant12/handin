@@ -88,7 +88,7 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
     save_assignment(
       socket,
       socket.assigns.action,
-      assignment_params |> Map.put("module_id", socket.assigns.module_id)
+      Map.put(assignment_params, "module_id", socket.assigns.module_id)
     )
   end
 
