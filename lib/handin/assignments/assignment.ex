@@ -3,6 +3,7 @@ defmodule Handin.Assignments.Assignment do
 
   import Ecto.Changeset
   alias Handin.Modules.Module
+  alias Handin.ProgrammingLanguages.ProgrammingLanguage
 
   schema "assignments" do
     field :name, :string
@@ -14,6 +15,7 @@ defmodule Handin.Assignments.Assignment do
     field :penalty_per_day, :float
 
     belongs_to :module, Module
+    belongs_to :programming_language, ProgrammingLanguage, on_replace: :nilify
 
     timestamps()
   end

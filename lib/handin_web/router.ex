@@ -50,6 +50,13 @@ defmodule HandinWeb.Router do
 
       live "/universities/:id", UniversityLive.Show, :show
       live "/universities/:id/show/edit", UniversityLive.Show, :edit
+
+      live "/programming_languages", ProgrammingLanguageLive.Index, :index
+      live "/programming_languages/new", ProgrammingLanguageLive.Index, :new
+      live "/programming_languages/:id/edit", ProgrammingLanguageLive.Index, :edit
+
+      live "/programming_languages/:id", ProgrammingLanguageLive.Show, :show
+      live "/programming_languages/:id/show/edit", ProgrammingLanguageLive.Show, :edit
     end
   end
 

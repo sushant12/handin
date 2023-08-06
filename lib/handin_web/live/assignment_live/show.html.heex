@@ -15,6 +15,7 @@
 
 <.list>
   <:item title="Name"><%= @assignment.name %></:item>
+  <:item title="Language"><%= @assignment.programming_language.name %></:item>
   <:item title="Total marks"><%= @assignment.total_marks %></:item>
   <:item title="Start date"><%= @assignment.start_date %></:item>
   <:item title="Due date"><%= @assignment.due_date %></:item>
@@ -38,6 +39,7 @@
     action={@live_action}
     assignment={@assignment}
     module_id={@module_id}
+    programming_languages={@programming_languages}
     patch={~p"/modules/#{@module_id}/assignments/#{@assignment}"}
   />
 </.modal>

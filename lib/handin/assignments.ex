@@ -4,6 +4,7 @@ defmodule Handin.Assignments do
   """
 
   import Ecto.Query, warn: false
+  alias Handin.ProgrammingLanguages
   alias Handin.{Repo, Modules}
 
   alias Handin.Assignments.Assignment
@@ -35,7 +36,7 @@ defmodule Handin.Assignments do
       ** (Ecto.NoResultsError)
 
   """
-  def get_assignment!(id), do: Repo.get!(Assignment, id)
+  def get_assignment!(id), do: Repo.get!(Assignment, id) |> Repo.preload(:programming_language)
 
   @doc """
   Creates a assignment.
@@ -51,10 +52,12 @@ defmodule Handin.Assignments do
   """
   def create_assignment(attrs \\ %{}) do
     module = Modules.get_module!(attrs["module_id"])
+    language = ProgrammingLanguages.get_programming_language!(attrs["programming_language_id"])
 
     %Assignment{}
     |> Assignment.changeset(attrs)
     |> Ecto.Changeset.put_assoc(:module, module)
+    |> Ecto.Changeset.put_assoc(:programming_language, language)
     |> Repo.insert()
   end
 
@@ -71,8 +74,12 @@ defmodule Handin.Assignments do
 
   """
   def update_assignment(%Assignment{} = assignment, attrs) do
+    language = ProgrammingLanguages.get_programming_language!(attrs["programming_language_id"])
+
     assignment
+    |> Repo.preload(:programming_language)
     |> Assignment.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:programming_language, language)
     |> Repo.update()
   end
 
