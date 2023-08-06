@@ -35,7 +35,7 @@ defmodule Handin.Assignments do
       ** (Ecto.NoResultsError)
 
   """
-  def get_assignment!(id), do: Repo.get!(Assignment, id)
+  def get_assignment!(id), do: Repo.get!(Assignment, id) |> Repo.preload(:programming_language)
 
   @doc """
   Creates a assignment.
@@ -52,10 +52,13 @@ defmodule Handin.Assignments do
   def create_assignment(attrs \\ %{}) do
     module = Modules.get_module!(attrs["module_id"])
 
-    %Assignment{}
-    |> Assignment.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:module, module)
-    |> Repo.insert()
+    case %Assignment{}
+         |> Assignment.changeset(attrs)
+         |> Ecto.Changeset.put_assoc(:module, module)
+         |> Repo.insert() do
+      {:ok, assignment} -> {:ok, assignment |> Repo.preload(:programming_language)}
+      error -> error
+    end
   end
 
   @doc """
@@ -72,6 +75,7 @@ defmodule Handin.Assignments do
   """
   def update_assignment(%Assignment{} = assignment, attrs) do
     assignment
+    |> Repo.preload(:programming_language)
     |> Assignment.changeset(attrs)
     |> Repo.update()
   end

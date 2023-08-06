@@ -1,0 +1,61 @@
+<.header>
+  Listing Programming languages
+  <:actions>
+    <.link patch={~p"/admin/programming_languages/new"}>
+      <.button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3">
+        New Programming language
+      </.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="programming_languages"
+  rows={@streams.programming_languages}
+  row_click={
+    fn {_id, programming_language} ->
+      JS.navigate(~p"/admin/programming_languages/#{programming_language}")
+    end
+  }
+>
+  <:col :let={{_id, programming_language}} label="Name"><%= programming_language.name %></:col>
+  <:col :let={{_id, programming_language}} label="Docker file url">
+    <%= programming_language.docker_file_url %>
+  </:col>
+  <:action :let={{_id, programming_language}}>
+    <div class="sr-only">
+      <.link navigate={~p"/admin/programming_languages/#{programming_language}"}>Show</.link>
+    </div>
+    <.link
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
+      patch={~p"/admin/programming_languages/#{programming_language}/edit"}
+    >
+      Edit
+    </.link>
+  </:action>
+  <:action :let={{id, programming_language}}>
+    <.link
+      class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+      phx-click={JS.push("delete", value: %{id: programming_language.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="programming_language-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/programming_languages")}
+>
+  <.live_component
+    module={HandinWeb.Admin.ProgrammingLanguageLive.FormComponent}
+    id={@programming_language.id || :new}
+    title={@page_title}
+    action={@live_action}
+    programming_language={@programming_language}
+    patch={~p"/admin/programming_languages"}
+  />
+</.modal>

@@ -1,16 +1,21 @@
 defmodule HandinWeb.AssignmentLive.Index do
   use HandinWeb, :live_view
 
-  alias Handin.{Assignments, Repo, Modules}
+  alias Handin.{Assignments, Modules, ProgrammingLanguages}
   alias Handin.Assignments.Assignment
 
   @impl true
   def mount(%{"id" => id} = _params, _session, socket) do
-    %{assignments: assignments} = Modules.get_module!(id) |> Repo.preload(:assignments)
+    %{assignments: assignments} =
+      Modules.get_module!(id)
+
+    programming_languages =
+      ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
 
     {:ok,
      socket
      |> stream(:assignments, assignments)
+     |> assign(:programming_languages, programming_languages)
      |> assign(:module_id, id)
      |> assign(:current_page, :modules)}
   end

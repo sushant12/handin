@@ -23,6 +23,9 @@
   }
 >
   <:col :let={{_id, assignment}} label="Name"><%= assignment.name %></:col>
+  <:col :let={{_id, assignment}} label="Language">
+    <%= assignment.programming_language.name %>
+  </:col>
   <:col :let={{_id, assignment}} label="Total marks"><%= assignment.total_marks %></:col>
   <:col :let={{_id, assignment}} label="Start date"><%= assignment.start_date %></:col>
   <:col :let={{_id, assignment}} label="Due date"><%= assignment.due_date %></:col>
@@ -66,6 +69,7 @@
     action={@live_action}
     assignment={@assignment}
     module_id={@module_id}
+    programming_languages={@programming_languages}
     patch={~p"/modules/#{@module_id}/assignments"}
   />
 </.modal>

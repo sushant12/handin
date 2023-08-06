@@ -1,7 +1,7 @@
-defmodule HandinWeb.AssignmentLive.FormComponent do
+defmodule HandinWeb.Admin.ProgrammingLanguageLive.FormComponent do
   use HandinWeb, :live_component
 
-  alias Handin.Assignments
+  alias Handin.ProgrammingLanguages
 
   @impl true
   def render(assigns) do
@@ -9,30 +9,18 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage assignment records in your database.</:subtitle>
+        <:subtitle>Use this form to manage programming_language records in your database.</:subtitle>
       </.header>
 
       <.simple_form
         for={@form}
-        id="assignment-form"
+        id="programming_language-form"
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" />
-        <.input
-          field={@form[:programming_language_id]}
-          label="Language"
-          type="select"
-          prompt="Select Programming Language"
-          options={@programming_languages}
-        />
-        <.input field={@form[:total_marks]} type="number" label="Total marks" />
-        <.input field={@form[:start_date]} type="datetime-local" label="Start date" />
-        <.input field={@form[:due_date]} type="datetime-local" label="Due date" />
-        <.input field={@form[:cutoff_date]} type="datetime-local" label="Cutoff date" />
-        <.input field={@form[:max_attempts]} type="number" label="Max attempts" />
-        <.input field={@form[:penalty_per_day]} type="number" label="Penalty per day" step="any" />
+        <.input field={@form[:docker_file_url]} type="text" label="Docker file url" />
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
@@ -50,7 +38,7 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
                 clip-rule="evenodd"
               >
               </path>
-            </svg>Save Assignment
+            </svg>Save Programming language
           </.button>
           <.link
             patch={@patch}
@@ -65,8 +53,8 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
   end
 
   @impl true
-  def update(%{assignment: assignment} = assigns, socket) do
-    changeset = Assignments.change_assignment(assignment)
+  def update(%{programming_language: programming_language} = assigns, socket) do
+    changeset = ProgrammingLanguages.change_programming_language(programming_language)
 
     {:ok,
      socket
@@ -75,31 +63,30 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"assignment" => assignment_params}, socket) do
+  def handle_event("validate", %{"programming_language" => programming_language_params}, socket) do
     changeset =
-      socket.assigns.assignment
-      |> Assignments.change_assignment(assignment_params)
+      socket.assigns.programming_language
+      |> ProgrammingLanguages.change_programming_language(programming_language_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
   end
 
-  def handle_event("save", %{"assignment" => assignment_params}, socket) do
-    save_assignment(
-      socket,
-      socket.assigns.action,
-      Map.put(assignment_params, "module_id", socket.assigns.module_id)
-    )
+  def handle_event("save", %{"programming_language" => programming_language_params}, socket) do
+    save_programming_language(socket, socket.assigns.action, programming_language_params)
   end
 
-  defp save_assignment(socket, :edit, assignment_params) do
-    case Assignments.update_assignment(socket.assigns.assignment, assignment_params) do
-      {:ok, assignment} ->
-        notify_parent({:saved, assignment})
+  defp save_programming_language(socket, :edit, programming_language_params) do
+    case ProgrammingLanguages.update_programming_language(
+           socket.assigns.programming_language,
+           programming_language_params
+         ) do
+      {:ok, programming_language} ->
+        notify_parent({:saved, programming_language})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Assignment updated successfully")
+         |> put_flash(:info, "Programming language updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -107,14 +94,14 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
     end
   end
 
-  defp save_assignment(socket, :new, assignment_params) do
-    case Assignments.create_assignment(assignment_params) do
-      {:ok, assignment} ->
-        notify_parent({:saved, assignment})
+  defp save_programming_language(socket, :new, programming_language_params) do
+    case ProgrammingLanguages.create_programming_language(programming_language_params) do
+      {:ok, programming_language} ->
+        notify_parent({:saved, programming_language})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Assignment created successfully")
+         |> put_flash(:info, "Programming language created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
