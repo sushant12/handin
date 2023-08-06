@@ -53,10 +53,13 @@ defmodule Handin.Assignments do
   def create_assignment(attrs \\ %{}) do
     module = Modules.get_module!(attrs["module_id"])
 
-    %Assignment{}
-    |> Assignment.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:module, module)
-    |> Repo.insert()
+    case %Assignment{}
+         |> Assignment.changeset(attrs)
+         |> Ecto.Changeset.put_assoc(:module, module)
+         |> Repo.insert() do
+      {:ok, assignment} -> {:ok, assignment |> Repo.preload(:programming_language)}
+      error -> error
+    end
   end
 
   @doc """

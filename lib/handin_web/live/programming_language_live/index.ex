@@ -36,7 +36,7 @@ defmodule HandinWeb.Admin.ProgrammingLanguageLive.Index do
 
   @impl true
   def handle_info(
-        {HandinWeb.ProgrammingLanguageLive.FormComponent, {:saved, programming_language}},
+        {HandinWeb.Admin.ProgrammingLanguageLive.FormComponent, {:saved, programming_language}},
         socket
       ) do
     {:noreply, stream_insert(socket, :programming_languages, programming_language)}
