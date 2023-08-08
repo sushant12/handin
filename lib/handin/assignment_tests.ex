@@ -118,7 +118,19 @@ defmodule Handin.AssignmentTests do
     |> Repo.insert()
   end
 
+  def get_test_support_file!(id), do: Repo.get!(TestSupportFile, id)
+
+  def delete_test_support_file(%TestSupportFile{} = test_support_file) do
+    Repo.delete(test_support_file)
+  end
+
   def change_test_support_file(%TestSupportFile{} = test_support_file, attrs \\ %{}) do
     TestSupportFile.changeset(test_support_file, attrs)
+  end
+
+  def get_test_support_files_for_test(test_id) do
+    TestSupportFile
+    |> where([t], t.assignment_test_id == ^test_id)
+    |> Repo.all()
   end
 end

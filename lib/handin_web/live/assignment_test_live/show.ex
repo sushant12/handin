@@ -21,7 +21,19 @@ defmodule HandinWeb.AssignmentTestLive.Show do
      |> assign(:module_id, id)
      |> assign(:assignment_id, assignment_id)
      |> assign(:assignment_test, AssignmentTests.get_assignment_test!(test_id))
-     |> assign(:test_support_file, %TestSupportFile{})}
+     |> assign(:test_support_file, %TestSupportFile{})
+     |> stream(
+       :test_support_files,
+       AssignmentTests.get_test_support_files_for_test(test_id)
+     )}
+  end
+
+  @impl true
+  def handle_event("delete", %{"test_support_file_id" => test_support_file_id}, socket) do
+    test_support_file = AssignmentTests.get_test_support_file!(test_support_file_id)
+    {:ok, _} = AssignmentTests.delete_test_support_file(test_support_file)
+
+    {:noreply, stream_delete(socket, :test_support_files, test_support_file)}
   end
 
   defp page_title(:show), do: "Show Assignment test"
