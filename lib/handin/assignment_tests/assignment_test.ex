@@ -2,6 +2,7 @@ defmodule Handin.AssignmentTests.AssignmentTest do
   use Handin.Schema
   import Ecto.Changeset
   alias Handin.Assignments.Assignment
+  alias Handin.AssignmentTests.TestSupportFile
 
   schema "assignment_tests" do
     field :command, :string
@@ -9,6 +10,7 @@ defmodule Handin.AssignmentTests.AssignmentTest do
     field :marks, :float
 
     belongs_to :assignment, Assignment
+    has_many :test_support_files, TestSupportFile
 
     timestamps()
   end

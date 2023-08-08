@@ -31,6 +31,7 @@ defmodule Handin.Assignments.Assignment do
     :cutoff_date,
     :max_attempts,
     :penalty_per_day,
+    :module_id,
     :programming_language_id
   ]
   @doc false

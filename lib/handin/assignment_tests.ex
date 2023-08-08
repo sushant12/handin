@@ -7,7 +7,7 @@ defmodule Handin.AssignmentTests do
 
   alias Handin.{Repo, Assignments}
 
-  alias Handin.AssignmentTests.AssignmentTest
+  alias Handin.AssignmentTests.{AssignmentTest, TestSupportFile}
 
   @doc """
   Returns the list of assignment_tests.
@@ -110,5 +110,15 @@ defmodule Handin.AssignmentTests do
     AssignmentTest
     |> where([at], at.assignment_id == ^id)
     |> Repo.all()
+  end
+
+  def create_test_support_file(attrs \\ %{}) do
+    %TestSupportFile{}
+    |> TestSupportFile.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def change_test_support_file(%TestSupportFile{} = test_support_file, attrs \\ %{}) do
+    TestSupportFile.changeset(test_support_file, attrs)
   end
 end

@@ -116,6 +116,8 @@ defmodule HandinWeb.Router do
 
           live "/tests/:test_id", AssignmentTestLive.Show, :show
           live "/tests/:test_id/show/edit", AssignmentTestLive.Show, :edit
+
+          live "/tests/:test_id/new_file", AssignmentTestLive.Show, :new_file
         end
       end
     end

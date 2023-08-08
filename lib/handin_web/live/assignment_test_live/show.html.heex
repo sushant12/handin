@@ -13,6 +13,13 @@
         Edit assignment_test
       </.button>
     </.link>
+    <.link patch={
+      ~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}/new_file"
+    }>
+      <.button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3">
+        Add Test support files
+      </.button>
+    </.link>
   </:actions>
 </.header>
 
@@ -41,6 +48,25 @@
     action={@live_action}
     assignment_test={@assignment_test}
     assignment_id={@assignment_id}
+    patch={~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}"}
+  />
+</.modal>
+<.modal
+  :if={@live_action == :new_file}
+  id="test_support_file-modal"
+  show
+  on_cancel={
+    JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}")
+  }
+>
+  <.live_component
+    module={HandinWeb.AssignmentTestLive.TestSupportFileComponent}
+    id={@assignment_test.id}
+    title={@page_title}
+    action={@live_action}
+    assignment_test={@assignment_test}
+    assignment_id={@assignment_id}
+    test_support_file={@test_support_file}
     patch={~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}"}
   />
 </.modal>
