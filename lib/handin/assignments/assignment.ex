@@ -4,6 +4,7 @@ defmodule Handin.Assignments.Assignment do
   import Ecto.Changeset
   alias Handin.Modules.Module
   alias Handin.ProgrammingLanguages.ProgrammingLanguage
+  alias Handin.AssignmentTests.AssignmentTest
 
   schema "assignments" do
     field :name, :string
@@ -17,6 +18,8 @@ defmodule Handin.Assignments.Assignment do
     belongs_to :module, Module
     belongs_to :programming_language, ProgrammingLanguage, on_replace: :nilify
 
+    has_many :assignment_tests, AssignmentTest
+
     timestamps()
   end
 
@@ -28,6 +31,7 @@ defmodule Handin.Assignments.Assignment do
     :cutoff_date,
     :max_attempts,
     :penalty_per_day,
+    :module_id,
     :programming_language_id
   ]
   @doc false

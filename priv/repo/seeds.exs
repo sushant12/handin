@@ -36,3 +36,9 @@ now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
   student_email_regex: "^\d+@studentmail\.ucc\.ie$"
 }
 |> Repo.insert!()
+
+%Handin.ProgrammingLanguages.ProgrammingLanguage{
+  name: "Elixir",
+  docker_file_url: "https://raw.githubusercontent.com/elixir-lang/elixir/master/README.md"
+}
+|> Repo.insert!()

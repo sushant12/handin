@@ -1,0 +1,92 @@
+<.header>
+  Assignment test <%= @assignment_test.id %>
+  <:subtitle>This is a assignment_test record from your database.</:subtitle>
+  <:actions>
+    <.link
+      :if={@current_user.role != "student"}
+      patch={
+        ~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}/show/edit"
+      }
+      phx-click={JS.push_focus()}
+    >
+      <.button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3">
+        Edit assignment_test
+      </.button>
+    </.link>
+    <.link patch={
+      ~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}/new_file"
+    }>
+      <.button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3">
+        Add Test support files
+      </.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @assignment_test.name %></:item>
+  <:item title="Marks"><%= @assignment_test.marks %></:item>
+  <:item title="Command"><%= @assignment_test.command %></:item>
+</.list>
+
+<.header :if={@streams.test_support_files}>
+  Listing Test support files
+</.header>
+<.table id="test_support_files" rows={@streams.test_support_files}>
+  <:col :let={{_id, test_support_file}} label="File name">
+    <%= test_support_file.file.file_name %>
+  </:col>
+  <:action :let={{id, test_support_file}}>
+    <.link
+      :if={@current_user.role != "student"}
+      class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+      phx-click={
+        JS.push("delete", value: %{test_support_file_id: test_support_file.id}) |> hide("##{id}")
+      }
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.back navigate={~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests"}>
+  Back to test_support_files
+</.back>
+<.modal
+  :if={@live_action == :edit}
+  id="assignment_test-modal"
+  show
+  on_cancel={
+    JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}")
+  }
+>
+  <.live_component
+    module={HandinWeb.AssignmentTestLive.FormComponent}
+    id={@assignment_test.id}
+    title={@page_title}
+    action={@live_action}
+    assignment_test={@assignment_test}
+    assignment_id={@assignment_id}
+    patch={~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}"}
+  />
+</.modal>
+<.modal
+  :if={@live_action == :new_file}
+  id="test_support_file-modal"
+  show
+  on_cancel={
+    JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}")
+  }
+>
+  <.live_component
+    module={HandinWeb.AssignmentTestLive.TestSupportFileComponent}
+    id={@assignment_test.id}
+    title={@page_title}
+    action={@live_action}
+    assignment_test={@assignment_test}
+    assignment_id={@assignment_id}
+    test_support_file={@test_support_file}
+    patch={~p"/modules/#{@module_id}/assignments/#{@assignment_id}/tests/#{@assignment_test}"}
+  />
+</.modal>
