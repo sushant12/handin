@@ -44,9 +44,9 @@ defmodule HandinWeb.ConnCase do
   It stores an updated connection and a registered user in the
   test context.
   """
-  def register_and_log_in_user(%{conn: conn}) do
-    user = Handin.AccountsFixtures.user_fixture()
-    %{conn: log_in_user(conn, user), user: user}
+  def register_and_log_in_student(%{conn: conn}) do
+    student = HandinWeb.Factory.build(:student)
+    %{conn: log_in_user(conn, student), user: student}
   end
 
   @doc """

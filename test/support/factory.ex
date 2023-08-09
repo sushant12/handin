@@ -1,12 +1,14 @@
 defmodule HandinWeb.Factory do
-  use ExMachina.Ecto, repo: Handin.Repo
+  alias Handin.Repo
   alias Handin.Accounts.User
   alias Handin.Modules.Module
+  alias Handin.Universities.University
 
   defp valid_user_password, do: "hello world!"
   @now NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+  @unique_num System.unique_integer()
 
-  def admin_factory do
+  def build(:admin) do
     %User{
       email: "admin@admin.com",
       hashed_password: Bcrypt.hash_pwd_salt("admin"),
@@ -15,18 +17,59 @@ defmodule HandinWeb.Factory do
     }
   end
 
-  def module_factory do
-    %Module{
-      name: sequence(:name, &"M#{&1}")
+  def build(:user_unconfirmed) do
+    %User{
+      email: "user#{@unique_num}@studentmail.ul.ie",
+      hashed_password: Bcrypt.hash_pwd_salt(valid_user_password()),
+      role: "student",
     }
   end
 
-  def lecturer_factory do
+  def build(:module) do
+    %Module{
+      name: "M#{@unique_num}",
+      code: "CS#{@unique_num}"
+    }
+  end
+
+  def build(:lecturer) do
     %User{
-      email: sequence(:email, &"lecturer#{&1}@studentmail.ul.ie"),
+      email: "lecturer#{@unique_num}@studentmail.ul.ie",
       hashed_password: Bcrypt.hash_pwd_salt(valid_user_password()),
       confirmed_at: @now,
       role: "lecturer"
     }
+  end
+
+  def build(:student_unconfirmed) do
+    %User{
+      email: "student#{@unique_num}@studentmail.ul.ie",
+      hashed_password: Bcrypt.hash_pwd_salt(valid_user_password()),
+      role: "student"
+    }
+  end
+
+  def build(:student) do
+    %User{
+      email: "student#{@unique_num}@studentmail.ul.ie",
+      hashed_password: Bcrypt.hash_pwd_salt(valid_user_password()),
+      confirmed_at: @now,
+      role: "student"
+    }
+  end
+
+  def build(:university) do
+    %University{
+      name: "U#{@unique_num}",
+      student_email_regex: "^\\d+@studentmail.ul.ie$"
+    }
+  end
+
+  def build(factory_name, attributes) do
+    factory_name |> build() |> struct!(attributes)
+  end
+
+  def insert!(factory_name, attributes \\ []) do
+    factory_name |> build(attributes) |> Repo.insert!()
   end
 end
