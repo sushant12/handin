@@ -5,3 +5,20 @@
 
 
 
+.custom-file-input {
+  display: none;
+}
+
+/* Style for the custom button */
+.custom-file-button {
+  display: inline-block;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* Style for the file input container */
+.file-input-container {
+  display: inline-block;
+  position: relative;
+}

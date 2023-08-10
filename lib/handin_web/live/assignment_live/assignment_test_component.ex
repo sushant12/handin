@@ -1,4 +1,4 @@
-defmodule HandinWeb.AssignmentTestLive.FormComponent do
+defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   use HandinWeb, :live_component
 
   alias Handin.AssignmentTests
@@ -99,7 +99,7 @@ defmodule HandinWeb.AssignmentTestLive.FormComponent do
     end
   end
 
-  defp save_assignment_test(socket, :new, assignment_test_params) do
+  defp save_assignment_test(socket, :new_test, assignment_test_params) do
     case AssignmentTests.create_assignment_test(assignment_test_params) do
       {:ok, assignment_test} ->
         notify_parent({:saved, assignment_test})

@@ -110,14 +110,9 @@ defmodule HandinWeb.Router do
         live "/members", MembersLive.Index, :index
 
         scope "/assignments/:assignment_id" do
-          live "/tests", AssignmentTestLive.Index, :index
-          live "/tests/new", AssignmentTestLive.Index, :new
-          live "/tests/:test_id/edit", AssignmentTestLive.Index, :edit
+          live "/tests/new", AssignmentLive.Show, :new_test
 
-          live "/tests/:test_id", AssignmentTestLive.Show, :show
-          live "/tests/:test_id/show/edit", AssignmentTestLive.Show, :edit
-
-          live "/tests/:test_id/new_file", AssignmentTestLive.Show, :new_file
+          live "/tests/:test_id/new_file", AssignmentLive.Show, :new_file
         end
       end
     end

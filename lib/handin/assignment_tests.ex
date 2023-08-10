@@ -110,6 +110,7 @@ defmodule Handin.AssignmentTests do
     AssignmentTest
     |> where([at], at.assignment_id == ^id)
     |> Repo.all()
+    |> Repo.preload(:test_support_files)
   end
 
   def create_test_support_file(attrs \\ %{}) do
