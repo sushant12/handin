@@ -38,7 +38,7 @@ defmodule Handin.AccountsTest do
   describe "get_user!/1" do
     test "raises if id is invalid" do
       assert_raise Ecto.NoResultsError, fn ->
-        Accounts.get_user!(Ecto.UUID.generate)
+        Accounts.get_user!(Ecto.UUID.generate())
       end
     end
 
@@ -65,7 +65,12 @@ defmodule Handin.AccountsTest do
     end
 
     test "validates email and password when given", %{university: university} do
-      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "not valid", university: university.id})
+      {:error, changeset} =
+        Accounts.register_user(%{
+          email: "not valid",
+          password: "not valid",
+          university: university.id
+        })
 
       assert %{
                email: ["please use your university student email address"],
@@ -75,14 +80,24 @@ defmodule Handin.AccountsTest do
 
     test "validates maximum values for email and password for security", %{university: university} do
       too_long = String.duplicate("db", 100)
-      {:error, changeset} = Accounts.register_user(%{email: too_long, password: too_long, university: university.id})
+
+      {:error, changeset} =
+        Accounts.register_user(%{email: too_long, password: too_long, university: university.id})
+
       assert "should be at most 160 character(s)" in errors_on(changeset).email
       assert "should be at most 72 character(s)" in errors_on(changeset).password
     end
 
     test "registers users with a hashed password", %{university: university} do
       email = unique_user_email()
-      {:ok, user} = Accounts.register_user(%{email: email, password: valid_user_password(), university: university.id})
+
+      {:ok, user} =
+        Accounts.register_user(%{
+          email: email,
+          password: valid_user_password(),
+          university: university.id
+        })
+
       assert user.email == email
       assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)
