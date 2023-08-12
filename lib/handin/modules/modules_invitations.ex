@@ -1,6 +1,7 @@
 defmodule Handin.Modules.ModulesInvitations do
   use Handin.Schema
   import Ecto.Changeset
+  @type t :: %__MODULE__{}
 
   schema "modules_invitations" do
     field :email, :string

@@ -157,6 +157,32 @@
           <span class="ml-3">Language</span>
         </.link>
       </li>
+      <li :if={@current_user.role == "admin"}>
+        <.link
+          navigate={~p"/users/settings"}
+          class={[
+            "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 group",
+            @current_page == :programming_languages && " bg-gray-300 "
+          ]}
+        >
+          <svg
+            width="1.5rem"
+            height="1.5rem"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="#000000"
+          >
+            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+            <g id="SVGRepo_iconCarrier">
+              <path d="M9.916 20.95l-.97-.241 4.138-16.66.97.242zm7.438-2.596l5.853-5.854-5.853-5.854-.707.707 5.146 5.147-5.146 5.146zM6.646 6.647L.792 12.5l5.854 5.854.707-.707L2.207 12.5l5.147-5.146z">
+              </path>
+              <path fill="none" d="M0 0h24v24H0z"></path>
+            </g>
+          </svg>
+          <span class="ml-3">Profile</span>
+        </.link>
+      </li>
       <li>
         <.link
           href={~p"/users/log_out"}

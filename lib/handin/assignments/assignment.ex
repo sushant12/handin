@@ -4,7 +4,7 @@ defmodule Handin.Assignments.Assignment do
   import Ecto.Changeset
   alias Handin.Modules.Module
   alias Handin.ProgrammingLanguages.ProgrammingLanguage
-  alias Handin.AssignmentTests.AssignmentTest
+  alias Handin.Assignments.AssignmentTest
 
   schema "assignments" do
     field :name, :string
@@ -38,6 +38,7 @@ defmodule Handin.Assignments.Assignment do
   def changeset(assignment, attrs) do
     assignment
     |> cast(attrs, @attrs)
+    |> cast_assoc(:assignment_tests, with: &AssignmentTest.changeset/2)
     |> validate_required(@attrs)
     |> validate_number(:max_attempts, greater_than_or_equal_to: 0)
     |> validate_number(:penalty_per_day, greater_than_or_equal_to: 0)

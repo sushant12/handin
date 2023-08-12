@@ -4,10 +4,10 @@ defmodule Handin.TestSupportFileUploader do
   # Include ecto support (requires package waffle_ecto installed):
   use Waffle.Ecto.Definition
 
-  @versions [:original]
+  # @versions [:original]
 
   # To add a thumbnail version:
-  @versions [:original, :thumb]
+  # @versions [:original, :thumb]
 
   # Override the bucket on a per definition basis:
   # def bucket do

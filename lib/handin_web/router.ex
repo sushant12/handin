@@ -88,7 +88,15 @@ defmodule HandinWeb.Router do
         live "/edit", ModulesLive.Index, :edit
         live "/assignments/new", AssignmentLive.Index, :new
         live "/assignments/:assignment_id/edit", AssignmentLive.Index, :edit
-        live "/assignments/:assignment_id/show/edit", AssignmentLive.Show, :edit
+
+        live "/assignments/:assignment_id/add_test",
+             AssignmentLive.Show,
+             :add_assignment_test
+
+        live "/assignments/:assignment_id/edit_test",
+             AssignmentLive.Show,
+             :edit_assignment_test
+
         live "/members/new", MembersLive.Index, :new
       end
     end
@@ -108,12 +116,6 @@ defmodule HandinWeb.Router do
         live "/assignments", AssignmentLive.Index, :index
         live "/assignments/:assignment_id", AssignmentLive.Show, :show
         live "/members", MembersLive.Index, :index
-
-        scope "/assignments/:assignment_id" do
-          live "/tests/new", AssignmentLive.Show, :new_test
-
-          live "/tests/:test_id/new_file", AssignmentLive.Show, :new_file
-        end
       end
     end
   end

@@ -5,9 +5,9 @@ defmodule Handin.AssignmentTests do
 
   import Ecto.Query, warn: false
 
-  alias Handin.{Repo, Assignments}
+  alias Handin.{Repo}
 
-  alias Handin.AssignmentTests.{AssignmentTest, TestSupportFile}
+  alias Handin.Assignments.{AssignmentTest, TestSupportFile}
 
   @doc """
   Returns the list of assignment_tests.
@@ -51,11 +51,8 @@ defmodule Handin.AssignmentTests do
 
   """
   def create_assignment_test(attrs \\ %{}) do
-    assignment = Assignments.get_assignment!(attrs["assignment_id"])
-
     %AssignmentTest{}
     |> AssignmentTest.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:assignment, assignment)
     |> Repo.insert()
   end
 
@@ -133,5 +130,11 @@ defmodule Handin.AssignmentTests do
     TestSupportFile
     |> where([t], t.assignment_test_id == ^test_id)
     |> Repo.all()
+  end
+
+  def upload_test_support_file(attrs \\ %{}) do
+    %TestSupportFile{}
+    |> TestSupportFile.changeset(attrs)
+    |> Repo.insert()
   end
 end

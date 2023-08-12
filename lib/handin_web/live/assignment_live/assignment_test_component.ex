@@ -9,7 +9,6 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage assignment_test records in your database.</:subtitle>
       </.header>
 
       <.simple_form
@@ -20,26 +19,16 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" />
-        <.input field={@form[:marks]} type="number" label="Marks" step="any" />
+        <.input field={@form[:marks]} type="number" label="Marks" />
         <.input field={@form[:command]} type="text" label="Command" />
+
+        <.live_file_input upload={@uploads.test_support_file} />
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
             phx-disable-with="Saving..."
           >
-            <svg
-              class="mr-1 -ml-1 w-6 h-6"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                clip-rule="evenodd"
-              >
-              </path>
-            </svg>Save test
+            Save
           </.button>
           <.link
             patch={@patch}
@@ -60,7 +49,9 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign_form(changeset)}
+     |> assign_form(changeset)
+     |> assign(:uploaded_files, [])
+     |> allow_upload(:test_support_file, accept: :any, max_entries: 5, max_file_size: 1_500_000)}
   end
 
   @impl true
@@ -99,9 +90,20 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     end
   end
 
-  defp save_assignment_test(socket, :new_test, assignment_test_params) do
+  defp save_assignment_test(socket, :add_assignment_test, assignment_test_params) do
     case AssignmentTests.create_assignment_test(assignment_test_params) do
       {:ok, assignment_test} ->
+        consume_uploaded_entries(socket, :test_support_file, fn meta, entry ->
+          AssignmentTests.upload_test_support_file(%{
+            "file" => %Plug.Upload{
+              content_type: entry.client_type,
+              filename: entry.client_name,
+              path: meta.path
+            },
+            "assignment_test_id" => assignment_test.id
+          })
+        end)
+
         notify_parent({:saved, assignment_test})
 
         {:noreply,

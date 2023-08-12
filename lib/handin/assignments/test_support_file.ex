@@ -1,9 +1,9 @@
-defmodule Handin.AssignmentTests.TestSupportFile do
+defmodule Handin.Assignments.TestSupportFile do
   use Handin.Schema
   import Ecto.Changeset
   use Waffle.Ecto.Schema
 
-  alias Handin.AssignmentTests.AssignmentTest
+  alias Handin.Assignments.AssignmentTest
 
   schema "test_support_files" do
     field :file, Handin.TestSupportFileUploader.Type
