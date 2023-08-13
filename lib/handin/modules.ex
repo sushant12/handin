@@ -19,7 +19,7 @@ defmodule Handin.Modules do
     |> Repo.all()
   end
 
-  @spec get_students(module_id :: Ecto.UUID) :: integer()
+  @spec get_students_count(module_id :: Ecto.UUID) :: integer()
   def get_students_count(module_id) do
     Module
     |> where([m], m.id == ^module_id)
@@ -43,6 +43,8 @@ defmodule Handin.Modules do
 
       ModulesUsers.changeset(%ModulesUsers{}, %{module_id: module.id, user_id: user_id})
       |> Repo.insert!()
+
+      module
     end)
   end
 

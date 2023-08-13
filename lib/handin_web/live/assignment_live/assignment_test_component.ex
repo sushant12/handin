@@ -22,7 +22,11 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
         <.input field={@form[:marks]} type="number" label="Marks" />
         <.input field={@form[:command]} type="text" label="Command" />
 
-        <.live_file_input upload={@uploads.test_support_file} />
+        <.label>Add test support file</.label>
+        <.live_file_input
+          upload={@uploads.test_support_file}
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+        />
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
@@ -72,7 +76,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     )
   end
 
-  defp save_assignment_test(socket, :edit, assignment_test_params) do
+  defp save_assignment_test(socket, :edit_assignment_test, assignment_test_params) do
     case AssignmentTests.update_assignment_test(
            socket.assigns.assignment_test,
            assignment_test_params

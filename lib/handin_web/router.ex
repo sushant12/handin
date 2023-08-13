@@ -93,7 +93,7 @@ defmodule HandinWeb.Router do
              AssignmentLive.Show,
              :add_assignment_test
 
-        live "/assignments/:assignment_id/edit_test",
+        live "/assignments/:assignment_id/:test_id/edit_test",
              AssignmentLive.Show,
              :edit_assignment_test
 

@@ -10,7 +10,7 @@ defmodule Handin.Assignments.AssignmentTest do
     field :marks, :float
 
     belongs_to :assignment, Assignment
-    has_many :test_support_files, TestSupportFile
+    has_many :test_support_files, TestSupportFile, on_delete: :delete_all
 
     timestamps()
   end
