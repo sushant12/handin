@@ -10,5 +10,6 @@ Before you run any installation steps, make sure you have the asdf tool and dock
 - run `asdf install`
 - run `mix deps.get`
 - run `mix ecto.setup`
+- run `cd assets && npm i`
 - run `mix phx.server`
 - visit `localhost:4000` on your browser
