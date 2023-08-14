@@ -1,6 +1,7 @@
 defmodule Handin.Modules.ModulesUsers do
   use Handin.Schema
   import Ecto.Changeset
+  @type t :: %__MODULE__{}
 
   schema "modules_users" do
     belongs_to :module, Handin.Modules.Module

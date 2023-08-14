@@ -6,8 +6,7 @@ defmodule HandinWeb.AssignmentLive.Index do
 
   @impl true
   def mount(%{"id" => id} = _params, _session, socket) do
-    %{assignments: assignments} =
-      Modules.get_module!(id)
+    %{assignments: assignments} = Modules.get_module!(id)
 
     programming_languages =
       ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})

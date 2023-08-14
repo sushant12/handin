@@ -5,6 +5,7 @@ defmodule Handin.Modules.Module do
   alias Handin.Modules.ModulesUsers
   alias Handin.Assignments.Assignment
   alias Handin.Modules.ModulesInvitations
+  @type t :: %__MODULE__{}
 
   schema "module" do
     field :name, :string

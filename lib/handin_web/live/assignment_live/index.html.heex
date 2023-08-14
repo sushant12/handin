@@ -13,29 +13,27 @@
   </:actions>
 </.header>
 
-<.table
-  id="assignments"
-  rows={@streams.assignments}
-  row_click={
-    fn {_id, assignment} ->
-      JS.navigate(~p"/modules/#{@module_id}/assignments/#{assignment.id}")
-    end
-  }
->
-  <:col :let={{_id, assignment}} label="Name"><%= assignment.name %></:col>
-  <:col :let={{_id, assignment}} label="Language">
-    <%= assignment.programming_language.name %>
+<.table id="assignments" rows={@streams.assignments}>
+  <:col :let={{_id, assignment}} label="Name">
+    <%= assignment.name %>
+    <span class="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300">
+      <%= assignment.programming_language.name %>
+    </span>
   </:col>
   <:col :let={{_id, assignment}} label="Total marks"><%= assignment.total_marks %></:col>
   <:col :let={{_id, assignment}} label="Start date"><%= assignment.start_date %></:col>
   <:col :let={{_id, assignment}} label="Due date"><%= assignment.due_date %></:col>
-  <:col :let={{_id, assignment}} label="Cutoff date"><%= assignment.cutoff_date %></:col>
   <:col :let={{_id, assignment}} label="Max attempts"><%= assignment.max_attempts %></:col>
   <:col :let={{_id, assignment}} label="Penalty per day"><%= assignment.penalty_per_day %></:col>
   <:action :let={{_id, assignment}}>
-    <div class="sr-only">
-      <.link navigate={~p"/modules/#{@module_id}/assignments/#{assignment.id}"}>Show</.link>
-    </div>
+    <.link
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
+      navigate={~p"/modules/#{@module_id}/assignments/#{assignment.id}"}
+    >
+      Show
+    </.link>
+  </:action>
+  <:action :let={{_id, assignment}}>
     <.link
       :if={@current_user.role != "student"}
       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
@@ -55,7 +53,6 @@
     </.link>
   </:action>
 </.table>
-
 <.modal
   :if={@live_action in [:new, :edit]}
   id="assignment-modal"

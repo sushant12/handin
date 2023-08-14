@@ -12,7 +12,10 @@ defmodule Handin.MixProject do
       ],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        list_unused_filters: true
+      ]
     ]
   end
 

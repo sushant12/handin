@@ -477,7 +477,7 @@ defmodule HandinWeb.CoreComponents do
           <td
             :if={@action != []}
             scope="row"
-            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-3"
           >
             <div class=" whitespace-nowrap py-4 text-right text-sm font-medium">
               <span
@@ -510,9 +510,9 @@ defmodule HandinWeb.CoreComponents do
 
   def list(assigns) do
     ~H"""
-    <div class="mt-14">
-      <dl class="-my-4 divide-y divide-zinc-100">
-        <div :for={item <- @item} class="flex gap-4 py-4 text-sm leading-6 sm:gap-8">
+    <div class="mt-4">
+      <dl class="divide-y divide-zinc-100">
+        <div :for={item <- @item} class="flex gap-4 pt-3 pb-4 text-sm leading-6 sm:gap-8">
           <dt class="w-1/4 flex-none text-zinc-500"><%= item.title %></dt>
           <dd class="text-zinc-700"><%= render_slot(item) %></dd>
         </div>
@@ -581,6 +581,17 @@ defmodule HandinWeb.CoreComponents do
       <ul class="flex flex-wrap -mb-px">
         <li class="mr-2">
           <.link
+            navigate={~p"/modules/#{@module_id}/assignments"}
+            class={[
+              "inline-block p-4 rounded-t-lg active dark:text-blue-500 dark:border-blue-500",
+              @current_tab == :assignments && " text-blue-600 border-b-2 border-blue-600"
+            ]}
+          >
+            Assignments
+          </.link>
+        </li>
+        <li class="mr-2">
+          <.link
             navigate={~p"/modules/#{@module_id}/members"}
             class={[
               "inline-block p-4 rounded-t-lg active dark:text-blue-500 dark:border-blue-500",
@@ -589,17 +600,6 @@ defmodule HandinWeb.CoreComponents do
             aria-current="page"
           >
             Members
-          </.link>
-        </li>
-        <li class="mr-2">
-          <.link
-            navigate={~p"/modules/#{@module_id}/assignments"}
-            class={[
-              "inline-block p-4 rounded-t-lg active dark:text-blue-500 dark:border-blue-500",
-              @current_tab == :assignments && " text-blue-600 border-b-2 border-blue-600"
-            ]}
-          >
-            Assignments
           </.link>
         </li>
         <li class="mr-2">

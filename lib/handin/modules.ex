@@ -4,40 +4,30 @@ defmodule Handin.Modules do
   """
 
   import Ecto.Query, warn: false
-  alias Handin.Accounts
   alias Handin.Repo
   alias Handin.Accounts.User
   alias Handin.Modules.ModulesInvitations
   alias Handin.Modules.Module
   alias Handin.Modules.ModulesUsers
 
-  @spec get_students(id :: integer) :: list(User.t())
-  def get_students(id) do
+  @spec get_students(module_id :: Ecto.UUID) :: list(User.t())
+  def get_students(module_id) do
     Module
-    |> where([m], m.id == ^id)
-    |> preload([m], [:users])
-    |> Repo.one()
-    |> Map.get(:users)
-    |> Enum.filter(&(&1.role == "student"))
+    |> where([m], m.id == ^module_id)
+    |> join(:inner, [m], u in assoc(m, :users), on: u.role == "student")
+    |> select([m, u], u)
+    |> Repo.all()
   end
 
-  def get_students_count(id) do
+  @spec get_students_count(module_id :: Ecto.UUID) :: integer()
+  def get_students_count(module_id) do
     Module
-    |> where([m], m.id == ^id)
+    |> where([m], m.id == ^module_id)
     |> join(:inner, [m], u in assoc(m, :users), on: u.role == "student")
     |> select([m, u], count(u.id))
     |> Repo.one()
   end
 
-  @doc """
-  Returns the list of module.
-
-  ## Examples
-
-      iex> list_module()
-      [%Module{}, ...]
-
-  """
   def list_module() do
     Repo.all(Module)
   end
@@ -45,78 +35,35 @@ defmodule Handin.Modules do
   def get_module!(id),
     do: Repo.get(Module, id) |> Repo.preload(assignments: [:programming_language])
 
-  @spec create_module(attrs :: map(), user_id :: integer) :: {:ok, Module.t()}
-  def create_module(attrs \\ %{}, user_id) do
-    user = Accounts.get_user!(user_id)
+  @spec create_module(attrs :: %{name: String.t(), code: String.t()}, user_id :: Ecto.UUID) ::
+          {:ok, Module.t()} | {:error, %Ecto.Changeset{}}
+  def create_module(attrs, user_id) do
+    Repo.transaction(fn ->
+      module = Module.changeset(%Module{}, attrs) |> Repo.insert!()
 
-    user
-    |> Ecto.Changeset.change()
-    |> Ecto.Changeset.put_assoc(:modules, [
-      %Module{code: attrs["code"], name: attrs["name"]} | user.modules
-    ])
-    |> Repo.update()
-    |> case do
-      {:ok, user} ->
-        module =
-          user.modules
-          |> Enum.find(&(&1.code == attrs["code"] and &1.name == attrs["name"]))
+      ModulesUsers.changeset(%ModulesUsers{}, %{module_id: module.id, user_id: user_id})
+      |> Repo.insert!()
 
-        {:ok, module}
-
-      err ->
-        err
-    end
+      module
+    end)
   end
 
-  @spec add_member(params :: %{user_id: integer, module_id: integer}) ::
-          {:ok, User.t()}
+  @spec add_member(params :: %{user_id: Ecto.UUID, module_id: Ecto.UUID}) ::
+          {:ok, ModulesUsers.t()}
   def add_member(params) do
     ModulesUsers.changeset(%ModulesUsers{}, params) |> Repo.insert()
   end
 
-  @doc """
-  Updates a module.
-
-  ## Examples
-
-      iex> update_module(module, %{field: new_value})
-      {:ok, %Module{}}
-
-      iex> update_module(module, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
   def update_module(%Module{} = module, attrs) do
     module
     |> Module.changeset(attrs)
     |> Repo.update()
   end
 
-  @doc """
-  Deletes a module.
-
-  ## Examples
-
-      iex> delete_module(module)
-      {:ok, %Module{}}
-
-      iex> delete_module(module)
-      {:error, %Ecto.Changeset{}}
-
-  """
   def delete_module(%Module{} = module) do
     Repo.delete(module)
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking module changes.
-
-  ## Examples
-
-      iex> change_module(module)
-      %Ecto.Changeset{data: %Module{}}
-
-  """
   def change_module(%Module{} = module, attrs \\ %{}) do
     Module.changeset(module, attrs)
   end
@@ -125,7 +72,7 @@ defmodule Handin.Modules do
     ModulesInvitations.changeset(modules_invitations, attrs)
   end
 
-  @spec add_modules_invitations(params :: %{email: String, module_id: Integer}) ::
+  @spec add_modules_invitations(params :: %{email: String.t(), module_id: Ecto.UUID}) ::
           {:ok, ModulesInvitations.t()}
   def add_modules_invitations(params) do
     change_modules_invitations(%ModulesInvitations{}, params) |> Repo.insert()

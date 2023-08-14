@@ -1,8 +1,8 @@
-defmodule Handin.AssignmentTests.AssignmentTest do
+defmodule Handin.Assignments.AssignmentTest do
   use Handin.Schema
   import Ecto.Changeset
   alias Handin.Assignments.Assignment
-  alias Handin.AssignmentTests.TestSupportFile
+  alias Handin.Assignments.TestSupportFile
 
   schema "assignment_tests" do
     field :command, :string
@@ -10,15 +10,16 @@ defmodule Handin.AssignmentTests.AssignmentTest do
     field :marks, :float
 
     belongs_to :assignment, Assignment
-    has_many :test_support_files, TestSupportFile
+    has_many :test_support_files, TestSupportFile, on_delete: :delete_all
 
     timestamps()
   end
 
+  @attrs [:name, :marks, :command, :assignment_id]
   @doc false
   def changeset(assignment_test, attrs) do
     assignment_test
-    |> cast(attrs, [:name, :marks, :command])
-    |> validate_required([:name, :marks, :command])
+    |> cast(attrs, @attrs)
+    |> validate_required(@attrs)
   end
 end

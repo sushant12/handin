@@ -7,6 +7,8 @@ defmodule Handin.Assignments do
   alias Handin.Repo
 
   alias Handin.Assignments.Assignment
+  alias Handin.Assignments.AssignmentTest
+  alias Handin.Assignments.TestSupportFile
 
   @doc """
   Returns the list of assignments.
@@ -35,7 +37,10 @@ defmodule Handin.Assignments do
       ** (Ecto.NoResultsError)
 
   """
-  def get_assignment!(id), do: Repo.get!(Assignment, id) |> Repo.preload(:programming_language)
+  def get_assignment!(id),
+    do:
+      Repo.get!(Assignment, id)
+      |> Repo.preload([:programming_language, [assignment_tests: :test_support_files]])
 
   @doc """
   Creates a assignment.
@@ -104,5 +109,20 @@ defmodule Handin.Assignments do
   """
   def change_assignment(%Assignment{} = assignment, attrs \\ %{}) do
     Assignment.changeset(assignment, attrs)
+  end
+
+  def change_assignment_test(%AssignmentTest{} = assignment_test, attrs \\ %{}) do
+    AssignmentTest.changeset(assignment_test, attrs)
+  end
+
+  def create_assignment_test(attrs \\ %{}) do
+    %AssignmentTest{}
+    |> AssignmentTest.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def test_support_file_change(attrs \\ %{}) do
+    %TestSupportFile{}
+    |> TestSupportFile.changeset(attrs)
   end
 end
