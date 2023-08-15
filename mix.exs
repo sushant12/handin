@@ -62,7 +62,11 @@ defmodule Handin.MixProject do
       {:nimble_csv, "~> 1.1"},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:waffle, "~> 1.1"},
-      {:waffle_ecto, "~> 0.0"}
+      {:waffle_ecto, "~> 0.0"},
+      {:ex_aws, "~> 2.1.2"},
+      {:ex_aws_s3, "~> 2.0"},
+      {:hackney, "~> 1.9"},
+      {:sweet_xml, "~> 0.6"}
     ]
   end
 

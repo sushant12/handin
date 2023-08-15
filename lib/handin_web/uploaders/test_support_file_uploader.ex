@@ -34,8 +34,9 @@ defmodule Handin.TestSupportFileUploader do
   # end
 
   # Override the persisted filenames:
-  def filename(version, _) do
-    version
+  def filename(version, {file, _id}) do
+    file_name = Path.basename(file.file_name, Path.extname(file.file_name))
+    "#{file_name}-#{version}"
   end
 
   # Override the storage directory:
