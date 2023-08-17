@@ -27,7 +27,7 @@ config :handin, HandinWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :handin, Handin.Mailer, adapter: Swoosh.Adapters.Local
+config :handin, Handin.Mailer, adapter: Swoosh.Adapters.ExAwsAmazonSES
 
 # Configure esbuild (the version is required)
 config :esbuild,
