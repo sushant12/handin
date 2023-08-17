@@ -8,7 +8,7 @@ defmodule Handin.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Handin", "contact@example.com"})
+      |> from({"Handin", "hello@handin.org"})
       |> subject(subject)
       |> text_body(body)
 

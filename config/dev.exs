@@ -31,7 +31,7 @@ config :handin, HandinWeb.Endpoint,
 
 config :waffle,
   storage: Waffle.Storage.S3,
-  bucket: System.get_env("AWS_S3_BUCKET_DEV")
+  bucket: System.get_env("AWS_S3_BUCKET")
 
 config :ex_aws,
   json_codec: Jason,
@@ -86,4 +86,4 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 # Disable swoosh api client as it is only required for production adapters.
-config :swoosh, :api_client, false
+config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: Handin.Finch
