@@ -117,8 +117,8 @@
             </ol>
           </div>
           <div id="test-logs">
-            <div>
-              Logs
+            <.header class="mt-4">
+              Run Test
               <button phx-click="run-test" phx-value-test_id={assignment_test.id}>
                 <svg
                   width="1.7rem"
@@ -132,7 +132,8 @@
                   class="pt-2"
                 >
                   <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                  </g>
                   <g id="SVGRepo_iconCarrier">
                     <defs></defs>
 
@@ -161,11 +162,12 @@
                   </g>
                 </svg>
               </button>
-            </div>
-            <div>
-              <ul>
-                <li :for={log <- @logs}><%= log %></li>
-              </ul>
+            </.header>
+
+            <div class="bg-gray-900">
+              sldkjflskdjf
+              asdfasdf
+              asdfasdfasdf
             </div>
           </div>
         <% end %>
