@@ -27,9 +27,9 @@ defmodule Handin.Accounts.UserNotifier do
 
     Hi #{user.email},
 
-    You can confirm your account by visiting the URL below:
+    You can confirm your account by clicking the button below:
 
-    #{url}
+    <a href="#{url}">Confirm</a>
 
     If you didn't create an account with us, please ignore this.
 
@@ -47,9 +47,9 @@ defmodule Handin.Accounts.UserNotifier do
 
     Hi #{user.email},
 
-    You can reset your password by visiting the URL below:
+    You can reset your password by clicking the button below:
 
-    #{url}
+    <a href="#{url}">Reset password</a>
 
     If you didn't request this change, please ignore this.
 
@@ -67,9 +67,9 @@ defmodule Handin.Accounts.UserNotifier do
 
     Hi #{user.email},
 
-    You can change your email by visiting the URL below:
+    You can change your email by clicking the button below:
 
-    #{url}
+    <a href="#{url}">Change email</a>
 
     If you didn't request this change, please ignore this.
 
