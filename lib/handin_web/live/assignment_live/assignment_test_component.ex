@@ -128,7 +128,10 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   defp save_assignment_test(socket, :add_assignment_test, assignment_test_params) do
     case AssignmentTests.create_assignment_test(assignment_test_params) do
       {:ok, assignment_test} ->
-        consume_entries(socket, assignment_test)
+        {:ok, test_support_file} =
+          AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
+
+        consume_entries(socket, test_support_file)
 
         notify_parent({:saved, assignment_test})
 
@@ -142,15 +145,14 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     end
   end
 
-  defp consume_entries(socket, assignment_test) do
+  defp consume_entries(socket, test_support_file) do
     consume_uploaded_entries(socket, :test_support_file, fn meta, entry ->
-      AssignmentTests.upload_test_support_file(%{
+      AssignmentTests.upload_test_support_file(test_support_file, %{
         "file" => %Plug.Upload{
           content_type: entry.client_type,
           filename: entry.client_name,
           path: meta.path
-        },
-        "assignment_test_id" => assignment_test.id
+        }
       })
     end)
   end

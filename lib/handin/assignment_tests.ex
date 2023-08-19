@@ -132,9 +132,15 @@ defmodule Handin.AssignmentTests do
     |> Repo.all()
   end
 
-  def upload_test_support_file(attrs \\ %{}) do
+  def save_test_support_file(attrs \\ %{}) do
     %TestSupportFile{}
     |> TestSupportFile.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def upload_test_support_file(test_support_file, attrs \\ %{}) do
+    test_support_file
+    |> TestSupportFile.file_changeset(attrs)
+    |> Repo.update()
   end
 end

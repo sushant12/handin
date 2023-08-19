@@ -16,7 +16,12 @@ defmodule Handin.Assignments.TestSupportFile do
   def changeset(test_support_file, attrs) do
     test_support_file
     |> cast(attrs, [:assignment_test_id])
+    |> validate_required([:assignment_test_id])
+  end
+
+  def file_changeset(test_support_file, attrs) do
+    test_support_file
     |> cast_attachments(attrs, [:file])
-    |> validate_required([:assignment_test_id, :file])
+    |> validate_required([:file])
   end
 end
