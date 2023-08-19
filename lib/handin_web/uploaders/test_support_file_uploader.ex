@@ -34,14 +34,15 @@ defmodule Handin.TestSupportFileUploader do
   # end
 
   # Override the persisted filenames:
-  def filename(version, _) do
-    version
-  end
+  # def filename(version, {file, _id}) do
+  #   file_name = Path.basename(file.file_name, Path.extname(file.file_name))
+  #   "#{file_name}-#{version}"
+  # end
 
   # Override the storage directory:
-  # def storage_dir(_version, {_file, test_support_file}) do
-  #   "uploads/user/test_support_files/#{test_support_file.id}"
-  # end
+  def storage_dir(_version, {_file, test_support_file}) do
+    "uploads/test/#{test_support_file.id}/"
+  end
 
   # Provide a default URL if there hasn't been a file uploaded
   # def default_url(version, scope) do

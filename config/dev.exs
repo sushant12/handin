@@ -29,6 +29,16 @@ config :handin, HandinWeb.Endpoint,
     tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 
+config :waffle,
+  storage: Waffle.Storage.S3,
+  bucket: System.get_env("AWS_S3_BUCKET")
+
+config :ex_aws,
+  json_codec: Jason,
+  access_key_id: System.get_env("AWS_ACCESS_KEY_ID"),
+  secret_access_key: System.get_env("AWS_SECRET_ACCESS_KEY"),
+  region: System.get_env("AWS_REGION")
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
