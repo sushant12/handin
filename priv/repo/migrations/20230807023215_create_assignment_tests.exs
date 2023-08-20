@@ -6,7 +6,6 @@ defmodule Handin.Repo.Migrations.CreateAssignmentTests do
       add :id, :binary_id, primary_key: true
       add :name, :string
       add :marks, :float
-      add :command, :string
       add :assignment_id, references(:assignments, type: :uuid, on_delete: :nothing)
 
       timestamps()

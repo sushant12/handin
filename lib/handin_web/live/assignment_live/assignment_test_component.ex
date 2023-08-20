@@ -2,6 +2,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   use HandinWeb, :live_component
 
   alias Handin.AssignmentTests
+  alias Handin.Assignments.Command
 
   @impl true
   def render(assigns) do
@@ -18,45 +19,69 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:name]} type="text" label="Name" />
-        <.input field={@form[:marks]} type="number" label="Marks" />
-        <.input field={@form[:command]} type="text" label="Command" />
+        <div class="grid grid-cols-2 gap-4">
+          <.input field={@form[:name]} type="text" label="Name" />
+          <.input field={@form[:marks]} type="number" label="Marks" />
+        </div>
 
-        <.label>Add test support file</.label>
-        <.live_file_input
-          upload={@uploads.test_support_file}
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-        />
-        <%= for entry <- @uploads.test_support_file.entries do %>
-          <article class="upload-entry">
-            <figure class="flex">
-              <svg
-                width="1.25rem"
-                height="1.25rem"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                <g id="SVGRepo_iconCarrier">
-                  <path
-                    d="M9 17H15M9 13H15M9 9H10M13 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.0799 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.0799 21 8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V9M13 3L19 9M13 3V7.4C13 7.96005 13 8.24008 13.109 8.45399C13.2049 8.64215 13.3578 8.79513 13.546 8.89101C13.7599 9 14.0399 9 14.6 9H19"
-                    stroke="#707070"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                  </path>
-                </g>
-              </svg>
-              <figcaption><%= entry.client_name %></figcaption>
-            </figure>
-          </article>
-        <% end %>
-        <%= for err <- upload_errors(@uploads.test_support_file) do %>
-          <p class="alert alert-danger"><%= error_to_string(err) %></p>
-        <% end %>
+        <div>
+          <label>Commands</label>
+          <button phx-click="add_command_fields" phx-target={@myself}>Add</button>
+          <.inputs_for :let={f} field={@form[:commands]}>
+            <div class="grid grid-cols-2 gap-4 mb-2">
+              <.input field={f[:name]} label="Name" type="text" />
+              <.input field={f[:command]} label="Command" type="text" />
+            </div>
+            <.input
+              field={f[:fail]}
+              type="checkbox"
+              label="Fail if output does not match"
+              phx-click="toggle_expected_output"
+            />
+            <.input field={f[:expected_output]} label="Expected output" type="text" />
+            <button phx-click="remove_command_fields" phx-value-remove={f.data.temp_id}>
+              Delete command
+            </button>
+          </.inputs_for>
+        </div>
+
+        <div>
+          <label>Add test support file</label>
+          <.live_file_input
+            upload={@uploads.test_support_file}
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          />
+          <%= for entry <- @uploads.test_support_file.entries do %>
+            <article class="upload-entry">
+              <figure class="flex">
+                <svg
+                  width="1.25rem"
+                  height="1.25rem"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M9 17H15M9 13H15M9 9H10M13 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.0799 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.0799 21 8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V9M13 3L19 9M13 3V7.4C13 7.96005 13 8.24008 13.109 8.45399C13.2049 8.64215 13.3578 8.79513 13.546 8.89101C13.7599 9 14.0399 9 14.6 9H19"
+                      stroke="#707070"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                    </path>
+                  </g>
+                </svg>
+                <figcaption><%= entry.client_name %></figcaption>
+              </figure>
+            </article>
+          <% end %>
+          <%= for err <- upload_errors(@uploads.test_support_file) do %>
+            <p class="alert alert-danger"><%= error_to_string(err) %></p>
+          <% end %>
+        </div>
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
@@ -106,13 +131,40 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     )
   end
 
+  def handle_event("add_command_fields", _, socket) do
+    commands = socket.assigns.form.data.commands
+
+    changeset =
+      socket.assigns.form.source
+      |> Ecto.Changeset.put_assoc(:commands, commands ++ [%Command{}])
+
+    {:noreply, assign_form(socket, changeset)}
+  end
+
+  def handle_event("remove_command_fields", %{"remove" => id}, socket) do
+    commands =
+      socket.assigns.changeset.changes.commands
+      |> Enum.reject(fn %{data: command} ->
+        command.temp_id == id
+      end)
+
+    changeset =
+      socket.assigns.changeset
+      |> Ecto.Changeset.put_assoc(:commands, commands)
+
+    {:noreply, assign_form(socket, changeset)}
+  end
+
   defp save_assignment_test(socket, :edit_assignment_test, assignment_test_params) do
     case AssignmentTests.update_assignment_test(
            socket.assigns.assignment_test,
            assignment_test_params
          ) do
       {:ok, assignment_test} ->
-        consume_entries(socket, assignment_test)
+        {:ok, test_support_file} =
+          AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
+
+        consume_entries(socket, test_support_file)
         notify_parent({:saved, assignment_test})
 
         {:noreply,

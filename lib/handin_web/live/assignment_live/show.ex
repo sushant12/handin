@@ -4,7 +4,7 @@ defmodule HandinWeb.AssignmentLive.Show do
   alias Handin.Assignments
   alias Handin.Assignments.AssignmentTest
   alias Handin.AssignmentTests
-  alias Handin.Assignments.TestSupportFile
+  alias Handin.Assignments.{TestSupportFile, Command}
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
@@ -31,6 +31,7 @@ defmodule HandinWeb.AssignmentLive.Show do
     |> assign(:page_title, "Add Test")
     |> assign(:assignment_test, %AssignmentTest{
       assignment_id: assignment_id,
+      commands: [%Command{}],
       test_support_files: [%TestSupportFile{}]
     })
   end
