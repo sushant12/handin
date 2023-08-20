@@ -7,7 +7,7 @@ defmodule Handin.AssignmentTests do
 
   alias Handin.{Repo}
 
-  alias Handin.Assignments.{AssignmentTest, TestSupportFile}
+  alias Handin.Assignments.{AssignmentTest, TestSupportFile, Log}
 
   @doc """
   Returns the list of assignment_tests.
@@ -142,5 +142,16 @@ defmodule Handin.AssignmentTests do
     test_support_file
     |> TestSupportFile.file_changeset(attrs)
     |> Repo.update()
+  end
+
+  @spec log(assignment_test_id :: Ecto.UUID, description :: String.t()) :: Log.t()
+  def log(assignment_test_id, description) do
+    Log.changeset(%{assignment_test_id: assignment_test_id, description: description})
+    |> Repo.insert()
+  end
+
+  @spec delete_logs(assignment_test_id :: Ecto.UUID) :: {non_neg_integer(), nil}
+  def delete_logs(assignment_test_id) do
+    Log |> where([l], l.assignment_test_id == ^assignment_test_id) |> Repo.delete_all()
   end
 end

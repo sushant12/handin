@@ -16,9 +16,7 @@ defmodule HandinWeb.AssignmentLive.Show do
      |> assign(current_page: :modules)
      |> assign(:module_id, id)
      |> assign(:assignment, assignment)
-     |> assign(:selected_assignment_test, nil)
-     |> assign(:logs, [])
-  }
+     |> assign(:selected_assignment_test, nil)}
   end
 
   @impl true
@@ -83,9 +81,10 @@ defmodule HandinWeb.AssignmentLive.Show do
      |> assign(:selected_assignment_test, assignment_test_id)}
   end
 
-  def handle_event("run-test", %{test_id: test_id}, socket) do
-    #also start the test?
-    Phoenix.PubSub.subscribe(Handin.PubSub, "test:#{test_id}")
+  def handle_event("run-test", %{"test_id" => test_id}, socket) do
+    HandinWeb.Endpoint.subscribe("test:#{test_id}")
+    AssignmentTests.delete_logs(test_id)
+    AssignmentTests.log(test_id, "Setting up environment...")
     {:noreply, socket}
   end
 

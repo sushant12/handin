@@ -3,6 +3,7 @@ defmodule Handin.Assignments.AssignmentTest do
   import Ecto.Changeset
   alias Handin.Assignments.Assignment
   alias Handin.Assignments.TestSupportFile
+  alias Handin.Assignments.Log
 
   schema "assignment_tests" do
     field :command, :string
@@ -11,7 +12,7 @@ defmodule Handin.Assignments.AssignmentTest do
 
     belongs_to :assignment, Assignment
     has_many :test_support_files, TestSupportFile, on_delete: :delete_all
-
+    has_many :logs, Log, on_delete: :delete_all
     timestamps()
   end
 
