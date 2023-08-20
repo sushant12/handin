@@ -164,7 +164,7 @@ defmodule Handin.AssignmentTests do
     assignment_test = get_assignment_test!(assignment_test_id)
 
     assignment_test.builds
-    |> Enum.sort_by(fn b -> b.inserted_at end)
+    |> Enum.sort_by(fn b -> b.inserted_at end, :desc)
     |> Enum.map(& &1.logs)
     |> List.first()
   end

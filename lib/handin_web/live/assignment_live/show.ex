@@ -88,6 +88,7 @@ defmodule HandinWeb.AssignmentLive.Show do
     HandinWeb.Endpoint.subscribe("test:#{test_id}")
     {:ok, build} = AssignmentTests.new_build(test_id)
     AssignmentTests.log(build.id, "Setting up environment...")
+    HandinWeb.Endpoint.broadcast!("test:#{test_id}", "new_log", test_id)
 
     # {:ok, machine} =
     #   MachineApi.create(
@@ -115,6 +116,7 @@ defmodule HandinWeb.AssignmentLive.Show do
     # MachineApi.stop(machine["id"])
     # MachineApi.destroy(machine["id"])
     AssignmentTests.log(build.id, "Completed!!")
+    HandinWeb.Endpoint.broadcast!("test:#{test_id}", "new_log", test_id)
     {:noreply, socket}
   end
 
@@ -128,8 +130,11 @@ defmodule HandinWeb.AssignmentLive.Show do
     {:noreply, socket |> assign(:assignment_tests, assignment.assignment_tests)}
   end
 
-  def handle_info({:new_log, log}, socket) do
-    {:noreply, assign(socket, :logs, [log | socket.assigns.logs])}
+  def handle_info(
+        %Phoenix.Socket.Broadcast{event: "new_log", payload: assignment_test_id},
+        socket
+      ) do
+    {:noreply, assign(socket, :logs, AssignmentTests.get_logs(assignment_test_id))}
   end
 
   # defp build_files(_assignment) do
