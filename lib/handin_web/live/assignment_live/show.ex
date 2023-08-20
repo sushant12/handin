@@ -5,6 +5,7 @@ defmodule HandinWeb.AssignmentLive.Show do
   alias Handin.Assignments.AssignmentTest
   alias Handin.AssignmentTests
   alias Handin.Assignments.TestSupportFile
+  # alias Handin.MachineApi
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
@@ -16,7 +17,8 @@ defmodule HandinWeb.AssignmentLive.Show do
      |> assign(current_page: :modules)
      |> assign(:module_id, id)
      |> assign(:assignment, assignment)
-     |> assign(:selected_assignment_test, nil)}
+     |> assign(:selected_assignment_test, nil)
+     |> assign(:logs, [])}
   end
 
   @impl true
@@ -78,13 +80,41 @@ defmodule HandinWeb.AssignmentLive.Show do
       ) do
     {:noreply,
      socket
-     |> assign(:selected_assignment_test, assignment_test_id)}
+     |> assign(:selected_assignment_test, assignment_test_id)
+     |> assign(:logs, AssignmentTests.get_logs(assignment_test_id))}
   end
 
   def handle_event("run-test", %{"test_id" => test_id}, socket) do
     HandinWeb.Endpoint.subscribe("test:#{test_id}")
-    AssignmentTests.delete_logs(test_id)
-    AssignmentTests.log(test_id, "Setting up environment...")
+    {:ok, build} = AssignmentTests.new_build(test_id)
+    AssignmentTests.log(build.id, "Setting up environment...")
+
+    # {:ok, machine} =
+    #   MachineApi.create(
+    #     Jason.encode!(%{
+    #       config: %{
+    #         image: socket.assigns.assignment.programming_language.docker_file_url
+    #         # files: build_files(socket.assigns.assignment)
+    #       }
+    #     })
+    #   )
+
+    # AssignmentTests.update_build(build, %{machine_id: machine["id"]})
+    # AssignmentTests.log(build.id, "Environment setup completed...")
+
+    # assignment_test.commands
+    # |> Enum.each(fn command ->
+    #   AssignmentTests.log(build.id, "Executing command #{command}")
+
+    #   case MachineApi.run_command(machine["id"], command) do
+    #     {:ok, response} ->
+    #       AssignmentTests.log(build.id, response["stdout"])
+    #   end
+    # end)
+
+    # MachineApi.stop(machine["id"])
+    # MachineApi.destroy(machine["id"])
+    AssignmentTests.log(build.id, "Completed!!")
     {:noreply, socket}
   end
 
@@ -101,4 +131,8 @@ defmodule HandinWeb.AssignmentLive.Show do
   def handle_info({:new_log, log}, socket) do
     {:noreply, assign(socket, :logs, [log | socket.assigns.logs])}
   end
+
+  # defp build_files(_assignment) do
+  #   []
+  # end
 end

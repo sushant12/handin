@@ -164,10 +164,10 @@
               </button>
             </.header>
 
-            <div class="bg-gray-900">
-              sldkjflskdjf
-              asdfasdf
-              asdfasdfasdf
+            <div class="bg-gray-900 text-white">
+              <%= for logs <- @logs do %>
+                <%= logs.description %>
+              <% end %>
             </div>
           </div>
         <% end %>

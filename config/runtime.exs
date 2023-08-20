@@ -73,6 +73,10 @@ if config_env() == :prod do
     secret_access_key: System.get_env("AWS_SECRET_ACCESS_KEY"),
     region: System.get_env("AWS_REGION")
 
+  config :fly,
+    base_url: "https://api.machines.dev/v1/apps/",
+    fly_auth_token: System.get_env("FLY_AUTH_TOKEN")
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key
