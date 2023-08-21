@@ -26,7 +26,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
         <div>
           <label>Commands</label>
-          <.link phx-click="add_command_fields" phx-target={@myself}>Add</.link>
+          <button type="button" phx-click="add_command_fields" phx-target={@myself}>Add</button>
           <.inputs_for :let={f} field={@form[:commands]}>
             <div class="grid grid-cols-2 gap-4 mb-2">
               <.input field={f[:name]} label="Name" type="text" />
