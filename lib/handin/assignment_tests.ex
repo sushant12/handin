@@ -7,7 +7,7 @@ defmodule Handin.AssignmentTests do
 
   alias Handin.{Repo}
 
-  alias Handin.Assignments.{AssignmentTest, TestSupportFile, Command}
+  alias Handin.Assignments.{AssignmentTest, TestSupportFile, Log, Build, Command}
 
   @doc """
   Returns the list of assignment_tests.
@@ -36,7 +36,7 @@ defmodule Handin.AssignmentTests do
       ** (Ecto.NoResultsError)
 
   """
-  def get_assignment_test!(id), do: Repo.get!(AssignmentTest, id) |> Repo.preload(:commands)
+  def get_assignment_test!(id), do: Repo.get!(AssignmentTest, id) |> Repo.preload([:commands, builds: :logs])
 
   @doc """
   Creates a assignment_test.
@@ -146,5 +146,30 @@ defmodule Handin.AssignmentTests do
 
   def change_command(command) do
     Command.changeset(command, %{})
+  end
+
+  @spec log(build_id :: Ecto.UUID, description :: String.t()) :: Log.t()
+  def log(build_id, description) do
+    Log.changeset(%{build_id: build_id, description: description})
+    |> Repo.insert()
+  end
+
+  def new_build(assignment_test_id) do
+    Build.changeset(%{assignment_test_id: assignment_test_id})
+    |> Repo.insert()
+  end
+
+  def update_build(build, attrs) do
+    Build.update_changeset(build, attrs)
+    |> Repo.update()
+  end
+
+  def get_logs(assignment_test_id) do
+    assignment_test = get_assignment_test!(assignment_test_id)
+
+    assignment_test.builds
+    |> Enum.sort_by(fn b -> b.inserted_at end, :desc)
+    |> Enum.map(& &1.logs)
+    |> List.first()
   end
 end

@@ -38,7 +38,7 @@ now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 |> Repo.insert!()
 
 %Handin.ProgrammingLanguages.ProgrammingLanguage{
-  name: "Elixir",
-  docker_file_url: "https://raw.githubusercontent.com/elixir-lang/elixir/master/README.md"
+  name: "Cpp",
+  docker_file_url: "sushantbajracharya/cpp:latest"
 }
 |> Repo.insert!()
