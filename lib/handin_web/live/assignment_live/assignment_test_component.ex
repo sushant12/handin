@@ -56,43 +56,50 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
           </.button>
           <.inputs_for :let={f} field={@form[:commands]}>
             <fieldset class="border border-solid border-gray-300 p-3">
-              <div class="grid grid-cols-7 gap-4 mb-2">
-                <div class="col-span-3">
-                  <.input field={f[:name]} label="Name" type="text" />
-                </div>
-                <div class="col-span-3">
-                  <.input field={f[:command]} label="Command" type="text" />
-                </div>
+              <legend>
                 <.button
                   type="button"
                   phx-click="remove_command_fields"
                   phx-value-index={f.index}
                   phx-target={@myself}
-                  class="flex justify-center pt-9"
                 >
                   <svg
-                    fill="#ee3f3f"
-                    width="1.15rem"
-                    height="1.15rem"
-                    viewBox="0 0 16 16"
+                    width="1.25rem"
+                    height="1.25rem"
+                    viewBox="0 0 1024 1024"
                     xmlns="http://www.w3.org/2000/svg"
-                    stroke="#ee3f3f"
+                    fill="#ff0000"
+                    stroke="#ff0000"
                   >
                     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                     <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                     <g id="SVGRepo_iconCarrier">
                       <path
-                        d="M0 14.545L1.455 16 8 9.455 14.545 16 16 14.545 9.455 8 16 1.455 14.545 0 8 6.545 1.455 0 0 1.455 6.545 8z"
-                        fill-rule="evenodd"
+                        fill="#dd3636"
+                        d="M160 256H96a32 32 0 0 1 0-64h256V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64h-64v672a32 32 0 0 1-32 32H192a32 32 0 0 1-32-32V256zm448-64v-64H416v64h192zM224 896h576V256H224v640zm192-128a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zm192 0a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32z"
                       >
                       </path>
                     </g>
                   </svg>
                 </.button>
+              </legend>
+              <div class="grid grid-cols-8 gap-4 mb-2">
+                <div class="col-span-4">
+                  <.input field={f[:name]} label="Name" type="text" />
+                </div>
+                <div class="col-span-4">
+                  <.input field={f[:command]} label="Command" type="text" />
+                </div>
               </div>
 
-              <.input field={f[:fail]} type="checkbox" label="Fail if output does not match" />
-              <.input field={f[:expected_output]} label="Expected output" type="text" />
+              <.input field={f[:fail]} type="checkbox" label="Fail if expected output does not match" />
+              <.input
+                field={f[:expected_output]}
+                label="Expected output"
+                type="textarea"
+                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Expected output"
+              />
             </fieldset>
           </.inputs_for>
         </div>
