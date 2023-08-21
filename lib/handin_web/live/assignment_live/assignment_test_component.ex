@@ -55,47 +55,45 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
             </svg>
           </.button>
           <.inputs_for :let={f} field={@form[:commands]}>
-            <div class="grid grid-cols-7 gap-4 mb-2">
-              <div class="col-span-3">
-                <.input field={f[:name]} label="Name" type="text" />
-              </div>
-              <div class="col-span-3">
-                <.input field={f[:command]} label="Command" type="text" />
-              </div>
-              <.button
-                type="button"
-                phx-click="remove_command_fields"
-                phx-value-index={f.index}
-                phx-target={@myself}
-                class="flex justify-center pt-9"
-              >
-                <svg
-                  fill="#ee3f3f"
-                  width="1.15rem"
-                  height="1.15rem"
-                  viewBox="0 0 16 16"
-                  xmlns="http://www.w3.org/2000/svg"
-                  stroke="#ee3f3f"
+            <fieldset class="border border-solid border-gray-300 p-3">
+              <div class="grid grid-cols-7 gap-4 mb-2">
+                <div class="col-span-3">
+                  <.input field={f[:name]} label="Name" type="text" />
+                </div>
+                <div class="col-span-3">
+                  <.input field={f[:command]} label="Command" type="text" />
+                </div>
+                <.button
+                  type="button"
+                  phx-click="remove_command_fields"
+                  phx-value-index={f.index}
+                  phx-target={@myself}
+                  class="flex justify-center pt-9"
                 >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                  <g id="SVGRepo_iconCarrier">
-                    <path
-                      d="M0 14.545L1.455 16 8 9.455 14.545 16 16 14.545 9.455 8 16 1.455 14.545 0 8 6.545 1.455 0 0 1.455 6.545 8z"
-                      fill-rule="evenodd"
-                    >
-                    </path>
-                  </g>
-                </svg>
-              </.button>
-            </div>
-            <.input
-              field={f[:fail]}
-              type="checkbox"
-              label="Fail if output does not match"
-              phx-click="toggle_expected_output"
-            />
-            <.input field={f[:expected_output]} label="Expected output" type="text" />
+                  <svg
+                    fill="#ee3f3f"
+                    width="1.15rem"
+                    height="1.15rem"
+                    viewBox="0 0 16 16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="#ee3f3f"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <path
+                        d="M0 14.545L1.455 16 8 9.455 14.545 16 16 14.545 9.455 8 16 1.455 14.545 0 8 6.545 1.455 0 0 1.455 6.545 8z"
+                        fill-rule="evenodd"
+                      >
+                      </path>
+                    </g>
+                  </svg>
+                </.button>
+              </div>
+
+              <.input field={f[:fail]} type="checkbox" label="Fail if output does not match" />
+              <.input field={f[:expected_output]} label="Expected output" type="text" />
+            </fieldset>
           </.inputs_for>
         </div>
 
@@ -186,7 +184,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   end
 
   def handle_event("add_command_fields", _, socket) do
-    existing_availability =
+    existing_commands =
       Ecto.Changeset.get_change(
         socket.assigns.form.source,
         :commands,
@@ -197,7 +195,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
       Ecto.Changeset.put_assoc(
         socket.assigns.form.source,
         :commands,
-        existing_availability ++ [%Command{}]
+        existing_commands ++ [%Command{}]
       )
 
     {:noreply, assign_form(socket, changeset)}
@@ -206,24 +204,22 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   def handle_event("remove_command_fields", %{"index" => index}, socket) do
     index = String.to_integer(index)
 
-    socket =
-      update(socket, :form, fn %{source: changeset} ->
-        existing = Ecto.Changeset.get_field(changeset, :commands)
-        {to_delete, rest} = List.pop_at(existing, index)
+    {_to_del, existing_commands} =
+      Ecto.Changeset.get_change(
+        socket.assigns.form.source,
+        :commands,
+        Ecto.Changeset.get_field(socket.assigns.form.source, :commands)
+      )
+      |> List.pop_at(index)
 
-        commands =
-          if Ecto.Changeset.change(to_delete).data.id do
-            List.replace_at(existing, index, Ecto.Changeset.change(to_delete, delete: true))
-          else
-            rest
-          end
+    changeset =
+      Ecto.Changeset.put_assoc(
+        socket.assigns.form.source,
+        :commands,
+        existing_commands
+      )
 
-        changeset
-        |> Ecto.Changeset.put_assoc(:commands, commands)
-        |> to_form()
-      end)
-
-    {:noreply, socket}
+    {:noreply, assign_form(socket, changeset)}
   end
 
   defp save_assignment_test(socket, :edit_assignment_test, assignment_test_params) do
@@ -232,10 +228,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
            assignment_test_params
          ) do
       {:ok, assignment_test} ->
-        {:ok, test_support_file} =
-          AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
-
-        consume_entries(socket, test_support_file)
+        consume_entries(socket, assignment_test)
         notify_parent({:saved, assignment_test})
 
         {:noreply,
@@ -251,10 +244,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   defp save_assignment_test(socket, :add_assignment_test, assignment_test_params) do
     case AssignmentTests.create_assignment_test(assignment_test_params) do
       {:ok, assignment_test} ->
-        {:ok, test_support_file} =
-          AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
-
-        consume_entries(socket, test_support_file)
+        consume_entries(socket, assignment_test)
 
         notify_parent({:saved, assignment_test})
 
@@ -268,8 +258,11 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     end
   end
 
-  defp consume_entries(socket, test_support_file) do
+  defp consume_entries(socket, assignment_test) do
     consume_uploaded_entries(socket, :test_support_file, fn meta, entry ->
+      {:ok, test_support_file} =
+        AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
+
       AssignmentTests.upload_test_support_file(test_support_file, %{
         "file" => %Plug.Upload{
           content_type: entry.client_type,

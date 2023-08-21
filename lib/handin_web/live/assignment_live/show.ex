@@ -82,7 +82,7 @@ defmodule HandinWeb.AssignmentLive.Show do
     {:noreply,
      socket
      |> assign(:selected_assignment_test, assignment_test_id)
-     |> assign(:logs, AssignmentTests.get_logs(assignment_test_id))}
+     |> assign(:logs, AssignmentTests.get_logs(assignment_test_id) || [])}
   end
 
   def handle_event("run-test", %{"test_id" => test_id}, socket) do

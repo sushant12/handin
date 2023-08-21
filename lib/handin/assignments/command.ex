@@ -10,7 +10,6 @@ defmodule Handin.Assignments.Command do
     field :fail, :boolean, default: false
     field :expected_output, :string
     field :response, :string
-
     belongs_to :assignment_test, AssignmentTest
 
     timestamps()
@@ -18,16 +17,15 @@ defmodule Handin.Assignments.Command do
 
   def changeset(command, attrs) do
     command
-    |> cast(attrs, [:name, :fail])
-    |> validate_required([:name])
-    |> validate_expected_output(attrs)
+    |> cast(attrs, [:name, :fail, :command, :expected_output, :response])
+    |> validate_required([:name, :command])
+    |> maybe_validate_expected_output()
   end
 
-  defp validate_expected_output(changeset, attrs) do
+  defp maybe_validate_expected_output(changeset) do
     case get_field(changeset, :fail) do
       true ->
         changeset
-        |> cast(attrs, [:expected_output])
         |> validate_required([:expected_output])
 
       false ->

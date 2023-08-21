@@ -81,8 +81,7 @@
             <:item title="Name"><%= assignment_test.name %></:item>
             <:item title="Marks"><%= assignment_test.marks %></:item>
           </.list>
-
-          <div :if={assignment_test.test_support_files != []} class="">
+          <div :if={Enum.count(assignment_test.test_support_files) > 0} class="">
             <h2 class="text-lg">Test support files</h2>
             <ol :for={test_support_file <- assignment_test.test_support_files}>
               <li class="text-zinc-700 border-b border-gray-200">
