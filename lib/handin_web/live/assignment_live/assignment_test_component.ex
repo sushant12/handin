@@ -267,16 +267,18 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
   defp consume_entries(socket, assignment_test) do
     consume_uploaded_entries(socket, :test_support_file, fn meta, entry ->
-      {:ok, test_support_file} =
-        AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
+      Handin.Repo.transaction(fn ->
+        {:ok, test_support_file} =
+          AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
 
-      AssignmentTests.upload_test_support_file(test_support_file, %{
-        "file" => %Plug.Upload{
-          content_type: entry.client_type,
-          filename: entry.client_name,
-          path: meta.path
-        }
-      })
+        AssignmentTests.upload_test_support_file(test_support_file, %{
+          "file" => %Plug.Upload{
+            content_type: entry.client_type,
+            filename: entry.client_name,
+            path: meta.path
+          }
+        })
+      end)
     end)
   end
 
