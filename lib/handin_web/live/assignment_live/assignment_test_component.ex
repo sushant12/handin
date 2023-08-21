@@ -26,7 +26,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
         <div>
           <label>Commands</label>
-          <button phx-click="add_command_fields" phx-target={@myself}>Add</button>
+          <.link phx-click="add_command_fields" phx-target={@myself}>Add</.link>
           <.inputs_for :let={f} field={@form[:commands]}>
             <div class="grid grid-cols-2 gap-4 mb-2">
               <.input field={f[:name]} label="Name" type="text" />
@@ -132,11 +132,19 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   end
 
   def handle_event("add_command_fields", _, socket) do
-    commands = socket.assigns.form.data.commands
+    existing_availability =
+      Ecto.Changeset.get_change(
+        socket.assigns.form.source,
+        :commands,
+        Ecto.Changeset.get_field(socket.assigns.form.source, :commands)
+      )
 
     changeset =
-      socket.assigns.form.source
-      |> Ecto.Changeset.put_assoc(:commands, commands ++ [%Command{}])
+      Ecto.Changeset.put_assoc(
+        socket.assigns.form.source,
+        :commands,
+        existing_availability ++ [%Command{}]
+      )
 
     {:noreply, assign_form(socket, changeset)}
   end
