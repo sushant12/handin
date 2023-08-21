@@ -26,7 +26,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
         <div>
           <label>Commands</label>
-          <button type="button" phx-click="add_command_fields" phx-target={@myself}>Add</button>
+          <.button type="button" phx-click="add_command_fields" phx-target={@myself}>Add</.button>
           <.inputs_for :let={f} field={@form[:commands]}>
             <div class="grid grid-cols-2 gap-4 mb-2">
               <.input field={f[:name]} label="Name" type="text" />
@@ -39,9 +39,14 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
               phx-click="toggle_expected_output"
             />
             <.input field={f[:expected_output]} label="Expected output" type="text" />
-            <button phx-click="remove_command_fields" phx-value-remove={f.data.temp_id}>
+            <.button
+              type="button"
+              phx-click="remove_command_fields"
+              phx-value-index={f.index}
+              phx-target={@myself}
+            >
               Delete command
-            </button>
+            </.button>
           </.inputs_for>
         </div>
 
@@ -149,18 +154,27 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     {:noreply, assign_form(socket, changeset)}
   end
 
-  def handle_event("remove_command_fields", %{"remove" => id}, socket) do
-    commands =
-      socket.assigns.changeset.changes.commands
-      |> Enum.reject(fn %{data: command} ->
-        command.temp_id == id
+  def handle_event("remove_command_fields", %{"index" => index}, socket) do
+    index = String.to_integer(index)
+
+    socket =
+      update(socket, :form, fn %{source: changeset} ->
+        existing = Ecto.Changeset.get_field(changeset, :commands)
+        {to_delete, rest} = List.pop_at(existing, index)
+
+        commands =
+          if Ecto.Changeset.change(to_delete).data.id do
+            List.replace_at(existing, index, Ecto.Changeset.change(to_delete, delete: true))
+          else
+            rest
+          end
+
+        changeset
+        |> Ecto.Changeset.put_assoc(:commands, commands)
+        |> to_form()
       end)
 
-    changeset =
-      socket.assigns.changeset
-      |> Ecto.Changeset.put_assoc(:commands, commands)
-
-    {:noreply, assign_form(socket, changeset)}
+    {:noreply, socket}
   end
 
   defp save_assignment_test(socket, :edit_assignment_test, assignment_test_params) do

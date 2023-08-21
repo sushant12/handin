@@ -36,7 +36,8 @@ defmodule Handin.AssignmentTests do
       ** (Ecto.NoResultsError)
 
   """
-  def get_assignment_test!(id), do: Repo.get!(AssignmentTest, id) |> Repo.preload([:commands, builds: :logs])
+  def get_assignment_test!(id),
+    do: Repo.get!(AssignmentTest, id) |> Repo.preload([:commands, builds: :logs])
 
   @doc """
   Creates a assignment_test.

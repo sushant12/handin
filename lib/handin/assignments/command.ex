@@ -10,8 +10,6 @@ defmodule Handin.Assignments.Command do
     field :fail, :boolean, default: false
     field :expected_output, :string
     field :response, :string
-    field :temp_id, :string, virtual: true
-    field :delete, :boolean, virtual: true
 
     belongs_to :assignment_test, AssignmentTest
 
@@ -20,8 +18,7 @@ defmodule Handin.Assignments.Command do
 
   def changeset(command, attrs) do
     command
-    |> Map.put(:temp_id, command.temp_id || attrs["temp_id"])
-    |> cast(attrs, [:name, :fail, :delete])
+    |> cast(attrs, [:name, :fail])
     |> validate_required([:name])
     |> validate_expected_output(attrs)
   end
