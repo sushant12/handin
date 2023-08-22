@@ -4,8 +4,8 @@ defmodule HandinWeb.AssignmentLive.Show do
   alias Handin.Assignments
   alias Handin.Assignments.AssignmentTest
   alias Handin.AssignmentTests
-  alias Handin.Assignments.TestSupportFile
-  # alias Handin.MachineApi
+  alias Handin.Assignments.{TestSupportFile, Command}
+  alias Handin.MachineApi
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
@@ -33,6 +33,7 @@ defmodule HandinWeb.AssignmentLive.Show do
     |> assign(:page_title, "Add Test")
     |> assign(:assignment_test, %AssignmentTest{
       assignment_id: assignment_id,
+      commands: [%Command{}],
       test_support_files: [%TestSupportFile{}]
     })
   end
@@ -81,40 +82,41 @@ defmodule HandinWeb.AssignmentLive.Show do
     {:noreply,
      socket
      |> assign(:selected_assignment_test, assignment_test_id)
-     |> assign(:logs, AssignmentTests.get_logs(assignment_test_id))}
+     |> assign(:logs, AssignmentTests.get_logs(assignment_test_id) || [])}
   end
 
   def handle_event("run-test", %{"test_id" => test_id}, socket) do
+    assignment_test = AssignmentTests.get_assignment_test!(test_id)
     HandinWeb.Endpoint.subscribe("test:#{test_id}")
     {:ok, build} = AssignmentTests.new_build(test_id)
     AssignmentTests.log(build.id, "Setting up environment...")
     HandinWeb.Endpoint.broadcast!("test:#{test_id}", "new_log", test_id)
 
-    # {:ok, machine} =
-    #   MachineApi.create(
-    #     Jason.encode!(%{
-    #       config: %{
-    #         image: socket.assigns.assignment.programming_language.docker_file_url
-    #         # files: build_files(socket.assigns.assignment)
-    #       }
-    #     })
-    #   )
+    {:ok, machine} =
+      MachineApi.create(
+        Jason.encode!(%{
+          config: %{
+            image: socket.assigns.assignment.programming_language.docker_file_url
+            # files: build_files(socket.assigns.assignment)
+          }
+        })
+      )
 
-    # AssignmentTests.update_build(build, %{machine_id: machine["id"]})
-    # AssignmentTests.log(build.id, "Environment setup completed...")
+    AssignmentTests.update_build(build, %{machine_id: machine["id"]})
+    AssignmentTests.log(build.id, "Environment setup completed...")
 
-    # assignment_test.commands
-    # |> Enum.each(fn command ->
-    #   AssignmentTests.log(build.id, "Executing command #{command}")
+    assignment_test.commands
+    |> Enum.each(fn command ->
+      AssignmentTests.log(build.id, "Executing command #{command}")
 
-    #   case MachineApi.run_command(machine["id"], command) do
-    #     {:ok, response} ->
-    #       AssignmentTests.log(build.id, response["stdout"])
-    #   end
-    # end)
+      case MachineApi.exec(machine["id"], command) do
+        {:ok, response} ->
+          AssignmentTests.log(build.id, response["stdout"])
+      end
+    end)
 
-    # MachineApi.stop(machine["id"])
-    # MachineApi.destroy(machine["id"])
+    MachineApi.stop(machine["id"])
+    MachineApi.destroy(machine["id"])
     AssignmentTests.log(build.id, "Completed!!")
     HandinWeb.Endpoint.broadcast!("test:#{test_id}", "new_log", test_id)
     {:noreply, socket}
