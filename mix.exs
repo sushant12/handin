@@ -67,7 +67,8 @@ defmodule Handin.MixProject do
       {:ex_aws_s3, "~> 2.0"},
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.6"},
-      {:gen_smtp, "~> 1.0"}
+      {:gen_smtp, "~> 1.0"},
+      {:httpoison, "~> 2.1"}
     ]
   end
 

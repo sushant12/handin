@@ -6,6 +6,7 @@ defmodule HandinWeb.AssignmentLive.Show do
   alias Handin.AssignmentTests
   alias Handin.Assignments.{TestSupportFile, Command}
   alias Handin.MachineApi
+  alias Handin.TestSupportFileUploader, as: Uploader
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
@@ -96,8 +97,8 @@ defmodule HandinWeb.AssignmentLive.Show do
       MachineApi.create(
         Jason.encode!(%{
           config: %{
-            image: socket.assigns.assignment.programming_language.docker_file_url
-            # files: build_files(socket.assigns.assignment)
+            image: socket.assigns.assignment.programming_language.docker_file_url,
+            files: build_files(assignment_test)
           }
         })
       )
@@ -139,7 +140,18 @@ defmodule HandinWeb.AssignmentLive.Show do
     {:noreply, assign(socket, :logs, AssignmentTests.get_logs(assignment_test_id))}
   end
 
-  # defp build_files(_assignment) do
-  #   []
-  # end
+  defp build_files(assignment_test) do
+    AssignmentTests.get_test_support_files_for_test(assignment_test.id)
+    |> Enum.map(fn test_support_file ->
+      %HTTPoison.Response{body: body} =
+        Uploader.url({test_support_file.file.filename, assignment_test}, signed: true)
+        |> HTTPoison.get!()
+
+      encoded_body =
+        body
+        |> Base.encode64()
+
+      %{"guest_path" => "#{test_support_file.file.filename}", "raw_value" => encoded_body}
+    end)
+  end
 end
