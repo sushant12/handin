@@ -120,8 +120,4 @@ defmodule HandinWeb.AssignmentLive.Show do
       ) do
     {:noreply, assign(socket, :logs, AssignmentTests.get_logs(assignment_test_id))}
   end
-
-  # defp build_files(_assignment) do
-  #   []
-  # end
 end
