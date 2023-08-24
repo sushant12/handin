@@ -37,7 +37,9 @@ defmodule Handin.AssignmentTests do
 
   """
   def get_assignment_test!(id),
-    do: Repo.get!(AssignmentTest, id) |> Repo.preload([:commands, builds: :logs])
+    do:
+      Repo.get!(AssignmentTest, id)
+      |> Repo.preload([:commands, :test_support_files, builds: :logs])
 
   @doc """
   Creates a assignment_test.
@@ -127,12 +129,6 @@ defmodule Handin.AssignmentTests do
     TestSupportFile.changeset(test_support_file, attrs)
   end
 
-  def get_test_support_files_for_test(test_id) do
-    TestSupportFile
-    |> where([t], t.assignment_test_id == ^test_id)
-    |> Repo.all()
-  end
-
   def save_test_support_file(attrs \\ %{}) do
     %TestSupportFile{}
     |> TestSupportFile.changeset(attrs)
@@ -171,7 +167,14 @@ defmodule Handin.AssignmentTests do
     |> Repo.update()
   end
 
-  def get_logs(assignment_test_id) do
+  def get_logs(build_id) do
+    Build
+    |> Repo.get!(build_id)
+    |> Repo.preload(:logs)
+    |> Map.get(:logs)
+  end
+
+  def get_recent_build_logs(assignment_test_id) do
     assignment_test = get_assignment_test!(assignment_test_id)
 
     build =

@@ -23,6 +23,5 @@ defmodule Handin.Assignments.Build do
   def update_changeset(build, attrs) do
     build
     |> cast(attrs, @attrs)
-    |> validate_required(@attrs)
   end
 end

@@ -1,7 +1,7 @@
 defmodule Handin.BuildServer do
   use GenServer
   alias Handin.AssignmentTests
-  alias Handin.TestSupportFileUploader, as: Uploader
+  alias Handin.TestSupportFileUploader
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
 
@@ -19,7 +19,8 @@ defmodule Handin.BuildServer do
   end
 
   defp process_build(state) do
-    assignment_test = AssignmentTests.get_assignment_test!(state.assignment_test_id) |> IO.inspect(label: "Id")
+    assignment_test =
+      AssignmentTests.get_assignment_test!(state.assignment_test_id)
 
     {:ok, build} =
       AssignmentTests.new_build(%{
@@ -32,11 +33,17 @@ defmodule Handin.BuildServer do
     case @machine_api.create(
            Jason.encode!(%{
              config: %{
+               auto_destroy: true,
                image: state.image,
-               files: build_files(assignment_test)
+               files: build_files(assignment_test),
+               processes: [
+                 %{
+                   cmd: ["sleep inf"]
+                 }
+               ]
              }
            })
-         )|> IO.inspect(label: "machine status") do
+         ) do
       {:ok, machine} ->
         AssignmentTests.update_build(build, %{machine_id: machine["id"], status: "setup_complete"})
 
@@ -44,8 +51,8 @@ defmodule Handin.BuildServer do
         AssignmentTests.update_build(build, %{status: "execute_command"})
 
         assignment_test.commands
-        |> Enum.each(fn %{command: command} ->
-          log_and_broadcast(build, "Running command #{command}.", state)
+        |> Enum.each(fn %{name: name, command: command} ->
+          log_and_broadcast(build, "#{name} #{command}.", state)
 
           case @machine_api.exec(machine["id"], command) do
             {:ok, response} ->
@@ -92,24 +99,26 @@ defmodule Handin.BuildServer do
     HandinWeb.Endpoint.broadcast!(
       "build:#{state.type}:#{state.assignment_test_id}",
       "new_log",
-      state.assignment_test_id
+      build.id
     )
   end
 
   defp build_files(assignment_test) do
-    AssignmentTests.get_test_support_files_for_test(assignment_test.id)
+    assignment_test.test_support_files
     |> Enum.map(fn test_support_file ->
-      url = Uploader.url({test_support_file.file.filename, assignment_test}, signed: true)
+      url =
+        TestSupportFileUploader.url({test_support_file.file.file_name, test_support_file},
+          signed: true
+        )
 
       {:ok, %Finch.Response{status: 200, body: body}} =
         Finch.build(:get, url)
         |> Finch.request(Handin.Finch)
 
-      encoded_body =
-        body
-        |> Base.encode64()
-
-      %{"guest_path" => "#{test_support_file.file.filename}", "raw_value" => encoded_body}
+      %{
+        "guest_path" => "/#{test_support_file.file.file_name}",
+        "raw_value" => Base.encode64(body)
+      }
     end)
   end
 end

@@ -81,7 +81,7 @@ defmodule HandinWeb.AssignmentLive.Show do
     {:noreply,
      socket
      |> assign(:selected_assignment_test, assignment_test_id)
-     |> assign(:logs, AssignmentTests.get_logs(assignment_test_id) || [])}
+     |> assign(:logs, AssignmentTests.get_recent_build_logs(assignment_test_id) || [])}
   end
 
   def handle_event("run-test", %{"test_id" => assignment_test_id}, socket) do
@@ -115,9 +115,9 @@ defmodule HandinWeb.AssignmentLive.Show do
   end
 
   def handle_info(
-        %Phoenix.Socket.Broadcast{event: "new_log", payload: assignment_test_id},
+        %Phoenix.Socket.Broadcast{event: "new_log", payload: build_id},
         socket
       ) do
-    {:noreply, assign(socket, :logs, AssignmentTests.get_logs(assignment_test_id))}
+    {:noreply, assign(socket, :logs, AssignmentTests.get_logs(build_id))}
   end
 end

@@ -1,7 +1,5 @@
 defmodule Handin.FakeMachineApi do
   def create(_params) do
-    :timer.sleep(5000)
-
     {:ok,
      %{
        "config" => %{
@@ -38,14 +36,10 @@ defmodule Handin.FakeMachineApi do
   end
 
   def stop(_machine_id) do
-    :timer.sleep(5000)
-
     {:ok, ""}
   end
 
   def destroy(_machine_id) do
-    :timer.sleep(5000)
-
     {:ok, ""}
   end
 
@@ -54,8 +48,6 @@ defmodule Handin.FakeMachineApi do
   end
 
   def exec(_machine_id, _cmd) do
-    :timer.sleep(5000)
-
-    {:ok, %{"stdout" => "some random string"}}
+    {:ok, %{"stdout" => "some randome string form FakeMachineAPI"}}
   end
 end
