@@ -9,7 +9,7 @@ defmodule Handin.Assignments.Log do
 
     belongs_to :build, Build
 
-    timestamps()
+    timestamps(type: :utc_datetime)
   end
 
   @attrs [:description, :build_id]

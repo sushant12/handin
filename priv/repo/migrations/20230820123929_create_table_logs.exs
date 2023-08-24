@@ -7,7 +7,7 @@ defmodule Handin.Repo.Migrations.CreateTableLogs do
       add :description, :string
       add :build_id, references(:builds, type: :uuid, on_delete: :nothing)
 
-      timestamps()
+      timestamps(type: :utc_datetime)
     end
   end
 end

@@ -155,11 +155,17 @@ defmodule Handin.AssignmentTests do
     |> Repo.insert()
   end
 
-  def new_build(assignment_test_id) do
-    Build.changeset(%{assignment_test_id: assignment_test_id})
+  @spec new_build(attrs :: %{assignment_test_id: Ecto.UUID, status: String.t()}) ::
+          {:ok, Build.t()}
+  def new_build(attrs) do
+    Build.changeset(attrs)
     |> Repo.insert()
   end
 
+  @spec update_build(
+          build :: Build.t(),
+          attrs :: %{status: String.t()} | %{status: String.t(), machine_id: String.t()}
+        ) :: {:ok, Build.t()}
   def update_build(build, attrs) do
     Build.update_changeset(build, attrs)
     |> Repo.update()
@@ -168,9 +174,15 @@ defmodule Handin.AssignmentTests do
   def get_logs(assignment_test_id) do
     assignment_test = get_assignment_test!(assignment_test_id)
 
-    assignment_test.builds
-    |> Enum.sort_by(fn b -> b.inserted_at end, :desc)
-    |> Enum.map(& &1.logs)
-    |> List.first()
+    build =
+      assignment_test.builds
+      |> Enum.sort_by(& &1.inserted_at, :desc)
+      |> List.first()
+
+    if build do
+      build |> Map.get(:logs) |> Enum.sort_by(& &1.inserted_at, :asc)
+    else
+      []
+    end
   end
 end

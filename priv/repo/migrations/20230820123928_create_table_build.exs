@@ -5,9 +5,10 @@ defmodule Handin.Repo.Migrations.CreateTableBuild do
     create table(:builds, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :machine_id, :string
+      add :status, :string
       add :assignment_test_id, references(:assignment_tests, type: :uuid, on_delete: :nothing)
 
-      timestamps()
+      timestamps(type: :utc_datetime)
     end
   end
 end

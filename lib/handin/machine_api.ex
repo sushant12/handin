@@ -10,8 +10,8 @@ defmodule Handin.MachineApi do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: 400, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 
@@ -26,8 +26,8 @@ defmodule Handin.MachineApi do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: 400, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 
@@ -42,8 +42,8 @@ defmodule Handin.MachineApi do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: 400, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 
@@ -58,8 +58,8 @@ defmodule Handin.MachineApi do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: 400, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 
@@ -74,8 +74,8 @@ defmodule Handin.MachineApi do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: 400, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 end

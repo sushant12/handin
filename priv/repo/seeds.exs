@@ -38,7 +38,7 @@ now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 |> Repo.insert!()
 
 %Handin.ProgrammingLanguages.ProgrammingLanguage{
-  name: "Cpp",
+  name: "cpp",
   docker_file_url: "sushantbajracharya/cpp:latest"
 }
 |> Repo.insert!()
