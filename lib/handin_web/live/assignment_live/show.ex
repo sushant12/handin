@@ -98,7 +98,7 @@ defmodule HandinWeb.AssignmentLive.Show do
              image: socket.assigns.assignment.programming_language.docker_file_url
            }
          ]},
-      restart: :transient
+      restart: :temporary
     })
 
     {:noreply, socket}

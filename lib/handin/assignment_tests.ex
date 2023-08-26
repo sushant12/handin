@@ -188,4 +188,10 @@ defmodule Handin.AssignmentTests do
       []
     end
   end
+
+  def save_command_output(command, attrs) do
+    command
+    |> Command.changeset(attrs)
+    |> Repo.update()
+  end
 end

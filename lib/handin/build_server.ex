@@ -13,9 +13,13 @@ defmodule Handin.BuildServer do
 
   @impl true
   def init(state) do
-    process_build(state)
+    {:ok, state, {:continue, :process_build}}
+  end
 
-    {:stop, "finished"}
+  @impl true
+  def handle_continue(:process_build, state) do
+    process_build(state)
+    {:stop, "finished", state}
   end
 
   defp process_build(state) do
@@ -35,61 +39,70 @@ defmodule Handin.BuildServer do
              config: %{
                auto_destroy: true,
                image: state.image,
-               files: build_files(assignment_test),
-               processes: [
-                 %{
-                   cmd: ["sleep inf"]
-                 }
-               ]
+               files: build_files(assignment_test)
              }
            })
          ) do
       {:ok, machine} ->
-        AssignmentTests.update_build(build, %{machine_id: machine["id"], status: "setup_complete"})
+        if machine_started?(machine) do
+          AssignmentTests.update_build(build, %{
+            machine_id: machine["id"],
+            status: "setup_complete"
+          })
 
-        log_and_broadcast(build, "Environment setup completed.", state)
-        AssignmentTests.update_build(build, %{status: "execute_command"})
+          log_and_broadcast(build, "Environment setup completed.", state)
+          AssignmentTests.update_build(build, %{status: "execute_command"})
 
-        assignment_test.commands
-        |> Enum.each(fn %{name: name, command: command} ->
-          log_and_broadcast(build, "#{name} #{command}.", state)
+          assignment_test.commands
+          |> Enum.each(fn %{name: name, command: command} = cmd ->
+            log_and_broadcast(build, "#{name} #{command}.", state)
 
-          case @machine_api.exec(machine["id"], command) do
-            {:ok, response} ->
-              log_and_broadcast(build, response["stdout"], state)
+            case @machine_api.exec(machine["id"], command) do
+              {:ok, response} ->
+                message =
+                  if String.trim(response["stdout"]) == "" do
+                    response["stderr"]
+                  else
+                    response["stdout"]
+                  end
 
-            {:error, reason} ->
-              log_and_broadcast(build, "Failed: #{reason}", state)
-          end
-        end)
-
-        AssignmentTests.update_build(build, %{status: "execute_command_complete"})
-
-        case @machine_api.stop(machine["id"]) do
-          {:ok, _} ->
-            AssignmentTests.update_build(build, %{status: "machine_stopped"})
-
-            case @machine_api.destroy(machine["id"]) do
-              {:ok, _} ->
-                AssignmentTests.update_build(build, %{status: "machine_destroyed"})
-                log_and_broadcast(build, "Completed!!", state)
-                AssignmentTests.update_build(build, %{status: "completed"})
+                AssignmentTests.save_command_output(cmd, %{response: message})
+                log_and_broadcast(build, message, state)
 
               {:error, reason} ->
-                AssignmentTests.update_build(build, %{status: "machine_destroy_failed"})
-
-                log_and_broadcast(build, "Failed to stop machine: #{reason}", state)
+                log_and_broadcast(build, "Failed: #{reason}", state)
             end
+          end)
 
-          {:error, reason} ->
-            AssignmentTests.update_build(build, %{status: "machine_stopped_failed"})
+          AssignmentTests.update_build(build, %{status: "execute_command_complete"})
 
-            log_and_broadcast(build, "Failed to stop machine: #{reason}", state)
+          case @machine_api.stop(machine["id"]) do
+            {:ok, _} ->
+              AssignmentTests.update_build(build, %{status: "machine_stopped"})
+              log_and_broadcast(build, "Completed!!", state)
+              AssignmentTests.update_build(build, %{status: "completed"})
+
+            {:error, reason} ->
+              AssignmentTests.update_build(build, %{status: "machine_stopped_failed"})
+
+              log_and_broadcast(build, "Failed to stop machine: #{reason}", state)
+          end
         end
 
       {:error, reason} ->
         AssignmentTests.update_build(build, %{status: "setup_failed"})
         log_and_broadcast(build, "Failed to setup VM: #{reason}", state)
+    end
+  end
+
+  defp machine_started?(machine) do
+    case @machine_api.status(machine["id"]) do
+      {:ok, %{"state" => state}} when state in ["created", "starting"] ->
+        :timer.sleep(1000)
+        machine_started?(machine)
+
+      _ ->
+        true
     end
   end
 
