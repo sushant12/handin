@@ -10,8 +10,8 @@ defmodule Handin.MachineApi do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: _, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 
@@ -19,15 +19,14 @@ defmodule Handin.MachineApi do
     case Finch.build(
            :post,
            "#{Application.get_env(:handin, :fly_base_url)}container/machines/#{machine_id}/stop",
-           [{"authorization", "Bearer #{Application.get_env(:handin, :fly_auth_token)}"}],
-           %{}
+           [{"authorization", "Bearer #{Application.get_env(:handin, :fly_auth_token)}"}]
          )
          |> Finch.request(Handin.Finch) do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: _, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 
@@ -35,15 +34,14 @@ defmodule Handin.MachineApi do
     case Finch.build(
            :post,
            "#{Application.get_env(:handin, :fly_base_url)}container/machines/#{machine_id}",
-           [{"authorization", "Bearer #{Application.get_env(:handin, :fly_auth_token)}"}],
-           %{}
+           [{"authorization", "Bearer #{Application.get_env(:handin, :fly_auth_token)}"}]
          )
          |> Finch.request(Handin.Finch) do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: _, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 
@@ -52,14 +50,14 @@ defmodule Handin.MachineApi do
            :get,
            "#{Application.get_env(:handin, :fly_base_url)}container/machines/#{machine_id}",
            [{"authorization", "Bearer #{Application.get_env(:handin, :fly_auth_token)}"}],
-           %{}
+           Jason.encode!(%{})
          )
          |> Finch.request(Handin.Finch) do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: _, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 
@@ -68,14 +66,14 @@ defmodule Handin.MachineApi do
            :post,
            "#{Application.get_env(:handin, :fly_base_url)}container/machines/#{machine_id}/exec",
            [{"authorization", "Bearer #{Application.get_env(:handin, :fly_auth_token)}"}],
-           %{cmd: cmd}
+           Jason.encode!(%{cmd: cmd})
          )
          |> Finch.request(Handin.Finch) do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, %Finch.Response{status: _, body: body}} ->
+        {:error, Jason.decode!(body) |> Map.get("error")}
     end
   end
 end

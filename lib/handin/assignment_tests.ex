@@ -37,7 +37,9 @@ defmodule Handin.AssignmentTests do
 
   """
   def get_assignment_test!(id),
-    do: Repo.get!(AssignmentTest, id) |> Repo.preload([:commands, builds: :logs])
+    do:
+      Repo.get!(AssignmentTest, id)
+      |> Repo.preload([:commands, :test_support_files, builds: :logs])
 
   @doc """
   Creates a assignment_test.
@@ -127,12 +129,6 @@ defmodule Handin.AssignmentTests do
     TestSupportFile.changeset(test_support_file, attrs)
   end
 
-  def get_test_support_files_for_test(test_id) do
-    TestSupportFile
-    |> where([t], t.assignment_test_id == ^test_id)
-    |> Repo.all()
-  end
-
   def save_test_support_file(attrs \\ %{}) do
     %TestSupportFile{}
     |> TestSupportFile.changeset(attrs)
@@ -155,22 +151,47 @@ defmodule Handin.AssignmentTests do
     |> Repo.insert()
   end
 
-  def new_build(assignment_test_id) do
-    Build.changeset(%{assignment_test_id: assignment_test_id})
+  @spec new_build(attrs :: %{assignment_test_id: Ecto.UUID, status: String.t()}) ::
+          {:ok, Build.t()}
+  def new_build(attrs) do
+    Build.changeset(attrs)
     |> Repo.insert()
   end
 
+  @spec update_build(
+          build :: Build.t(),
+          attrs :: %{status: String.t()} | %{status: String.t(), machine_id: String.t()}
+        ) :: {:ok, Build.t()}
   def update_build(build, attrs) do
     Build.update_changeset(build, attrs)
     |> Repo.update()
   end
 
-  def get_logs(assignment_test_id) do
+  def get_logs(build_id) do
+    Build
+    |> Repo.get!(build_id)
+    |> Repo.preload(:logs)
+    |> Map.get(:logs)
+  end
+
+  def get_recent_build_logs(assignment_test_id) do
     assignment_test = get_assignment_test!(assignment_test_id)
 
-    assignment_test.builds
-    |> Enum.sort_by(fn b -> b.inserted_at end, :desc)
-    |> Enum.map(& &1.logs)
-    |> List.first()
+    build =
+      assignment_test.builds
+      |> Enum.sort_by(& &1.inserted_at, :desc)
+      |> List.first()
+
+    if build do
+      build |> Map.get(:logs) |> Enum.sort_by(& &1.inserted_at, :asc)
+    else
+      []
+    end
+  end
+
+  def save_command_output(command, attrs) do
+    command
+    |> Command.changeset(attrs)
+    |> Repo.update()
   end
 end
