@@ -19,4 +19,7 @@ config :logger, level: :info
 
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
-config :handing, machine_api_module: Handin.MachineApi
+config :handin,
+  fly_base_url: "https://api.machines.dev/v1/apps/",
+  fly_auth_token: System.get_env("FLY_AUTH_TOKEN"),
+  machine_api_module: Handin.MachineApi
