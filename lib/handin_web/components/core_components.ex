@@ -602,7 +602,7 @@ defmodule HandinWeb.CoreComponents do
             Members
           </.link>
         </li>
-        <li class="mr-2">
+        <%!-- <li class="mr-2">
           <a
             href="#"
             class={[
@@ -612,7 +612,7 @@ defmodule HandinWeb.CoreComponents do
           >
             Settings
           </a>
-        </li>
+        </li> --%>
       </ul>
     </div>
     """

@@ -115,6 +115,11 @@ defmodule HandinWeb.Router do
       scope "/modules/:id" do
         live "/assignments", AssignmentLive.Index, :index
         live "/assignments/:assignment_id", AssignmentLive.Show, :show
+
+        live "/assignments/:assignment_id/upload_submissions",
+             AssignmentLive.Show,
+             :upload_submissions
+
         live "/members", MembersLive.Index, :index
       end
     end

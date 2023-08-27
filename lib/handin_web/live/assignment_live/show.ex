@@ -4,7 +4,9 @@ defmodule HandinWeb.AssignmentLive.Show do
   alias Handin.Assignments
   alias Handin.Assignments.AssignmentTest
   alias Handin.AssignmentTests
+  alias Handin.AssignmentSubmissions
   alias Handin.Assignments.{TestSupportFile, Command}
+  alias Handin.AssignmentSubmission.StudentAssignmentSubmission
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
@@ -17,6 +19,10 @@ defmodule HandinWeb.AssignmentLive.Show do
      |> assign(:module_id, id)
      |> assign(:assignment, assignment)
      |> assign(:selected_assignment_test, nil)
+     |> assign(
+       :assignment_submission,
+       AssignmentSubmissions.get_user_assignment_submission(socket.assigns.current_user.id)
+     )
      |> assign(:logs, [])}
   end
 
@@ -34,6 +40,15 @@ defmodule HandinWeb.AssignmentLive.Show do
       assignment_id: assignment_id,
       commands: [%Command{}],
       test_support_files: [%TestSupportFile{}]
+    })
+  end
+
+  defp apply_action(socket, :upload_submissions, %{"assignment_id" => assignment_id}) do
+    socket
+    |> assign(:page_title, "Upload Submissions")
+    |> assign(:student_assignment_submission, %StudentAssignmentSubmission{
+      user_id: socket.assigns.current_user.id,
+      assignment_id: assignment_id
     })
   end
 
@@ -112,6 +127,19 @@ defmodule HandinWeb.AssignmentLive.Show do
     assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
 
     {:noreply, socket |> assign(:assignment_tests, assignment.assignment_tests)}
+  end
+
+  def handle_info(
+        {HandinWeb.AssignmentSubmission.AssignmentSubmissionUploadComponent,
+         {:saved, _assignment_test}},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(
+       :assignment_submission,
+       AssignmentSubmissions.get_user_assignment_submission(socket.assigns.current_user.id)
+     )}
   end
 
   def handle_info(
