@@ -28,6 +28,14 @@ defmodule Handin.Modules do
     |> Repo.one()
   end
 
+  def get_assignments_count(module_id) do
+    Module
+    |> where([m], m.id == ^module_id)
+    |> join(:inner, [m], a in assoc(m, :assignments), on: a.module_id == ^module_id)
+    |> select([m, a], count(a.id))
+    |> Repo.one()
+  end
+
   def list_module() do
     Repo.all(Module)
   end
