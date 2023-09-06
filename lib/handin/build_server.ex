@@ -54,7 +54,7 @@ defmodule Handin.BuildServer do
           AssignmentTests.update_build(build, %{status: "execute_command"})
 
           assignment_test.commands
-          |> Enum.each(fn %{name: name, command: command} = cmd ->
+          |> Enum.each(fn %{name: name, command: command} ->
             log_and_broadcast(build, "#{name} #{command}.", state)
 
             case @machine_api.exec(machine["id"], command) do
@@ -66,7 +66,6 @@ defmodule Handin.BuildServer do
                     response["stdout"]
                   end
 
-                AssignmentTests.save_command_output(cmd, %{response: message})
                 log_and_broadcast(build, message, state)
 
               {:error, reason} ->

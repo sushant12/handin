@@ -1,6 +1,5 @@
-defmodule HandinWeb.AssignmentSubmission.AssignmentSubmissionUploadComponent do
+defmodule HandinWeb.AssignmentSubmission.AssignmentUploadComponent do
   use HandinWeb, :live_component
-  # alias Handin.AssignmentSubmission.StudentAssignmentSubmission
   alias Handin.AssignmentSubmissions
 
   @impl true
@@ -13,18 +12,18 @@ defmodule HandinWeb.AssignmentSubmission.AssignmentSubmissionUploadComponent do
 
       <.simple_form
         for={@form}
-        id="assignment_submission-upload-form"
+        id="assignment_upload_form"
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
       >
         <div>
-          <label>Upload assignment files</label>
+          <label>Upload Assignment Files</label>
           <.live_file_input
-            upload={@uploads.student_assignment_submission}
+            upload={@uploads.assignment_submission}
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           />
-          <%= for entry <- @uploads.student_assignment_submission.entries do %>
+          <%= for entry <- @uploads.assignment_submission.entries do %>
             <article class="upload-entry">
               <figure class="flex">
                 <svg
@@ -51,7 +50,7 @@ defmodule HandinWeb.AssignmentSubmission.AssignmentSubmissionUploadComponent do
               </figure>
             </article>
           <% end %>
-          <%= for err <- upload_errors(@uploads.student_assignment_submission) do %>
+          <%= for err <- upload_errors(@uploads.assignment_submission) do %>
             <p class="alert alert-danger"><%= error_to_string(err) %></p>
           <% end %>
         </div>
@@ -76,14 +75,14 @@ defmodule HandinWeb.AssignmentSubmission.AssignmentSubmissionUploadComponent do
 
   @impl true
   def update(assigns, socket) do
-    changeset = AssignmentSubmissions.change_submission(assigns.student_assignment_submission)
+    changeset = AssignmentSubmissions.change_submission(assigns.assignment_submission)
 
     {:ok,
      socket
      |> assign(assigns)
      |> assign_form(changeset)
      |> assign(:uploaded_files, [])
-     |> allow_upload(:student_assignment_submission,
+     |> allow_upload(:assignment_submission,
        accept: :any,
        max_entries: 5,
        max_file_size: 1_500_000
@@ -91,24 +90,20 @@ defmodule HandinWeb.AssignmentSubmission.AssignmentSubmissionUploadComponent do
   end
 
   @impl true
-  def handle_event("validate", _, socket) do
-    {:noreply, socket}
-  end
+  def handle_event("validate", _, socket), do: {:noreply, socket}
 
   def handle_event("save", _, socket) do
     assignment_submission =
-      AssignmentSubmissions.create_or_update_submission(
-        socket.assigns.student_assignment_submission
-      )
+      AssignmentSubmissions.create_or_update_submission(socket.assigns.assignment_submission)
 
-    consume_uploaded_entries(socket, :student_assignment_submission, fn meta, entry ->
+    consume_uploaded_entries(socket, :assignment_submission, fn meta, entry ->
       Handin.Repo.transaction(fn ->
         assignment_submission_file =
           AssignmentSubmissions.save_assignment_submission_file(%{
-            "student_assignment_submission_id" => assignment_submission.id
+            "assignment_submission_id" => assignment_submission.id
           })
 
-        AssignmentSubmissions.upload_assignment_submission_file(assignment_submission_file, %{
+        AssignmentSubmissions.upload_file(assignment_submission_file, %{
           "file" => %Plug.Upload{
             content_type: entry.client_type,
             filename: entry.client_name,
@@ -125,42 +120,6 @@ defmodule HandinWeb.AssignmentSubmission.AssignmentSubmissionUploadComponent do
      |> put_flash(:info, "Done")
      |> push_patch(to: socket.assigns.patch)}
   end
-
-  # defp save_assignment_test(socket, :add_assignment_test, assignment_test_params) do
-  #   case AssignmentSubmissions.create_assignment_test(assignment_test_params) do
-  #     {:ok, assignment_test} ->
-  #       consume_entries(socket, assignment_test)
-
-  #       notify_parent({:saved, assignment_test})
-
-  #       {:noreply,
-  #        socket
-  #        |> put_flash(:info, "Assignment test created successfully")
-  #        |> push_patch(to: socket.assigns.patch)}
-
-  #     {:error, %Ecto.Changeset{} = changeset} ->
-  #       {:noreply, assign_form(socket, changeset)}
-  #   end
-  # end
-
-  # defp consume_entries(socket, assignment_test) do
-  #   consume_uploaded_entries(socket, :test_support_file, fn meta, entry ->
-  #     Handin.Repo.transaction(fn ->
-  #       {:ok, test_support_file} =
-  #         AssignmentSubmissions.save_test_support_file(%{
-  #           "assignment_test_id" => assignment_test.id
-  #         })
-
-  #       AssignmentSubmissions.upload_test_support_file(test_support_file, %{
-  #         "file" => %Plug.Upload{
-  #           content_type: entry.client_type,
-  #           filename: entry.client_name,
-  #           path: meta.path
-  #         }
-  #       })
-  #     end)
-  #   end)
-  # end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))

@@ -8,7 +8,6 @@ defmodule Handin.Repo.Migrations.CreateCommandsTable do
       add :command, :text
       add :fail, :boolean
       add :expected_output, :text
-      add :response, :text
 
       add :assignment_test_id, references(:assignment_tests, type: :uuid, on_delete: :delete_all)
 

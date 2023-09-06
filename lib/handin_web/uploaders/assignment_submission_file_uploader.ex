@@ -40,7 +40,7 @@ defmodule Handin.AssignmentSubmissionFileUploader do
 
   # Override the storage directory:
   def storage_dir(_version, {_file, assignment_submission_file}) do
-    "uploads/user/#{assignment_submission_file.student_assignment_submission.user.id}/assignment/#{assignment_submission_file.student_assignment_submission.assignment.id}/submission/#{assignment_submission_file.id}"
+    "uploads/user/#{assignment_submission_file.assignment_submission.user.id}/assignment/#{assignment_submission_file.assignment_submission.assignment.id}/submission/#{assignment_submission_file.id}"
   end
 
   # Provide a default URL if there hasn't been a file uploaded

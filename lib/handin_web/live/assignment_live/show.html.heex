@@ -187,13 +187,10 @@
   </.header>
   <div class="col-span-9"></div>
   <div class="col-span-12 border-2 rounded-lg px-3">
-    <div id="general mx-2">
-      <div
-        :if={Enum.count(@assignment_submission.student_assignment_submission_files) > 0}
-        class=""
-      >
-        <h2 class="text-lg">Upload Files</h2>
-        <ol :for={test_support_file <- @assignment_submission.student_assignment_submission_files}>
+    <div :if={not is_nil(@assignment_submission)} id="general mx-2">
+      <div>
+        <h2 class="text-lg">Files</h2>
+        <ol :for={test_support_file <- @assignment_submission.assignment_submission_files}>
           <li class="text-zinc-700 border-b border-gray-200">
             <button
               class="mr-2 pt-2"
@@ -320,11 +317,11 @@
   on_cancel={JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment.id}")}
 >
   <.live_component
-    module={HandinWeb.AssignmentSubmission.AssignmentSubmissionUploadComponent}
+    module={HandinWeb.AssignmentSubmission.AssignmentUploadComponent}
     id={:new}
     title={@page_title}
     action={@live_action}
-    student_assignment_submission={@student_assignment_submission}
+    assignment_submission={@assignment_submission}
     assignment_id={@assignment.id}
     patch={~p"/modules/#{@module_id}/assignments/#{@assignment.id}"}
   />
