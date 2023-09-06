@@ -20,10 +20,10 @@ defmodule HandinWeb.AssignmentSubmission.AssignmentUploadComponent do
         <div>
           <label>Upload Assignment Files</label>
           <.live_file_input
-            upload={@uploads.assignment_submission}
+            upload={@uploads.assignment_submission_schema}
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           />
-          <%= for entry <- @uploads.assignment_submission.entries do %>
+          <%= for entry <- @uploads.assignment_submission_schema.entries do %>
             <article class="upload-entry">
               <figure class="flex">
                 <svg
@@ -50,7 +50,7 @@ defmodule HandinWeb.AssignmentSubmission.AssignmentUploadComponent do
               </figure>
             </article>
           <% end %>
-          <%= for err <- upload_errors(@uploads.assignment_submission) do %>
+          <%= for err <- upload_errors(@uploads.assignment_submission_schema) do %>
             <p class="alert alert-danger"><%= error_to_string(err) %></p>
           <% end %>
         </div>
@@ -75,14 +75,14 @@ defmodule HandinWeb.AssignmentSubmission.AssignmentUploadComponent do
 
   @impl true
   def update(assigns, socket) do
-    changeset = AssignmentSubmissions.change_submission(assigns.assignment_submission)
+    changeset = AssignmentSubmissions.change_submission(assigns.assignment_submission_schema)
 
     {:ok,
      socket
      |> assign(assigns)
      |> assign_form(changeset)
      |> assign(:uploaded_files, [])
-     |> allow_upload(:assignment_submission,
+     |> allow_upload(:assignment_submission_schema,
        accept: :any,
        max_entries: 5,
        max_file_size: 1_500_000
@@ -94,9 +94,11 @@ defmodule HandinWeb.AssignmentSubmission.AssignmentUploadComponent do
 
   def handle_event("save", _, socket) do
     assignment_submission =
-      AssignmentSubmissions.create_or_update_submission(socket.assigns.assignment_submission)
+      AssignmentSubmissions.create_or_update_submission(
+        socket.assigns.assignment_submission_schema
+      )
 
-    consume_uploaded_entries(socket, :assignment_submission, fn meta, entry ->
+    consume_uploaded_entries(socket, :assignment_submission_schema, fn meta, entry ->
       Handin.Repo.transaction(fn ->
         assignment_submission_file =
           AssignmentSubmissions.save_assignment_submission_file(%{

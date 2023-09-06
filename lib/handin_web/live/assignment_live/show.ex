@@ -46,7 +46,7 @@ defmodule HandinWeb.AssignmentLive.Show do
   defp apply_action(socket, :upload_submissions, %{"assignment_id" => assignment_id}) do
     socket
     |> assign(:page_title, "Upload Submissions")
-    |> assign(:assignment_submission, %AssignmentSubmission{
+    |> assign(:assignment_submission_schema, %AssignmentSubmission{
       user_id: socket.assigns.current_user.id,
       assignment_id: assignment_id
     })
