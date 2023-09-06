@@ -112,8 +112,9 @@ defmodule HandinWeb.AssignmentLive.Show do
            [
              %{
                assignment_test_id: assignment_test.id,
-               type: "assignment_test",
-               image: socket.assigns.assignment.programming_language.docker_file_url
+               type: "assignment_submission_test",
+               image: socket.assigns.assignment.programming_language.docker_file_url,
+               assignment_submission_id: assignment_submission_id
              }
            ]},
         restart: :temporary

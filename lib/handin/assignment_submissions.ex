@@ -28,6 +28,11 @@ defmodule Handin.AssignmentSubmissions do
     |> Repo.update!()
   end
 
+  def get_assignment_submission!(id) do
+    Repo.get!(AssignmentSubmission, id)
+    |> Repo.preload(assignment_submission_files: [assignment_submission: [:user, :assignment]])
+  end
+
   def get_user_assignment_submission(user_id) do
     Repo.get_by(AssignmentSubmission, user_id: user_id)
     |> Repo.preload(:assignment_submission_files)

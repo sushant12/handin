@@ -1,7 +1,7 @@
 defmodule Handin.BuildServer do
   use GenServer
   alias Handin.AssignmentTests
-  alias Handin.TestSupportFileUploader
+  alias Handin.{TestSupportFileUploader, AssignmentSubmissions, AssignmentSubmissionFileUploader}
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
 
@@ -34,12 +34,19 @@ defmodule Handin.BuildServer do
 
     log_and_broadcast(build, "Setting up environment...", state)
 
+    build_files =
+      case state.type do
+        "assignment_test" -> %{test: assignment_test}
+        "assignment_submission_test" -> %{submission_id: state.assignment_submission_id}
+      end
+      |> build_files()
+
     case @machine_api.create(
            Jason.encode!(%{
              config: %{
                auto_destroy: true,
                image: state.image,
-               files: build_files(assignment_test)
+               files: build_files
              }
            })
          ) do
@@ -115,7 +122,7 @@ defmodule Handin.BuildServer do
     )
   end
 
-  defp build_files(assignment_test) do
+  defp build_files(%{test: assignment_test}) do
     assignment_test.test_support_files
     |> Enum.map(fn test_support_file ->
       url =
@@ -129,6 +136,26 @@ defmodule Handin.BuildServer do
 
       %{
         "guest_path" => "/#{test_support_file.file.file_name}",
+        "raw_value" => Base.encode64(body)
+      }
+    end)
+  end
+
+  defp build_files(%{submission_id: assignment_submission_id}) do
+    assignment_submission = AssignmentSubmissions.get_assignment_submission!(assignment_submission_id)
+    assignment_submission.assignment_submission_files
+    |> Enum.map(fn submission_file ->
+      url =
+        AssignmentSubmissionFileUploader.url({submission_file.file.file_name, submission_file},
+          signed: true
+        )
+
+      {:ok, %Finch.Response{status: 200, body: body}} =
+        Finch.build(:get, url)
+        |> Finch.request(Handin.Finch)
+
+      %{
+        "guest_path" => "/#{submission_file.file.file_name}",
         "raw_value" => Base.encode64(body)
       }
     end)
