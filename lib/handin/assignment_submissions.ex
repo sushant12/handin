@@ -32,4 +32,13 @@ defmodule Handin.AssignmentSubmissions do
     Repo.get_by(AssignmentSubmission, user_id: user_id)
     |> Repo.preload(:assignment_submission_files)
   end
+
+  def validate_submission(user_id) do
+    %AssignmentSubmission{retries: retries} =
+      old_submission = get_user_assignment_submission(user_id)
+
+    old_submission
+    |> change_submission(%{retries: retries + 1, submitted_at: DateTime.utc_now()})
+    |> Repo.update!()
+  end
 end

@@ -8,6 +8,7 @@ defmodule Handin.AssignmentSubmission.AssignmentSubmission do
   @type t :: %__MODULE__{}
   schema "assignment_submissions" do
     field :submitted_at, :utc_datetime
+    field :retries, :integer, default: 0
 
     belongs_to :user, User
     belongs_to :assignment, Assignment
@@ -16,7 +17,7 @@ defmodule Handin.AssignmentSubmission.AssignmentSubmission do
     timestamps(type: :utc_datetime)
   end
 
-  @attrs [:submitted_at, :user_id, :assignment_id]
+  @attrs [:submitted_at, :user_id, :assignment_id, :retries]
   def changeset(assignment_submission, attrs) do
     assignment_submission
     |> cast(attrs, @attrs)
