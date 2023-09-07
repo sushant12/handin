@@ -1,7 +1,8 @@
 defmodule Handin.AssignmentSubmission.AssignmentSubmission do
   alias Handin.AssignmentSubmission.AssignmentSubmissionFile
   alias Handin.Accounts.User
-  alias Handin.Assignments.Assignment
+  alias Handin.Assignments.{Assignment, Build}
+  alias Handin.AssignmentSubmission.AssignmentSubmissionsBuilds
   use Handin.Schema
 
   import Ecto.Changeset
@@ -13,6 +14,8 @@ defmodule Handin.AssignmentSubmission.AssignmentSubmission do
     belongs_to :user, User
     belongs_to :assignment, Assignment
     has_many :assignment_submission_files, AssignmentSubmissionFile
+
+    many_to_many :builds, Build, join_through: AssignmentSubmissionsBuilds
 
     timestamps(type: :utc_datetime)
   end

@@ -99,10 +99,30 @@ defmodule HandinWeb.AssignmentLive.Show do
      |> assign(:logs, AssignmentTests.get_recent_build_logs(assignment_test_id) || [])}
   end
 
-  def handle_event("run-test", %{"test_id" => assignment_submission_id}, socket) do
+  def handle_event("run-test", %{"test_id" => assignment_test_id}, socket) do
+    HandinWeb.Endpoint.subscribe("build:assignment_test:#{assignment_test_id}")
+
+    DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
+      id: Handin.BuildServer,
+      start:
+        {Handin.BuildServer, :start_link,
+         [
+           %{
+             assignment_test_id: assignment_test_id,
+             type: "assignment_test",
+             image: socket.assigns.assignment.programming_language.docker_file_url
+           }
+         ]},
+      restart: :temporary
+    })
+
+    {:noreply, socket}
+  end
+
+  def handle_event("submit-assignment", %{"assignment_submission_id" => assignment_submission_id}, socket) do
     AssignmentSubmissions.validate_submission(socket.assigns.current_user.id)
 
-    HandinWeb.Endpoint.subscribe("build:assignment_test:#{assignment_submission_id}")
+    HandinWeb.Endpoint.subscribe("build:assignment_submission_test:#{assignment_submission_id}")
 
     Enum.each(socket.assigns.assignment_tests, fn assignment_test ->
       DynamicSupervisor.start_child(Handin.BuildSupervisor, %{

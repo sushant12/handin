@@ -224,7 +224,10 @@
       <div id="test-logs">
         <.header class="mt-4">
           Submit Assignment
-          <button phx-click="run-test" phx-value-test_id={@assignment_submission.id}>
+          <button
+            phx-click="submit-assignment"
+            phx-value-assignment_submission_id={@assignment_submission.id}
+          >
             <svg
               width="1.7rem"
               height="1.7rem"
