@@ -9,7 +9,15 @@ defmodule Handin.BuildServer do
     GenServer.start_link(__MODULE__, state, name: name_for(state))
   end
 
-  def name_for(state), do: {:global, "build:#{state.type}:#{state.assignment_test_id}"}
+  def name_for(state) do
+    case state.type do
+      "assignment_test" ->
+        {:global, "build:#{state.type}:#{state.assignment_test_id}"}
+
+      "assignment_submission" ->
+        {:global, "build:#{state.type}:#{state.assignment_submission_id}"}
+    end
+  end
 
   @impl true
   def init(state) do
@@ -17,6 +25,15 @@ defmodule Handin.BuildServer do
   end
 
   @impl true
+  def handle_continue(:process_build, %{type: "assignment_submission"} = state) do
+    Enum.each(state.assignment_tests, fn assignment_test ->
+      state = Map.put(state, :assignment_test_id, assignment_test.id)
+      process_build(state)
+    end)
+
+    {:stop, "finished", state}
+  end
+
   def handle_continue(:process_build, state) do
     process_build(state)
     {:stop, "finished", state}
@@ -36,9 +53,15 @@ defmodule Handin.BuildServer do
 
     build_files =
       case state.type do
-        "assignment_test" -> %{test: assignment_test}
-        "assignment_submission_test" ->
-          AssignmentTests.add_assignment_submission_build_record(%{build_id: build.id, assignment_submission_id: state.assignment_submission_id})
+        "assignment_test" ->
+          %{test: assignment_test}
+
+        "assignment_submission" ->
+          AssignmentTests.add_assignment_submission_build_record(%{
+            build_id: build.id,
+            assignment_submission_id: state.assignment_submission_id
+          })
+
           %{assignment_submission_id: state.assignment_submission_id}
       end
       |> build_files()
@@ -124,12 +147,12 @@ defmodule Handin.BuildServer do
     )
   end
 
-  defp log_and_broadcast(build, message, %{type: "assignment_submission_test"} = state) do
+  defp log_and_broadcast(build, message, %{type: "assignment_submission"} = state) do
     AssignmentTests.log(build.id, message)
 
     HandinWeb.Endpoint.broadcast!(
       "build:#{state.type}:#{state.assignment_submission_id}",
-      "new_log",
+      "new_assignment_submission_log",
       build.id
     )
   end
@@ -154,7 +177,9 @@ defmodule Handin.BuildServer do
   end
 
   defp build_files(%{assignment_submission_id: assignment_submission_id}) do
-    assignment_submission = AssignmentSubmissions.get_assignment_submission!(assignment_submission_id)
+    assignment_submission =
+      AssignmentSubmissions.get_assignment_submission!(assignment_submission_id)
+
     assignment_submission.assignment_submission_files
     |> Enum.map(fn submission_file ->
       url =

@@ -119,27 +119,28 @@ defmodule HandinWeb.AssignmentLive.Show do
     {:noreply, socket}
   end
 
-  def handle_event("submit-assignment", %{"assignment_submission_id" => assignment_submission_id}, socket) do
-    AssignmentSubmissions.validate_submission(socket.assigns.current_user.id)
+  def handle_event(
+        "submit-assignment",
+        %{"assignment_submission_id" => assignment_submission_id},
+        socket
+      ) do
+    HandinWeb.Endpoint.subscribe("build:assignment_submission:#{assignment_submission_id}")
+    # AssignmentSubmissions.validate_submission(socket.assigns.current_user.id)
 
-    HandinWeb.Endpoint.subscribe("build:assignment_submission_test:#{assignment_submission_id}")
-
-    Enum.each(socket.assigns.assignment_tests, fn assignment_test ->
-      DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
-        id: Handin.BuildServer,
-        start:
-          {Handin.BuildServer, :start_link,
-           [
-             %{
-               assignment_test_id: assignment_test.id,
-               type: "assignment_submission_test",
-               image: socket.assigns.assignment.programming_language.docker_file_url,
-               assignment_submission_id: assignment_submission_id
-             }
-           ]},
-        restart: :temporary
-      })
-    end)
+    DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
+      id: Handin.BuildServer,
+      start:
+        {Handin.BuildServer, :start_link,
+         [
+           %{
+             type: "assignment_submission",
+             image: socket.assigns.assignment.programming_language.docker_file_url,
+             assignment_submission_id: assignment_submission_id,
+             assignment_tests: socket.assigns.assignment_tests
+           }
+         ]},
+      restart: :temporary
+    })
 
     {:noreply, socket}
   end
@@ -171,5 +172,12 @@ defmodule HandinWeb.AssignmentLive.Show do
         socket
       ) do
     {:noreply, assign(socket, :logs, AssignmentTests.get_logs(build_id))}
+  end
+
+  def handle_info(
+        %Phoenix.Socket.Broadcast{event: "new_assignment_submission_log", payload: build_id},
+        socket
+      ) do
+    {:noreply, assign(socket, :logs, "show here")}
   end
 end
