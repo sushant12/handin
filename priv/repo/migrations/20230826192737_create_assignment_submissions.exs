@@ -7,7 +7,6 @@ defmodule Handin.Repo.Migrations.CreateAssignmentSubmissions do
       add :user_id, references(:users, type: :uuid)
       add :assignment_id, references(:assignments, type: :uuid)
       add :submitted_at, :utc_datetime
-      add :retries, :integer
       timestamps(type: :utc_datetime)
     end
 
