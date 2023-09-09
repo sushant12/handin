@@ -1,7 +1,7 @@
-defmodule Handin.BuildServer do
+defmodule Handin.AssignmentBuildServer do
   use GenServer
   alias Handin.AssignmentTests
-  alias Handin.TestSupportFileUploader
+  alias Handin.{AssignmentSubmissions, AssignmentSubmissionFileUploader}
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
 
@@ -10,7 +10,7 @@ defmodule Handin.BuildServer do
   end
 
   def name_for(state) do
-    {:global, "build:#{state.type}:#{state.assignment_test_id}"}
+    {:global, "build:#{state.type}:#{state.assignment_submission_id}"}
   end
 
   @impl true
@@ -20,7 +20,12 @@ defmodule Handin.BuildServer do
 
   @impl true
   def handle_continue(:process_build, state) do
-    process_build(state)
+    Enum.each(state.assignment_tests, fn assignment_test ->
+      state = Map.put(state, :assignment_test_id, assignment_test.id)
+      process_build(state)
+    end)
+
+    AssignmentSubmissions.submit_assignment(state.assignment_submission_id)
     {:stop, "finished", state}
   end
 
@@ -34,6 +39,11 @@ defmodule Handin.BuildServer do
         status: "environment_setup"
       })
 
+    AssignmentSubmissions.new_build(%{
+      assignment_submission_id: state.assignment_submission_id,
+      build_id: build.id
+    })
+
     log_and_broadcast(build, "Setting up environment...", state)
 
     case @machine_api.create(
@@ -41,7 +51,7 @@ defmodule Handin.BuildServer do
              config: %{
                auto_destroy: true,
                image: state.image,
-               files: build_files(assignment_test)
+               files: build_files(state.assignment_submission_id)
              }
            })
          ) do
@@ -107,7 +117,7 @@ defmodule Handin.BuildServer do
     end
   end
 
-  defp log_and_broadcast(build, message, state) do
+  defp log_and_broadcast(build, message, %{type: "assignment_test"} = state) do
     AssignmentTests.log(build.id, message)
 
     HandinWeb.Endpoint.broadcast!(
@@ -117,11 +127,24 @@ defmodule Handin.BuildServer do
     )
   end
 
-  defp build_files(assignment_test) do
-    assignment_test.test_support_files
-    |> Enum.map(fn test_support_file ->
+  defp log_and_broadcast(build, message, %{type: "assignment_submission"} = state) do
+    AssignmentTests.log(build.id, message)
+
+    HandinWeb.Endpoint.broadcast!(
+      "build:#{state.type}:#{state.assignment_submission_id}",
+      "new_assignment_submission_log",
+      state.assignment_submission_id
+    )
+  end
+
+  defp build_files(assignment_submission_id) do
+    assignment_submission =
+      AssignmentSubmissions.get_assignment_submission!(assignment_submission_id)
+
+    assignment_submission.assignment_submission_files
+    |> Enum.map(fn submission_file ->
       url =
-        TestSupportFileUploader.url({test_support_file.file.file_name, test_support_file},
+        AssignmentSubmissionFileUploader.url({submission_file.file.file_name, submission_file},
           signed: true
         )
 
@@ -130,7 +153,7 @@ defmodule Handin.BuildServer do
         |> Finch.request(Handin.Finch)
 
       %{
-        "guest_path" => "/#{test_support_file.file.file_name}",
+        "guest_path" => "/#{submission_file.file.file_name}",
         "raw_value" => Base.encode64(body)
       }
     end)

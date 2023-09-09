@@ -1,6 +1,8 @@
 defmodule Handin.AssignmentSubmissions do
+  import Ecto.Query, warn: false
   alias Handin.AssignmentSubmission.AssignmentSubmission
   alias Handin.AssignmentSubmission.AssignmentSubmissionFile
+  alias Handin.AssignmentSubmission.AssignmentSubmissionsBuilds
   alias Handin.Repo
 
   def change_submission(assignment_submission, attrs \\ %{}) do
@@ -33,17 +35,43 @@ defmodule Handin.AssignmentSubmissions do
     |> Repo.preload(assignment_submission_files: [assignment_submission: [:user, :assignment]])
   end
 
-  def get_user_assignment_submission(user_id) do
-    Repo.get_by(AssignmentSubmission, user_id: user_id)
+  @spec new_build(attrs :: %{assignment_submission_id: Ecto.UUID, build_id: Ecto.UUID}) ::
+          {:ok, AssignmentSubmissionsBuilds.t()}
+  def new_build(attrs) do
+    AssignmentSubmissionsBuilds.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def get_user_assignment_submission(user_id, assignment_id) do
+    AssignmentSubmission
+    |> where([as], as.user_id == ^user_id and as.assignment_id == ^assignment_id)
+    |> Repo.one()
     |> Repo.preload(:assignment_submission_files)
   end
 
-  def validate_submission(user_id) do
-    %AssignmentSubmission{retries: retries} =
-      old_submission = get_user_assignment_submission(user_id)
+  def get_builds(assignment_submission_id) do
+    AssignmentSubmissionsBuilds
+    |> where(
+      [asb],
+      asb.assignment_submission_id == ^assignment_submission_id and is_nil(asb.deleted_at)
+    )
+    |> order_by([asb], asc: asb.inserted_at)
+    |> Repo.all()
+    |> Repo.preload(build: [:logs])
+  end
 
-    old_submission
-    |> change_submission(%{retries: retries + 1, submitted_at: DateTime.utc_now()})
-    |> Repo.update!()
+  def submit_assignment(assignment_submission_id) do
+    now = DateTime.utc_now()
+
+    AssignmentSubmission
+    |> where([as], as.id == ^assignment_submission_id)
+    |> update([as], inc: [retries: 1], set: [submitted_at: ^now])
+    |> Repo.update_all([])
+  end
+
+  def soft_delete_old_builds(assignment_submission_id) do
+    AssignmentSubmissionsBuilds
+    |> where([asb], asb.assignment_submission_id == ^assignment_submission_id)
+    |> Repo.update_all(set: [deleted_at: DateTime.utc_now()])
   end
 end

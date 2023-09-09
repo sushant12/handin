@@ -8,7 +8,6 @@ defmodule Handin.AssignmentTests do
   alias Handin.{Repo}
 
   alias Handin.Assignments.{AssignmentTest, TestSupportFile, Log, Build, Command}
-  alias Handin.AssignmentSubmission.AssignmentSubmissionsBuilds
 
   @doc """
   Returns the list of assignment_tests.
@@ -188,10 +187,5 @@ defmodule Handin.AssignmentTests do
     else
       []
     end
-  end
-
-  def add_assignment_submission_build_record(params) do
-    AssignmentSubmissionsBuilds.changeset(%AssignmentSubmissionsBuilds{}, params)
-    |> Repo.insert()
   end
 end
