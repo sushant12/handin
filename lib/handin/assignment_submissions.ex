@@ -4,6 +4,7 @@ defmodule Handin.AssignmentSubmissions do
   alias Handin.AssignmentSubmission.AssignmentSubmissionFile
   alias Handin.AssignmentSubmission.AssignmentSubmissionsBuilds
   alias Handin.Repo
+  alias Handin.Assignments.Assignment
 
   def change_submission(assignment_submission, attrs \\ %{}) do
     assignment_submission
@@ -30,17 +31,23 @@ defmodule Handin.AssignmentSubmissions do
     |> Repo.update!()
   end
 
-  def get_assignment_submission_file!(id) do
-    Repo.get!(AssignmentSubmissionFile, id)
+  def get_assignment_submission_file!(assignment_submission_id) do
+    Repo.get!(AssignmentSubmissionFile, assignment_submission_id)
   end
 
   def delete_assignment_submission_file!(file) do
     Repo.delete!(file)
   end
 
-  def get_assignment_submission!(id) do
-    Repo.get!(AssignmentSubmission, id)
-    |> Repo.preload(assignment_submission_files: [assignment_submission: [:user, :assignment]])
+  def get_assignment_submission!(assignment_submission_id) do
+    Repo.get!(AssignmentSubmission, assignment_submission_id)
+    |> Repo.preload([:user, assignment_submission_files: [assignment_submission: [:user, :assignment]]])
+  end
+
+  def get_submitted_assignment_submissions(assignment_id) do
+    Repo.get!(Assignment, assignment_id)
+    |> Repo.preload(assignment_submissions: :user)
+    |> Map.get(:assignment_submissions)
   end
 
   @spec new_build(attrs :: %{assignment_submission_id: Ecto.UUID, build_id: Ecto.UUID}) ::

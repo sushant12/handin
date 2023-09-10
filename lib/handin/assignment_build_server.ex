@@ -25,7 +25,9 @@ defmodule Handin.AssignmentBuildServer do
       process_build(state)
     end)
 
-    AssignmentSubmissions.submit_assignment(state.assignment_submission_id)
+    if !state[:submit],
+      do: AssignmentSubmissions.submit_assignment(state.assignment_submission_id)
+
     {:stop, "finished", state}
   end
 

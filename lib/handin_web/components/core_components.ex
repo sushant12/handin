@@ -494,6 +494,73 @@ defmodule HandinWeb.CoreComponents do
     """
   end
 
+  attr :id, :string, required: true
+  attr :rows, :list, required: true
+  attr :row_id, :any, default: nil, doc: "the function for generating the row id"
+  attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
+
+  attr :row_item, :any,
+    default: &Function.identity/1,
+    doc: "the function for mapping each row before calling the :col and :action slots"
+
+  slot :col, required: true do
+    attr :label, :string
+  end
+
+  slot :action, doc: "the slot for showing user actions in the last table column"
+
+  def table_with_index(assigns) do
+    assigns =
+      with %{rows: %Phoenix.LiveView.LiveStream{}} <- assigns do
+        assign(assigns, row_id: assigns.row_id || fn {id, _item} -> id end)
+      end
+
+    ~H"""
+    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <tr>
+          <th class="px-6 py-3">ID</th>
+          <th :for={col <- @col} scope="col" class="px-6 py-3"><%= col[:label] %></th>
+          <th scope="col" class="px-6 py-3">
+            <%= gettext("Actions") %>
+          </th>
+        </tr>
+      </thead>
+      <tbody id={@id} phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}>
+        <tr
+          :for={{row, i} <- Enum.with_index(@rows, 1)}
+          id={@row_id && @row_id.(row)}
+          class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+        >
+          <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"><%= i %></td>
+          <td
+            :for={{col, _i} <- Enum.with_index(@col)}
+            phx-click={@row_click && @row_click.(row)}
+            scope="row"
+            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+          >
+            <%= render_slot(col, @row_item.(row)) %>
+          </td>
+          <td
+            :if={@action != []}
+            scope="row"
+            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-3"
+          >
+            <div class=" whitespace-nowrap py-4 text-right text-sm font-medium">
+              <span
+                :for={action <- @action}
+                class=" ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+              >
+                <%= render_slot(action, @row_item.(row)) %>
+              </span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    """
+  end
+
   @doc """
   Renders a data list.
 

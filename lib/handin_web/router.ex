@@ -120,6 +120,10 @@ defmodule HandinWeb.Router do
              AssignmentLive.Show,
              :upload_submissions
 
+        live "/assignments/:assignment_id/submission/:submission_id",
+             AssignmentSubmissionLive.Show,
+             :show
+
         live "/members", MembersLive.Index, :index
       end
     end
