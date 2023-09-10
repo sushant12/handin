@@ -190,13 +190,15 @@
     <div :if={not is_nil(@assignment_submission)} id="general mx-2">
       <div>
         <h2 class="text-lg">Files</h2>
-        <ol :for={test_support_file <- @assignment_submission.assignment_submission_files}>
+        <ol :for={
+          assignment_submission_file <- @assignment_submission.assignment_submission_files
+        }>
           <li class="text-zinc-700 border-b border-gray-200">
             <button
               class="mr-2 pt-2"
               data-confirm="Are you sure?"
               phx-click="delete"
-              phx-value-test_support_file_id={test_support_file.id}
+              phx-value-assignment_submission_file_id={assignment_submission_file.id}
             >
               <svg
                 width="1.25rem"
@@ -217,14 +219,17 @@
                 </g>
               </svg>
             </button>
-            <%= test_support_file.file.file_name %>
+            <%= assignment_submission_file.file.file_name %>
           </li>
         </ol>
       </div>
       <div id="test-logs">
         <.header class="mt-4">
           Submit Assignment
-          <button phx-click="run-test" phx-value-test_id={@assignment_submission.id}>
+          <button
+            phx-click="submit-assignment"
+            phx-value-assignment_submission_id={@assignment_submission.id}
+          >
             <svg
               width="1.7rem"
               height="1.7rem"
