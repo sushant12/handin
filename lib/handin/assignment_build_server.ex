@@ -117,17 +117,7 @@ defmodule Handin.AssignmentBuildServer do
     end
   end
 
-  defp log_and_broadcast(build, message, %{type: "assignment_test"} = state) do
-    AssignmentTests.log(build.id, message)
-
-    HandinWeb.Endpoint.broadcast!(
-      "build:#{state.type}:#{state.assignment_test_id}",
-      "new_log",
-      build.id
-    )
-  end
-
-  defp log_and_broadcast(build, message, %{type: "assignment_submission"} = state) do
+  defp log_and_broadcast(build, message, state) do
     AssignmentTests.log(build.id, message)
 
     HandinWeb.Endpoint.broadcast!(

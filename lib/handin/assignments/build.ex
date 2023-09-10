@@ -2,7 +2,7 @@ defmodule Handin.Assignments.Build do
   use Handin.Schema
 
   import Ecto.Changeset
-  alias Handin.AssignmentSubmission.{AssignmentSubmission,AssignmentSubmissionsBuilds}
+  alias Handin.AssignmentSubmission.{AssignmentSubmission, AssignmentSubmissionsBuilds}
   alias Handin.Assignments.AssignmentTest
   alias Handin.Assignments.Log
   @type t :: %__MODULE__{}
@@ -12,7 +12,9 @@ defmodule Handin.Assignments.Build do
     belongs_to :assignment_test, AssignmentTest
     has_many :logs, Log, on_delete: :delete_all
 
-    many_to_many :assignment_submissions, AssignmentSubmission, join_through: AssignmentSubmissionsBuilds
+    many_to_many :assignment_submissions, AssignmentSubmission,
+      join_through: AssignmentSubmissionsBuilds
+
     timestamps(type: :utc_datetime)
   end
 

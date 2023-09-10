@@ -109,6 +109,29 @@ defmodule HandinWeb.AssignmentLive.Show do
   end
 
   def handle_event(
+        "delete",
+        %{"assignment_submission_file_id" => assignment_submission_file_id},
+        socket
+      ) do
+    assignment_submission_file =
+      AssignmentSubmissions.get_assignment_submission_file!(assignment_submission_file_id)
+
+    AssignmentSubmissions.delete_assignment_submission_file!(assignment_submission_file)
+    assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
+
+
+    {:noreply,
+     socket
+     |> assign(
+       :assignment_submission,
+       AssignmentSubmissions.get_user_assignment_submission(
+         socket.assigns.current_user.id,
+         assignment.id
+       )
+     )}
+  end
+
+  def handle_event(
         "assignment_test_selected",
         %{"assignment_test_id" => assignment_test_id},
         socket
@@ -144,7 +167,7 @@ defmodule HandinWeb.AssignmentLive.Show do
         %{"assignment_submission_id" => assignment_submission_id},
         socket
       ) do
-    if socket.assigns.assignment.max_attempts <= socket.assigns.assignment_submission.retries do
+    if socket.assigns.assignment.max_attempts >= socket.assigns.assignment_submission.retries do
       AssignmentSubmissions.soft_delete_old_builds(assignment_submission_id)
       HandinWeb.Endpoint.subscribe("build:assignment_submission:#{assignment_submission_id}")
 
