@@ -39,20 +39,22 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
         %{"assignment_submission_id" => assignment_submission_id},
         socket
       ) do
-    AssignmentSubmissions.soft_delete_old_builds(assignment_submission_id)
-    HandinWeb.Endpoint.subscribe("build:assignment_submission_test:#{assignment_submission_id}")
+    AssignmentSubmissions.soft_delete_old_lecturer_builds(assignment_submission_id)
+
+    HandinWeb.Endpoint.subscribe(
+      "build:lecturer_assignment_submission_test:#{assignment_submission_id}"
+    )
 
     DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
-      id: Handin.AssignmentBuildServer,
+      id: Handin.LecturerAssignmentBuildServer,
       start:
-        {Handin.AssignmentBuildServer, :start_link,
+        {Handin.LecturerAssignmentBuildServer, :start_link,
          [
            %{
-             type: "assignment_submission_test",
+             type: "lecturer_assignment_submission_test",
              image: socket.assigns.assignment.programming_language.docker_file_url,
              assignment_submission_id: assignment_submission_id,
-             assignment_tests: socket.assigns.assignment_tests,
-             lecturer: true
+             assignment_tests: socket.assigns.assignment_tests
            }
          ]},
       restart: :temporary
@@ -64,7 +66,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
   @impl true
   def handle_info(
         %Phoenix.Socket.Broadcast{
-          event: "new_assignment_submission_log",
+          event: "new_lecturer_assignment_submission_log",
           payload: _assignment_submission_id
         },
         socket
@@ -73,7 +75,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
   end
 
   defp logs(assignment_submission) do
-    AssignmentSubmissions.get_builds(assignment_submission.id)
+    AssignmentSubmissions.get_lecturer_builds(assignment_submission.id)
     |> Enum.map(fn assignment_submission_build ->
       assignment_submission_build.build.logs
       |> Enum.sort(&(DateTime.compare(&1.updated_at, &2.updated_at) != :gt))

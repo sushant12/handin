@@ -280,14 +280,14 @@
   <.header class="mt-5">
     Student Submissions
   </.header>
-  <.table_with_index
-    id="submitted_assignment_submissions"
-    rows={@submitted_assignment_submissions}
-  >
-    <:col :let={submitted_assignment_submission} label="email">
+  <.table id="submitted_assignment_submissions" rows={@submitted_assignment_submissions}>
+    <:col :let={{_, i}} label="id">
+      <%= i %>
+    </:col>
+    <:col :let={{submitted_assignment_submission, _}} label="email">
       <%= submitted_assignment_submission.user.email %>
     </:col>
-    <:action :let={submitted_assignment_submission}>
+    <:action :let={{submitted_assignment_submission, _}}>
       <.link
         class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
         href={
@@ -298,7 +298,7 @@
         Show
       </.link>
     </:action>
-  </.table_with_index>
+  </.table>
 </div>
 <.modal
   :if={@live_action == :edit}

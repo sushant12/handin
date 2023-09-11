@@ -46,7 +46,10 @@ defmodule HandinWeb.AssignmentLive.Show do
      |> assign(:logs, logs)
      |> assign(
        :submitted_assignment_submissions,
-       AssignmentSubmissions.get_submitted_assignment_submissions(assignment.id)
+       Enum.with_index(
+         AssignmentSubmissions.get_submitted_assignment_submissions(assignment.id),
+         1
+       )
      )}
   end
 

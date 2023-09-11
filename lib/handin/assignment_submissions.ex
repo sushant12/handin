@@ -2,7 +2,12 @@ defmodule Handin.AssignmentSubmissions do
   import Ecto.Query, warn: false
   alias Handin.AssignmentSubmission.AssignmentSubmission
   alias Handin.AssignmentSubmission.AssignmentSubmissionFile
-  alias Handin.AssignmentSubmission.AssignmentSubmissionsBuilds
+
+  alias Handin.AssignmentSubmission.{
+    AssignmentSubmissionsBuilds,
+    LecturerAssignmentSubmissionsBuilds
+  }
+
   alias Handin.Repo
   alias Handin.Assignments.Assignment
 
@@ -41,19 +46,27 @@ defmodule Handin.AssignmentSubmissions do
 
   def get_assignment_submission!(assignment_submission_id) do
     Repo.get!(AssignmentSubmission, assignment_submission_id)
-    |> Repo.preload([:user, assignment_submission_files: [assignment_submission: [:user, :assignment]]])
+    |> Repo.preload([
+      :user,
+      assignment_submission_files: [assignment_submission: [:user, :assignment]]
+    ])
   end
 
   def get_submitted_assignment_submissions(assignment_id) do
-    Repo.get!(Assignment, assignment_id)
+    Repo.get(Assignment, assignment_id)
     |> Repo.preload(assignment_submissions: :user)
-    |> Map.get(:assignment_submissions)
+    |> Map.get(:assignment_submissions, nil)
   end
 
   @spec new_build(attrs :: %{assignment_submission_id: Ecto.UUID, build_id: Ecto.UUID}) ::
           {:ok, AssignmentSubmissionsBuilds.t()}
   def new_build(attrs) do
     AssignmentSubmissionsBuilds.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def new_lecturers_build(attrs) do
+    LecturerAssignmentSubmissionsBuilds.changeset(attrs)
     |> Repo.insert()
   end
 
@@ -75,6 +88,17 @@ defmodule Handin.AssignmentSubmissions do
     |> Repo.preload(build: [:logs])
   end
 
+  def get_lecturer_builds(assignment_submission_id) do
+    LecturerAssignmentSubmissionsBuilds
+    |> where(
+      [lasb],
+      lasb.assignment_submission_id == ^assignment_submission_id and is_nil(lasb.deleted_at)
+    )
+    |> order_by([lasb], asc: lasb.inserted_at)
+    |> Repo.all()
+    |> Repo.preload(build: [:logs])
+  end
+
   def submit_assignment(assignment_submission_id) do
     now = DateTime.utc_now()
 
@@ -86,6 +110,12 @@ defmodule Handin.AssignmentSubmissions do
 
   def soft_delete_old_builds(assignment_submission_id) do
     AssignmentSubmissionsBuilds
+    |> where([asb], asb.assignment_submission_id == ^assignment_submission_id)
+    |> Repo.update_all(set: [deleted_at: DateTime.utc_now()])
+  end
+
+  def soft_delete_old_lecturer_builds(assignment_submission_id) do
+    LecturerAssignmentSubmissionsBuilds
     |> where([asb], asb.assignment_submission_id == ^assignment_submission_id)
     |> Repo.update_all(set: [deleted_at: DateTime.utc_now()])
   end
