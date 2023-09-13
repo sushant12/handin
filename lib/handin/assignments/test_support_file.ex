@@ -7,6 +7,7 @@ defmodule Handin.Assignments.TestSupportFile do
 
   schema "test_support_files" do
     field :file, Handin.TestSupportFileUploader.Type
+    field :solution_file, :boolean, default: false
 
     belongs_to :assignment_test, AssignmentTest
 
@@ -15,7 +16,7 @@ defmodule Handin.Assignments.TestSupportFile do
 
   def changeset(test_support_file, attrs) do
     test_support_file
-    |> cast(attrs, [:assignment_test_id])
+    |> cast(attrs, [:assignment_test_id, :solution_file])
     |> validate_required([:assignment_test_id])
   end
 

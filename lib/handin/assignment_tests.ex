@@ -188,4 +188,9 @@ defmodule Handin.AssignmentTests do
       []
     end
   end
+
+  def mark_solution_file(test_support_file) do
+    Ecto.Changeset.change(test_support_file, solution_file: !test_support_file.solution_file && true)
+    |> Repo.update()
+  end
 end

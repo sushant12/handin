@@ -190,6 +190,13 @@ defmodule HandinWeb.AssignmentLive.Show do
     {:noreply, socket}
   end
 
+  def handle_event("mark_solution_file", %{"test_support_file_id" => test_support_file_id}, socket) do
+    test_support_file = AssignmentTests.get_test_support_file!(test_support_file_id)
+    {:ok, _} = AssignmentTests.mark_solution_file(test_support_file)
+
+    {:noreply, socket}
+  end
+
   @impl true
   def handle_info(
         {HandinWeb.AssignmentLive.AssignmentTestComponent, {:saved, _assignment_test}},

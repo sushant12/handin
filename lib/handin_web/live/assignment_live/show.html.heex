@@ -84,34 +84,44 @@
           <div :if={Enum.count(assignment_test.test_support_files) > 0} class="">
             <h2 class="text-lg">Test support files</h2>
             <ol :for={test_support_file <- assignment_test.test_support_files}>
-              <li class="text-zinc-700 border-b border-gray-200">
-                <button
-                  class="mr-2 pt-2"
-                  data-confirm="Are you sure?"
-                  phx-click="delete"
+              <li class="flex items-center text-zinc-700 border-b border-gray-200">
+                <.input
+                  name="solution_file"
+                  type="checkbox"
+                  phx-click="mark_solution_file"
                   phx-value-test_support_file_id={test_support_file.id}
-                >
-                  <svg
-                    width="1.25rem"
-                    height="1.25rem"
-                    viewBox="0 0 1024 1024"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="#ff0000"
-                    stroke="#ff0000"
+                  value={test_support_file.id}
+                  class="mt-3"
+                />
+                <div class="ml-2">
+                  <button
+                    class="mr-2 pt-2"
+                    data-confirm="Are you sure?"
+                    phx-click="delete"
+                    phx-value-test_support_file_id={test_support_file.id}
                   >
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                    </g>
-                    <g id="SVGRepo_iconCarrier">
-                      <path
-                        fill="#dd3636"
-                        d="M160 256H96a32 32 0 0 1 0-64h256V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64h-64v672a32 32 0 0 1-32 32H192a32 32 0 0 1-32-32V256zm448-64v-64H416v64h192zM224 896h576V256H224v640zm192-128a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zm192 0a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32z"
-                      >
-                      </path>
-                    </g>
-                  </svg>
-                </button>
-                <%= test_support_file.file.file_name %>
+                    <svg
+                      width="1.25rem"
+                      height="1.25rem"
+                      viewBox="0 0 1024 1024"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="#ff0000"
+                      stroke="#ff0000"
+                    >
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                      </g>
+                      <g id="SVGRepo_iconCarrier">
+                        <path
+                          fill="#dd3636"
+                          d="M160 256H96a32 32 0 0 1 0-64h256V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64h-64v672a32 32 0 0 1-32 32H192a32 32 0 0 1-32-32V256zm448-64v-64H416v64h192zM224 896h576V256H224v640zm192-128a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zm192 0a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32z"
+                        >
+                        </path>
+                      </g>
+                    </svg>
+                  </button>
+                  <%= test_support_file.file.file_name %>
+                </div>
               </li>
             </ol>
           </div>
