@@ -43,7 +43,14 @@ defmodule HandinWeb.AssignmentLive.Show do
          assignment.id
        )
      )
-     |> assign(:logs, logs)}
+     |> assign(:logs, logs)
+     |> assign(
+       :submitted_assignment_submissions,
+       Enum.with_index(
+         AssignmentSubmissions.get_submitted_assignment_submissions(assignment.id),
+         1
+       )
+     )}
   end
 
   @impl true
@@ -118,7 +125,6 @@ defmodule HandinWeb.AssignmentLive.Show do
 
     AssignmentSubmissions.delete_assignment_submission_file!(assignment_submission_file)
     assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
-
 
     {:noreply,
      socket
