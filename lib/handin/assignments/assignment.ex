@@ -5,6 +5,7 @@ defmodule Handin.Assignments.Assignment do
   alias Handin.Modules.Module
   alias Handin.ProgrammingLanguages.ProgrammingLanguage
   alias Handin.Assignments.AssignmentTest
+  alias Handin.AssignmentSubmission.AssignmentSubmission
 
   schema "assignments" do
     field :name, :string
@@ -19,6 +20,7 @@ defmodule Handin.Assignments.Assignment do
     belongs_to :programming_language, ProgrammingLanguage, on_replace: :nilify
 
     has_many :assignment_tests, AssignmentTest
+    has_many :assignment_submissions, AssignmentSubmission
 
     timestamps()
   end

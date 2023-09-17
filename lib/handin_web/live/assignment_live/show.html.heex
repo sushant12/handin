@@ -19,10 +19,7 @@
   <.header class="mt-5 col-span-3">
     Tests
     <:actions>
-      <.link
-        :if={@current_user.role != "student"}
-        patch={~p"/modules/#{@module_id}/assignments/#{@assignment.id}/add_test"}
-      >
+      <.link patch={~p"/modules/#{@module_id}/assignments/#{@assignment.id}/add_test"}>
         <.button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3">
           Add Tests
         </.button>
@@ -34,7 +31,6 @@
     <div class="font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
       <button
         :for={assignment_test <- @assignment_tests}
-        :if={@current_user.role != "student"}
         class={[
           "w-full px-4 py-2 font-medium text-left border-b border-gray-200 cursor-pointer focus:outline-none dark:border-gray-600",
           @selected_assignment_test == assignment_test.id &&
@@ -59,7 +55,6 @@
             Tests details
             <:actions>
               <.link
-                :if={@current_user.role != "student"}
                 class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 mt-3"
                 patch={
                   ~p"/modules/#{@module_id}/assignments/#{@assignment.id}/#{assignment_test.id}/edit_test"
@@ -68,7 +63,6 @@
                 Edit
               </.link>
               <.link
-                :if={@current_user.role != "student"}
                 class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
                 phx-click={JS.push("delete", value: %{test_id: assignment_test.id})}
                 data-confirm="Are you sure?"
@@ -291,6 +285,30 @@
       </div>
     </div>
   </div>
+</div>
+<div :if={@current_user.role != "student"}>
+  <.header class="mt-5">
+    Student Submissions
+  </.header>
+  <.table id="submitted_assignment_submissions" rows={@submitted_assignment_submissions}>
+    <:col :let={{_, i}} label="id">
+      <%= i %>
+    </:col>
+    <:col :let={{submitted_assignment_submission, _}} label="email">
+      <%= submitted_assignment_submission.user.email %>
+    </:col>
+    <:action :let={{submitted_assignment_submission, _}}>
+      <.link
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
+        href={
+          ~p"/modules/#{@module_id}/assignments/#{@assignment.id}/submission/#{submitted_assignment_submission.id}"
+        }
+        target="_blank"
+      >
+        Show
+      </.link>
+    </:action>
+  </.table>
 </div>
 <.modal
   :if={@live_action == :edit}

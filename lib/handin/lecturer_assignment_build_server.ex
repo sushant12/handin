@@ -1,4 +1,4 @@
-defmodule Handin.AssignmentBuildServer do
+defmodule Handin.LecturerAssignmentBuildServer do
   use GenServer
   alias Handin.AssignmentTests
   alias Handin.{AssignmentSubmissions, AssignmentSubmissionFileUploader}
@@ -25,8 +25,6 @@ defmodule Handin.AssignmentBuildServer do
       process_build(state)
     end)
 
-    AssignmentSubmissions.submit_assignment(state.assignment_submission_id)
-
     {:stop, "finished", state}
   end
 
@@ -40,7 +38,7 @@ defmodule Handin.AssignmentBuildServer do
         status: "environment_setup"
       })
 
-    AssignmentSubmissions.new_build(%{
+    AssignmentSubmissions.new_lecturers_build(%{
       assignment_submission_id: state.assignment_submission_id,
       build_id: build.id
     })
@@ -123,7 +121,7 @@ defmodule Handin.AssignmentBuildServer do
 
     HandinWeb.Endpoint.broadcast!(
       "build:#{state.type}:#{state.assignment_submission_id}",
-      "new_assignment_submission_log",
+      "new_lecturer_assignment_submission_log",
       state.assignment_submission_id
     )
   end
