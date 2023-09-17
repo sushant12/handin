@@ -8,20 +8,43 @@
     Submission
   </.header>
   <div class="col-span-9"></div>
-  <div class="col-span-12 border-2 rounded-lg px-3">
-    <div :if={not is_nil(@assignment_submission)} id="general mx-2">
-      <div>
+  <div class="col-span-12 px-3">
+    <div
+      :if={not is_nil(@assignment_submission)}
+      id="general mx-2"
+      class="grid grid-cols-12 gap-4"
+    >
+      <div class="col-span-2">
         <h2 class="text-lg">Files</h2>
-        <ol :for={
-          assignment_submission_file <- @assignment_submission.assignment_submission_files
-        }>
-          <li class="text-zinc-700 border-b border-gray-200">
+        <div class="font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          <button
+            :for={
+              assignment_submission_file <- @assignment_submission.assignment_submission_files
+            }
+            class={[
+              "w-full px-4 py-2 font-medium text-left border-b border-gray-200 cursor-pointer focus:outline-none dark:border-gray-600",
+              @selected_assignment_submission_file == assignment_submission_file.id &&
+                "text-white bg-blue-700  rounded-lg   dark:bg-gray-800 ",
+              @selected_assignment_submission_file != assignment_submission_file.id &&
+                "hover:bg-gray-100 hover:text-blue-700 focus:ring-2 focus:ring-blue-700 focus:text-blue-700  dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"
+            ]}
+            aria-current="true"
+            type="button"
+            phx-click="assignment_submission_file_selected"
+            phx-value-assignment_submission_file_id={assignment_submission_file.id}
+          >
             <%= assignment_submission_file.file.file_name %>
-          </li>
-        </ol>
+          </button>
+        </div>
       </div>
-      <div id="test-logs">
-        <.header class="mt-4">
+      <div id="test-logs" class="col-span-10 border-2 rounded-lg px-3">
+        <div :if={@code}>
+          <h2 class="text-lg">Code</h2>
+          <pre>
+          <%= @code %>
+        </pre>
+        </div>
+        <.header>
           Run tests
           <button
             phx-click="run-tests"

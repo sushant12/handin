@@ -38,6 +38,7 @@ defmodule Handin.AssignmentSubmissions do
 
   def get_assignment_submission_file!(assignment_submission_id) do
     Repo.get!(AssignmentSubmissionFile, assignment_submission_id)
+    |> Repo.preload(assignment_submission: [:user, :assignment])
   end
 
   def delete_assignment_submission_file!(file) do

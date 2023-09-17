@@ -3,6 +3,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
 
   alias Handin.AssignmentSubmissions
   alias Handin.Assignments
+  alias Handin.AssignmentSubmissionFileUploader
 
   @impl true
   def mount(
@@ -23,7 +24,9 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
      )
      |> assign(:logs, [])
      |> assign(:assignment, assignment)
-     |> assign(:assignment_tests, assignment.assignment_tests)}
+     |> assign(:assignment_tests, assignment.assignment_tests)
+     |> assign(:selected_assignment_submission_file, nil)
+     |> assign(:code, nil)}
   end
 
   @impl true
@@ -61,6 +64,29 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
     })
 
     {:noreply, socket}
+  end
+
+  def handle_event(
+        "assignment_submission_file_selected",
+        %{"assignment_submission_file_id" => assignment_submission_file_id},
+        socket
+      ) do
+    submission_file =
+      AssignmentSubmissions.get_assignment_submission_file!(assignment_submission_file_id)
+
+    url =
+      AssignmentSubmissionFileUploader.url({submission_file.file.file_name, submission_file},
+        signed: true
+      )
+
+    {:ok, %Finch.Response{status: 200, body: body}} =
+      Finch.build(:get, url)
+      |> Finch.request(Handin.Finch)
+
+    {:noreply,
+     socket
+     |> assign(:selected_assignment_submission_file, assignment_submission_file_id)
+     |> assign(:code, body)}
   end
 
   @impl true
