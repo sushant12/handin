@@ -25,8 +25,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
      |> assign(:logs, [])
      |> assign(:assignment, assignment)
      |> assign(:assignment_tests, assignment.assignment_tests)
-     |> assign(:selected_assignment_submission_file, nil)
-     |> assign(:code, nil)}
+     |> assign(:selected_assignment_submission_file, nil)}
   end
 
   @impl true
@@ -86,7 +85,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
     {:noreply,
      socket
      |> assign(:selected_assignment_submission_file, assignment_submission_file_id)
-     |> assign(:code, body)}
+     |> LiveMonacoEditor.set_value(body)}
   end
 
   @impl true

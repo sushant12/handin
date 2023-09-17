@@ -38,11 +38,9 @@
         </div>
       </div>
       <div id="test-logs" class="col-span-10 border-2 rounded-lg px-3">
-        <div :if={@code}>
+        <div>
           <h2 class="text-lg">Code</h2>
-          <pre>
-          <%= @code %>
-        </pre>
+          <LiveMonacoEditor.code_editor style="min-height: 450px; width: 100%;" />
         </div>
         <.header>
           Run tests
