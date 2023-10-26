@@ -125,4 +125,9 @@ defmodule Handin.Assignments do
     %TestSupportFile{}
     |> TestSupportFile.changeset(attrs)
   end
+
+  def valid_submission_date?(assignment) do
+    now = DateTime.utc_now()
+    (DateTime.compare(assignment.start_date, now) == :lt) && (DateTime.compare(assignment.cutoff_date, now) == :gt)
+  end
 end
