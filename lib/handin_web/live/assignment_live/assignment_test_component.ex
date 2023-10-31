@@ -106,7 +106,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
               <.input field={f[:fail]} type="checkbox" label="Fail if expected output does not match" />
               <.input
-                :if={f[:fail].value}
+                :if={f[:fail].value == true }
                 field={f[:expected_output]}
                 label="Expected output"
                 type="textarea"
@@ -194,6 +194,8 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
     {:noreply, assign_form(socket, changeset)}
   end
+
+  def handle_event("copy_test", %{"value" => ""}, socket), do: {:noreply, socket}
 
   def handle_event("copy_test", %{"value" => id}, socket) do
     assignment_test_attrs = AssignmentTests.get_assignment_test!(id) |> get_attrs()
