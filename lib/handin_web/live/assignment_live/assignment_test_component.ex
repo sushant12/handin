@@ -12,6 +12,18 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
         <%= @title %>
       </.header>
 
+      <.input
+        :if={@action == :add_assignment_test}
+        name="copy_test"
+        type="select"
+        value={nil}
+        label="Copy from test"
+        options={@available_tests}
+        prompt="Select test to copy"
+        phx-target={@myself}
+        phx-click="copy_test"
+      />
+
       <.simple_form
         for={@form}
         id="assignment_test-form"
@@ -94,6 +106,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
               <.input field={f[:fail]} type="checkbox" label="Fail if expected output does not match" />
               <.input
+                :if={f[:fail].value}
                 field={f[:expected_output]}
                 label="Expected output"
                 type="textarea"
@@ -177,6 +190,17 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     changeset =
       socket.assigns.assignment_test
       |> AssignmentTests.change_assignment_test(assignment_test_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign_form(socket, changeset)}
+  end
+
+  def handle_event("copy_test", %{"value" => id}, socket) do
+    assignment_test_attrs = AssignmentTests.get_assignment_test!(id) |> get_attrs()
+
+    changeset =
+      socket.assigns.assignment_test
+      |> AssignmentTests.change_assignment_test(assignment_test_attrs)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
@@ -290,4 +314,31 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
   def error_to_string(:too_large), do: "Too large"
   def error_to_string(:too_many_files), do: "You have selected too many files"
+
+  defp get_attrs(assignment_test) do
+    commands =
+      Enum.map(assignment_test.commands, fn %Command{
+                                              name: name,
+                                              command: command,
+                                              fail: fail,
+                                              expected_output: expected_output
+                                            } ->
+        %{
+          name: name,
+          command: command,
+          fail: fail,
+          expected_output: expected_output || "",
+          _persistent_id: nil
+        }
+      end)
+      |> Enum.with_index(fn command, i -> {i, %{command | _persistent_id: i}} end)
+      |> Map.new()
+
+    %{
+      commands: commands,
+      name: assignment_test.name,
+      marks: assignment_test.marks,
+      assignment_id: assignment_test.assignment_id
+    }
+  end
 end
