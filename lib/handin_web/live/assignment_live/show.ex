@@ -51,7 +51,8 @@ defmodule HandinWeb.AssignmentLive.Show do
          AssignmentSubmissions.get_submitted_assignment_submissions(assignment.id),
          1
        )
-     )}
+     )
+     |> assign(:test_support_files, [])}
   end
 
   @impl true

@@ -124,7 +124,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
             upload={@uploads.test_support_file}
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           />
-          <%= for test_support_file <- @assignment_test.test_support_files do %>
+          <%= for test_support_file <- @test_support_files do %>
             <article :if={test_support_file.file} class="upload-entry">
               <figure class="flex">
                 <svg
@@ -283,24 +283,26 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     assignment_test = AssignmentTests.get_assignment_test!(id)
     assignment_test_attrs = assignment_test |> get_attrs()
 
+    test_support_files = assignment_test.test_support_files
+
     changeset =
       socket.assigns.assignment_test
       |> AssignmentTests.change_assignment_test(assignment_test_attrs)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign_form(socket, changeset) |> assign(:assignment_test, assignment_test)}
+    {:noreply, assign_form(socket, changeset) |> assign(:test_support_files, test_support_files)}
   end
 
   def handle_event("cancel-copy", %{"test_support_file_id" => test_support_file_id}, socket) do
     test_support_files =
-      socket.assigns.assignment_test.test_support_files
+      socket.assigns.test_support_files
       |> Enum.reject(&(&1.id == test_support_file_id))
 
     {:noreply,
      assign(
        socket,
-       :assignment_test,
-       Map.put(socket.assigns.assignment_test, :test_support_files, test_support_files)
+       :test_support_files,
+       test_support_files
      )}
   end
 
@@ -377,7 +379,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   defp save_assignment_test(socket, :add_assignment_test, assignment_test_params) do
     case AssignmentTests.create_assignment_test(assignment_test_params) do
       {:ok, assignment_test} ->
-        socket.assigns.assignment_test.test_support_files
+        socket.assigns.test_support_files
         |> Enum.map(fn test_support_file ->
           if test_support_file.file do
             file_name = test_support_file.file.file_name
@@ -394,7 +396,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
             {:ok, test_support_file} =
               AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
 
-            File.mkdir!("/tmp/uploads/#{test_support_file.id}")
+            File.mkdir_p!("/tmp/uploads/#{test_support_file.id}")
             File.write!("/tmp/uploads/#{test_support_file.id}/#{file_name}", body)
 
             AssignmentTests.upload_test_support_file(test_support_file, %{
@@ -459,12 +461,12 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
           name: name,
           command: command,
           fail: fail,
-          expected_output: expected_output || "",
-          _persistent_id: nil
+          expected_output: expected_output || ""
         }
       end)
-      |> Enum.with_index(fn command, i -> {i, %{command | _persistent_id: i}} end)
+      |> Enum.with_index(fn command, i -> {i, command} end)
       |> Map.new()
+      |> dbg
 
     %{
       commands: commands,
