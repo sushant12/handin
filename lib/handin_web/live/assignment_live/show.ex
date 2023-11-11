@@ -34,6 +34,7 @@ defmodule HandinWeb.AssignmentLive.Show do
      |> assign(:assignment_tests, assignment.assignment_tests)
      |> assign(current_page: :modules)
      |> assign(:module_id, id)
+     |> assign(:available_tests, nil)
      |> assign(:assignment, assignment)
      |> assign(:selected_assignment_test, nil)
      |> assign(
@@ -43,7 +44,15 @@ defmodule HandinWeb.AssignmentLive.Show do
          assignment.id
        )
      )
-     |> assign(:logs, logs)}
+     |> assign(:logs, logs)
+     |> assign(
+       :submitted_assignment_submissions,
+       Enum.with_index(
+         AssignmentSubmissions.get_submitted_assignment_submissions(assignment.id),
+         1
+       )
+     )
+     |> assign(:test_support_files, [])}
   end
 
   @impl true
@@ -55,6 +64,11 @@ defmodule HandinWeb.AssignmentLive.Show do
 
   defp apply_action(socket, :add_assignment_test, %{"assignment_id" => assignment_id}) do
     socket
+    |> assign(
+      :available_tests,
+      AssignmentTests.list_assignment_tests_for_assignment(assignment_id)
+      |> Enum.map(&{&1.name, &1.id})
+    )
     |> assign(:page_title, "Add Test")
     |> assign(:assignment_test, %AssignmentTest{
       assignment_id: assignment_id,
@@ -118,7 +132,6 @@ defmodule HandinWeb.AssignmentLive.Show do
 
     AssignmentSubmissions.delete_assignment_submission_file!(assignment_submission_file)
     assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
-
 
     {:noreply,
      socket

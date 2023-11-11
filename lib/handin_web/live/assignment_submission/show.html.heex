@@ -1,0 +1,102 @@
+<.list>
+  <:item title="Email"><%= @assignment_submission.user.email %></:item>
+  <:item title="Assignment Name"><%= @assignment.name %></:item>
+</.list>
+
+<div :if={@current_user.role != "student"} class="grid grid-cols-12 gap-4">
+  <.header class="mt-5 col-span-3">
+    Submission
+  </.header>
+  <div class="col-span-9"></div>
+  <div class="col-span-12 px-3">
+    <div
+      :if={not is_nil(@assignment_submission)}
+      id="general mx-2"
+      class="grid grid-cols-12 gap-4"
+    >
+      <div class="col-span-2">
+        <h2 class="text-lg">Files</h2>
+        <div class="font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          <button
+            :for={
+              assignment_submission_file <- @assignment_submission.assignment_submission_files
+            }
+            class={[
+              "w-full px-4 py-2 font-medium text-left border-b border-gray-200 cursor-pointer focus:outline-none dark:border-gray-600",
+              @selected_assignment_submission_file == assignment_submission_file.id &&
+                "text-white bg-blue-700  rounded-lg   dark:bg-gray-800 ",
+              @selected_assignment_submission_file != assignment_submission_file.id &&
+                "hover:bg-gray-100 hover:text-blue-700 focus:ring-2 focus:ring-blue-700 focus:text-blue-700  dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-500 dark:focus:text-white"
+            ]}
+            aria-current="true"
+            type="button"
+            phx-click="assignment_submission_file_selected"
+            phx-value-assignment_submission_file_id={assignment_submission_file.id}
+          >
+            <%= assignment_submission_file.file.file_name %>
+          </button>
+        </div>
+      </div>
+      <div id="test-logs" class="col-span-10 border-2 rounded-lg px-3">
+        <div>
+          <h2 class="text-lg">Code</h2>
+          <LiveMonacoEditor.code_editor style="min-height: 450px; width: 100%;" />
+        </div>
+        <.header>
+          Run tests
+          <button
+            phx-click="run-tests"
+            phx-value-assignment_submission_id={@assignment_submission.id}
+          >
+            <svg
+              width="1.7rem"
+              height="1.7rem"
+              viewBox="-3 0 28 28"
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"
+              fill="#000000"
+              class="pt-2"
+            >
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+              <g id="SVGRepo_iconCarrier">
+                <defs></defs>
+
+                <g
+                  id="Page-1"
+                  stroke="none"
+                  stroke-width="1"
+                  fill="none"
+                  fill-rule="evenodd"
+                  sketch:type="MSPage"
+                >
+                  <g
+                    id="Icon-Set-Filled"
+                    sketch:type="MSLayerGroup"
+                    transform="translate(-419.000000, -571.000000)"
+                    fill="#06cb37"
+                  >
+                    <path
+                      d="M440.415,583.554 L421.418,571.311 C420.291,570.704 419,570.767 419,572.946 L419,597.054 C419,599.046 420.385,599.36 421.418,598.689 L440.415,586.446 C441.197,585.647 441.197,584.353 440.415,583.554"
+                      id="play"
+                      sketch:type="MSShapeGroup"
+                    >
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </.header>
+
+        <div class="bg-gray-900 text-white">
+          <%= for logs <- @logs do %>
+            <%= logs.description %> <br />
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

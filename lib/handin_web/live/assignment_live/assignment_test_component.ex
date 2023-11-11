@@ -3,6 +3,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
   alias Handin.AssignmentTests
   alias Handin.Assignments.Command
+  alias Handin.TestSupportFileUploader
 
   @impl true
   def render(assigns) do
@@ -11,6 +12,18 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
       <.header>
         <%= @title %>
       </.header>
+
+      <.input
+        :if={@action == :add_assignment_test}
+        name="copy_test"
+        type="select"
+        value={nil}
+        label="Copy from test"
+        options={@available_tests}
+        prompt="Select test to copy"
+        phx-target={@myself}
+        phx-click="copy_test"
+      />
 
       <.simple_form
         for={@form}
@@ -94,6 +107,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
               <.input field={f[:fail]} type="checkbox" label="Fail if expected output does not match" />
               <.input
+                :if={f[:fail].value == true}
                 field={f[:expected_output]}
                 label="Expected output"
                 type="textarea"
@@ -110,6 +124,60 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
             upload={@uploads.test_support_file}
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           />
+          <%= for test_support_file <- @test_support_files do %>
+            <article :if={test_support_file.file} class="upload-entry">
+              <figure class="flex">
+                <svg
+                  width="1.25rem"
+                  height="1.25rem"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M9 17H15M9 13H15M9 9H10M13 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.0799 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.0799 21 8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V9M13 3L19 9M13 3V7.4C13 7.96005 13 8.24008 13.109 8.45399C13.2049 8.64215 13.3578 8.79513 13.546 8.89101C13.7599 9 14.0399 9 14.6 9H19"
+                      stroke="#707070"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                    </path>
+                  </g>
+                </svg>
+                <figcaption><%= test_support_file.file.file_name %></figcaption>&nbsp;
+                <button
+                  :if={@action == :add_assignment_test}
+                  type="button"
+                  phx-click="cancel-copy"
+                  phx-value-test_support_file_id={test_support_file.id}
+                  phx-target={@myself}
+                  aria-label="cancel"
+                >
+                  <svg
+                    width="1.25rem"
+                    height="1.25rem"
+                    viewBox="0 0 1024 1024"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="#ff0000"
+                    stroke="#ff0000"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <path
+                        fill="#dd3636"
+                        d="M160 256H96a32 32 0 0 1 0-64h256V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64h-64v672a32 32 0 0 1-32 32H192a32 32 0 0 1-32-32V256zm448-64v-64H416v64h192zM224 896h576V256H224v640zm192-128a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zm192 0a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32z"
+                      >
+                      </path>
+                    </g>
+                  </svg>
+                </button>
+              </figure>
+            </article>
+          <% end %>
           <%= for entry <- @uploads.test_support_file.entries do %>
             <article class="upload-entry">
               <figure class="flex">
@@ -133,7 +201,34 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
                     </path>
                   </g>
                 </svg>
-                <figcaption><%= entry.client_name %></figcaption>
+                <figcaption><%= entry.client_name %></figcaption>&nbsp;
+                <button
+                  :if={@action == :add_assignment_test}
+                  type="button"
+                  phx-click="cancel-upload"
+                  phx-value-ref={entry.ref}
+                  phx-target={@myself}
+                  aria-label="cancel"
+                >
+                  <svg
+                    width="1.25rem"
+                    height="1.25rem"
+                    viewBox="0 0 1024 1024"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="#ff0000"
+                    stroke="#ff0000"
+                  >
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <path
+                        fill="#dd3636"
+                        d="M160 256H96a32 32 0 0 1 0-64h256V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64h-64v672a32 32 0 0 1-32 32H192a32 32 0 0 1-32-32V256zm448-64v-64H416v64h192zM224 896h576V256H224v640zm192-128a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zm192 0a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32z"
+                      >
+                      </path>
+                    </g>
+                  </svg>
+                </button>
               </figure>
             </article>
           <% end %>
@@ -180,6 +275,39 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
+  end
+
+  def handle_event("copy_test", %{"value" => ""}, socket), do: {:noreply, socket}
+
+  def handle_event("copy_test", %{"value" => id}, socket) do
+    assignment_test = AssignmentTests.get_assignment_test!(id)
+    assignment_test_attrs = assignment_test |> get_attrs()
+
+    test_support_files = assignment_test.test_support_files
+
+    changeset =
+      socket.assigns.assignment_test
+      |> AssignmentTests.change_assignment_test(assignment_test_attrs)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign_form(socket, changeset) |> assign(:test_support_files, test_support_files)}
+  end
+
+  def handle_event("cancel-copy", %{"test_support_file_id" => test_support_file_id}, socket) do
+    test_support_files =
+      socket.assigns.test_support_files
+      |> Enum.reject(&(&1.id == test_support_file_id))
+
+    {:noreply,
+     assign(
+       socket,
+       :test_support_files,
+       test_support_files
+     )}
+  end
+
+  def handle_event("cancel-upload", %{"ref" => ref}, socket) do
+    {:noreply, cancel_upload(socket, :test_support_file, ref)}
   end
 
   def handle_event("save", %{"assignment_test" => assignment_test_params}, socket) do
@@ -251,6 +379,36 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   defp save_assignment_test(socket, :add_assignment_test, assignment_test_params) do
     case AssignmentTests.create_assignment_test(assignment_test_params) do
       {:ok, assignment_test} ->
+        socket.assigns.test_support_files
+        |> Enum.map(fn test_support_file ->
+          if test_support_file.file do
+            file_name = test_support_file.file.file_name
+
+            url =
+              TestSupportFileUploader.url({file_name, test_support_file},
+                signed: true
+              )
+
+            {:ok, %Finch.Response{status: 200, body: body}} =
+              Finch.build(:get, url)
+              |> Finch.request(Handin.Finch)
+
+            {:ok, test_support_file} =
+              AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
+
+            File.mkdir_p!("/tmp/uploads/#{test_support_file.id}")
+            File.write!("/tmp/uploads/#{test_support_file.id}/#{file_name}", body)
+
+            AssignmentTests.upload_test_support_file(test_support_file, %{
+              "file" => %Plug.Upload{
+                content_type: MIME.from_path(file_name),
+                filename: file_name,
+                path: "/tmp/uploads/#{test_support_file.id}/#{file_name}"
+              }
+            })
+          end
+        end)
+
         consume_entries(socket, assignment_test)
 
         notify_parent({:saved, assignment_test})
@@ -290,4 +448,31 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
   def error_to_string(:too_large), do: "Too large"
   def error_to_string(:too_many_files), do: "You have selected too many files"
+
+  defp get_attrs(assignment_test) do
+    commands =
+      Enum.map(assignment_test.commands, fn %Command{
+                                              name: name,
+                                              command: command,
+                                              fail: fail,
+                                              expected_output: expected_output
+                                            } ->
+        %{
+          name: name,
+          command: command,
+          fail: fail,
+          expected_output: expected_output || ""
+        }
+      end)
+      |> Enum.with_index(fn command, i -> {i, command} end)
+      |> Map.new()
+      |> dbg
+
+    %{
+      commands: commands,
+      name: assignment_test.name,
+      marks: assignment_test.marks,
+      assignment_id: assignment_test.assignment_id
+    }
+  end
 end
