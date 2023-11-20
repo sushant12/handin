@@ -9,6 +9,8 @@ defmodule Handin.Assignments.Command do
     field :command, :string
     field :fail, :boolean, default: false
     field :expected_output, :string
+    field :timeout, :integer
+
     belongs_to :assignment_test, AssignmentTest
     belongs_to :log, Log
 
@@ -17,7 +19,7 @@ defmodule Handin.Assignments.Command do
 
   def changeset(command, attrs) do
     command
-    |> cast(attrs, [:name, :fail, :command, :expected_output])
+    |> cast(attrs, [:name, :fail, :command, :expected_output, :timeout])
     |> validate_required([:name, :command])
     |> maybe_validate_expected_output()
   end

@@ -96,12 +96,15 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
                   </svg>
                 </.button>
               </legend>
-              <div class="grid grid-cols-8 gap-4 mb-2">
+              <div class="grid grid-cols-10 gap-4 mb-2">
                 <div class="col-span-4">
                   <.input field={f[:name]} label="Name" type="text" />
                 </div>
                 <div class="col-span-4">
                   <.input field={f[:command]} label="Command" type="text" />
+                </div>
+                <div class="col-span-2">
+                  <.input field={f[:timeout]} label="Timeout" type="number" />
                 </div>
               </div>
 
@@ -635,12 +638,14 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
                                               name: name,
                                               command: command,
                                               fail: fail,
-                                              expected_output: expected_output
+                                              expected_output: expected_output,
+                                              timeout: timeout
                                             } ->
         %{
           name: name,
           command: command,
           fail: fail,
+          timeout: timeout,
           expected_output: expected_output || ""
         }
       end)
