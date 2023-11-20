@@ -5,7 +5,7 @@ defmodule HandinWeb.AssignmentLive.Show do
   alias Handin.Assignments.AssignmentTest
   alias Handin.AssignmentTests
   alias Handin.AssignmentSubmissions
-  alias Handin.Assignments.{TestSupportFile, Command}
+  alias Handin.Assignments.{TestSupportFile, Command, SolutionFile}
   alias Handin.AssignmentSubmission.AssignmentSubmission
 
   @impl true
@@ -52,7 +52,8 @@ defmodule HandinWeb.AssignmentLive.Show do
          1
        )
      )
-     |> assign(:test_support_files, [])}
+     |> assign(:test_support_files, [])
+     |> assign(:solution_files, [])}
   end
 
   @impl true
@@ -73,7 +74,8 @@ defmodule HandinWeb.AssignmentLive.Show do
     |> assign(:assignment_test, %AssignmentTest{
       assignment_id: assignment_id,
       commands: [%Command{}],
-      test_support_files: [%TestSupportFile{}]
+      test_support_files: [%TestSupportFile{}],
+      solution_files: [%SolutionFile{}]
     })
   end
 
@@ -84,12 +86,6 @@ defmodule HandinWeb.AssignmentLive.Show do
       user_id: socket.assigns.current_user.id,
       assignment_id: assignment_id
     })
-  end
-
-  defp apply_action(socket, :upload_test_files, _) do
-    socket
-    |> assign(:page_title, "Upload File")
-    |> assign(:test_support_file, %TestSupportFile{})
   end
 
   defp apply_action(socket, :edit_assignment_test, %{"test_id" => test_id}) do
@@ -116,6 +112,15 @@ defmodule HandinWeb.AssignmentLive.Show do
   def handle_event("delete", %{"test_support_file_id" => test_support_file_id}, socket) do
     test_support_file = AssignmentTests.get_test_support_file!(test_support_file_id)
     {:ok, _} = AssignmentTests.delete_test_support_file(test_support_file)
+
+    assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
+
+    {:noreply, socket |> assign(:assignment_tests, assignment.assignment_tests)}
+  end
+
+  def handle_event("delete", %{"solution_file_id" => solution_file_id}, socket) do
+    solution_file = AssignmentTests.get_solution_file!(solution_file_id)
+    {:ok, _} = AssignmentTests.delete_solution_file(solution_file)
 
     assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
 
@@ -199,13 +204,6 @@ defmodule HandinWeb.AssignmentLive.Show do
         restart: :temporary
       })
     end
-
-    {:noreply, socket}
-  end
-
-  def handle_event("mark_solution_file", %{"test_support_file_id" => test_support_file_id}, socket) do
-    test_support_file = AssignmentTests.get_test_support_file!(test_support_file_id)
-    {:ok, _} = AssignmentTests.mark_solution_file(test_support_file)
 
     {:noreply, socket}
   end

@@ -7,7 +7,7 @@ defmodule Handin.AssignmentTests do
 
   alias Handin.{Repo}
 
-  alias Handin.Assignments.{AssignmentTest, TestSupportFile, Log, Build, Command}
+  alias Handin.Assignments.{AssignmentTest, TestSupportFile, Log, Build, Command, SolutionFile}
 
   @doc """
   Returns the list of assignment_tests.
@@ -39,7 +39,7 @@ defmodule Handin.AssignmentTests do
   def get_assignment_test!(id),
     do:
       Repo.get!(AssignmentTest, id)
-      |> Repo.preload([:commands, :test_support_files, builds: :logs])
+      |> Repo.preload([:commands, :test_support_files, :solution_files, builds: :logs])
 
   @doc """
   Creates a assignment_test.
@@ -110,7 +110,7 @@ defmodule Handin.AssignmentTests do
     AssignmentTest
     |> where([at], at.assignment_id == ^id)
     |> Repo.all()
-    |> Repo.preload(:test_support_files)
+    |> Repo.preload([:test_support_files, :solution_files])
   end
 
   def create_test_support_file(attrs \\ %{}) do
@@ -121,8 +121,14 @@ defmodule Handin.AssignmentTests do
 
   def get_test_support_file!(id), do: Repo.get!(TestSupportFile, id)
 
+  def get_solution_file!(id), do: Repo.get!(SolutionFile, id)
+
   def delete_test_support_file(%TestSupportFile{} = test_support_file) do
     Repo.delete(test_support_file)
+  end
+
+  def delete_solution_file(%SolutionFile{} = solution_file) do
+    Repo.delete(solution_file)
   end
 
   def change_test_support_file(%TestSupportFile{} = test_support_file, attrs \\ %{}) do
@@ -135,9 +141,21 @@ defmodule Handin.AssignmentTests do
     |> Repo.insert()
   end
 
+  def save_solution_file(attrs \\ %{}) do
+    %SolutionFile{}
+    |> SolutionFile.changeset(attrs)
+    |> Repo.insert()
+  end
+
   def upload_test_support_file(test_support_file, attrs \\ %{}) do
     test_support_file
     |> TestSupportFile.file_changeset(attrs)
+    |> Repo.update!()
+  end
+
+  def upload_solution_file(solution_file, attrs \\ %{}) do
+    solution_file
+    |> SolutionFile.file_changeset(attrs)
     |> Repo.update!()
   end
 
