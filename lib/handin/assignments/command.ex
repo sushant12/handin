@@ -2,7 +2,7 @@ defmodule Handin.Assignments.Command do
   use Handin.Schema
   import Ecto.Changeset
 
-  alias Handin.Assignments.AssignmentTest
+  alias Handin.Assignments.{AssignmentTest, Log}
 
   schema "commands" do
     field :name, :string
@@ -10,6 +10,7 @@ defmodule Handin.Assignments.Command do
     field :fail, :boolean, default: false
     field :expected_output, :string
     belongs_to :assignment_test, AssignmentTest
+    belongs_to :log, Log
 
     timestamps()
   end

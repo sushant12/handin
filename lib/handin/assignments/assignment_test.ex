@@ -1,7 +1,7 @@
 defmodule Handin.Assignments.AssignmentTest do
   use Handin.Schema
   import Ecto.Changeset
-  alias Handin.Assignments.{Assignment, TestSupportFile, Command, Build}
+  alias Handin.Assignments.{Assignment, TestSupportFile, Command, Build, SolutionFile}
 
   schema "assignment_tests" do
     field :name, :string
@@ -15,6 +15,7 @@ defmodule Handin.Assignments.AssignmentTest do
       preload_order: [asc: :inserted_at]
 
     has_many :test_support_files, TestSupportFile, on_delete: :delete_all
+    has_many :solution_files, SolutionFile, on_delete: :delete_all
     has_many :builds, Build, on_delete: :delete_all
     timestamps()
   end
