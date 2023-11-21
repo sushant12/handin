@@ -118,10 +118,11 @@ defmodule Handin.BuildServer do
   end
 
   defp build_files(assignment_test) do
-    assignment_test.test_support_files
-    |> Enum.map(fn test_support_file ->
-      url =
-        TestSupportFileUploader.url({test_support_file.file.file_name, test_support_file},
+    [assignment_test.test_support_files, assignment_test.solution_files]
+    |> Enum.map(fn files ->
+      Enum.map(files, fn file ->
+        url =
+        TestSupportFileUploader.url({file.file.file_name, file},
           signed: true
         )
 
@@ -130,9 +131,11 @@ defmodule Handin.BuildServer do
         |> Finch.request(Handin.Finch)
 
       %{
-        "guest_path" => "/#{test_support_file.file.file_name}",
+        "guest_path" => "/#{file.file.file_name}",
         "raw_value" => Base.encode64(body)
       }
+      end)
     end)
+    |> List.flatten()
   end
 end
