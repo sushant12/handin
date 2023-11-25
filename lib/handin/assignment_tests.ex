@@ -7,7 +7,7 @@ defmodule Handin.AssignmentTests do
 
   alias Handin.{Repo}
 
-  alias Handin.Assignments.{AssignmentTest, TestSupportFile, Log, Build, Command, SolutionFile}
+  alias Handin.Assignments.{AssignmentTest, TestSupportFile, Log, Build, SolutionFile}
 
   @doc """
   Returns the list of assignment_tests.
@@ -39,7 +39,7 @@ defmodule Handin.AssignmentTests do
   def get_assignment_test!(id),
     do:
       Repo.get!(AssignmentTest, id)
-      |> Repo.preload([:commands, :test_support_files, :solution_files, builds: :logs])
+      |> Repo.preload([:test_support_files, :solution_files, builds: :logs])
 
   @doc """
   Creates a assignment_test.
@@ -157,10 +157,6 @@ defmodule Handin.AssignmentTests do
     solution_file
     |> SolutionFile.file_changeset(attrs)
     |> Repo.update!()
-  end
-
-  def change_command(command) do
-    Command.changeset(command, %{})
   end
 
   @spec log(build_id :: Ecto.UUID, description :: String.t()) :: Log.t()

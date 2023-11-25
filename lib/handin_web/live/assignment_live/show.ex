@@ -5,7 +5,7 @@ defmodule HandinWeb.AssignmentLive.Show do
   alias Handin.Assignments.AssignmentTest
   alias Handin.AssignmentTests
   alias Handin.AssignmentSubmissions
-  alias Handin.Assignments.{TestSupportFile, Command, SolutionFile}
+  alias Handin.Assignments.{TestSupportFile, SolutionFile}
   alias Handin.AssignmentSubmission.AssignmentSubmission
 
   @impl true
@@ -73,7 +73,6 @@ defmodule HandinWeb.AssignmentLive.Show do
     |> assign(:page_title, "Add Test")
     |> assign(:assignment_test, %AssignmentTest{
       assignment_id: assignment_id,
-      commands: [%Command{}],
       test_support_files: [%TestSupportFile{}],
       solution_files: [%SolutionFile{}]
     })

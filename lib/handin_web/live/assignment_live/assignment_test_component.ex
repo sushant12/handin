@@ -2,7 +2,6 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   use HandinWeb, :live_component
 
   alias Handin.AssignmentTests
-  alias Handin.Assignments.Command
   alias Handin.TestSupportFileUploader
 
   @impl true
@@ -35,87 +34,6 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
         <div class="grid grid-cols-2 gap-4">
           <.input field={@form[:name]} type="text" label="Name" />
           <.input field={@form[:marks]} type="number" label="Marks" />
-        </div>
-
-        <div>
-          <label>Commands</label>
-          <.button type="button" phx-click="add_command_fields" phx-target={@myself}>
-            <svg
-              width="1.25rem"
-              height="1.25rem"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              stroke="#2ac666"
-            >
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-              <g id="SVGRepo_iconCarrier">
-                <path
-                  d="M11 8C11 7.44772 11.4477 7 12 7C12.5523 7 13 7.44772 13 8V11H16C16.5523 11 17 11.4477 17 12C17 12.5523 16.5523 13 16 13H13V16C13 16.5523 12.5523 17 12 17C11.4477 17 11 16.5523 11 16V13H8C7.44771 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H11V8Z"
-                  fill="#2ac666"
-                >
-                </path>
-
-                <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12ZM3.00683 12C3.00683 16.9668 7.03321 20.9932 12 20.9932C16.9668 20.9932 20.9932 16.9668 20.9932 12C20.9932 7.03321 16.9668 3.00683 12 3.00683C7.03321 3.00683 3.00683 7.03321 3.00683 12Z"
-                  fill="#2ac666"
-                >
-                </path>
-              </g>
-            </svg>
-          </.button>
-          <.inputs_for :let={f} field={@form[:commands]}>
-            <fieldset class="border border-solid border-gray-300 p-3">
-              <legend>
-                <.button
-                  type="button"
-                  phx-click="remove_command_fields"
-                  phx-value-index={f.index}
-                  phx-target={@myself}
-                >
-                  <svg
-                    width="1.25rem"
-                    height="1.25rem"
-                    viewBox="0 0 1024 1024"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="#ff0000"
-                    stroke="#ff0000"
-                  >
-                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <path
-                        fill="#dd3636"
-                        d="M160 256H96a32 32 0 0 1 0-64h256V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64h-64v672a32 32 0 0 1-32 32H192a32 32 0 0 1-32-32V256zm448-64v-64H416v64h192zM224 896h576V256H224v640zm192-128a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zm192 0a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32z"
-                      >
-                      </path>
-                    </g>
-                  </svg>
-                </.button>
-              </legend>
-              <div class="grid grid-cols-8 gap-4 mb-2">
-                <div class="col-span-4">
-                  <.input field={f[:name]} label="Name" type="text" />
-                </div>
-                <div class="col-span-4">
-                  <.input field={f[:command]} label="Command" type="text" />
-                </div>
-              </div>
-
-              <.input field={f[:fail]} type="checkbox" label="Fail if expected output does not match" />
-              <.input
-                :if={f[:fail].value == true}
-                field={f[:expected_output]}
-                label="Expected output"
-                type="textarea"
-                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Expected output"
-              />
-            </fieldset>
-          </.inputs_for>
         </div>
 
         <div>
@@ -451,45 +369,6 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     )
   end
 
-  def handle_event("add_command_fields", _, socket) do
-    existing_commands =
-      Ecto.Changeset.get_change(
-        socket.assigns.form.source,
-        :commands,
-        Ecto.Changeset.get_field(socket.assigns.form.source, :commands)
-      )
-
-    changeset =
-      Ecto.Changeset.put_assoc(
-        socket.assigns.form.source,
-        :commands,
-        existing_commands ++ [%Command{}]
-      )
-
-    {:noreply, assign_form(socket, changeset)}
-  end
-
-  def handle_event("remove_command_fields", %{"index" => index}, socket) do
-    index = String.to_integer(index)
-
-    {_to_del, existing_commands} =
-      Ecto.Changeset.get_change(
-        socket.assigns.form.source,
-        :commands,
-        Ecto.Changeset.get_field(socket.assigns.form.source, :commands)
-      )
-      |> List.pop_at(index)
-
-    changeset =
-      Ecto.Changeset.put_assoc(
-        socket.assigns.form.source,
-        :commands,
-        existing_commands
-      )
-
-    {:noreply, assign_form(socket, changeset)}
-  end
-
   defp save_assignment_test(socket, :edit_assignment_test, assignment_test_params) do
     case AssignmentTests.update_assignment_test(
            socket.assigns.assignment_test,
@@ -630,25 +509,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   def error_to_string(:too_many_files), do: "You have selected too many files"
 
   defp get_attrs(assignment_test) do
-    commands =
-      Enum.map(assignment_test.commands, fn %Command{
-                                              name: name,
-                                              command: command,
-                                              fail: fail,
-                                              expected_output: expected_output
-                                            } ->
-        %{
-          name: name,
-          command: command,
-          fail: fail,
-          expected_output: expected_output || ""
-        }
-      end)
-      |> Enum.with_index(fn command, i -> {i, command} end)
-      |> Map.new()
-
     %{
-      commands: commands,
       name: assignment_test.name,
       marks: assignment_test.marks,
       assignment_id: assignment_test.assignment_id
