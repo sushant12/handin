@@ -64,26 +64,6 @@ defmodule Handin.LecturerAssignmentBuildServer do
           log_and_broadcast(build, "Environment setup completed.", state)
           AssignmentTests.update_build(build, %{status: "execute_command"})
 
-          assignment_test.commands
-          |> Enum.each(fn %{name: name, command: command} ->
-            log_and_broadcast(build, "#{name} #{command}.", state)
-
-            case @machine_api.exec(machine["id"], command) do
-              {:ok, response} ->
-                message =
-                  if String.trim(response["stdout"]) == "" do
-                    response["stderr"]
-                  else
-                    response["stdout"]
-                  end
-
-                log_and_broadcast(build, message, state)
-
-              {:error, reason} ->
-                log_and_broadcast(build, "Failed: #{reason}", state)
-            end
-          end)
-
           AssignmentTests.update_build(build, %{status: "execute_command_complete"})
 
           case @machine_api.stop(machine["id"]) do

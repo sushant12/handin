@@ -11,7 +11,6 @@ defmodule Handin.AssignmentTestsFixtures do
     {:ok, assignment_test} =
       attrs
       |> Enum.into(%{
-        command: "some command",
         name: "some name",
         marks: 120.5
       })
