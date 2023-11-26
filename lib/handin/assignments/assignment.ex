@@ -4,7 +4,7 @@ defmodule Handin.Assignments.Assignment do
   import Ecto.Changeset
   alias Handin.Modules.Module
   alias Handin.ProgrammingLanguages.ProgrammingLanguage
-  alias Handin.Assignments.{AssignmentTest, Build}
+  alias Handin.Assignments.{AssignmentTest, Build, SupportFile, SolutionFile}
   alias Handin.AssignmentSubmission.AssignmentSubmission
 
   schema "assignments" do
@@ -15,6 +15,8 @@ defmodule Handin.Assignments.Assignment do
     field :due_date, :utc_datetime
     field :cutoff_date, :utc_datetime
     field :penalty_per_day, :float
+    field :run_script, :string
+    field :attempt_marks, :integer
 
     belongs_to :module, Module
     belongs_to :programming_language, ProgrammingLanguage, on_replace: :nilify
@@ -22,6 +24,8 @@ defmodule Handin.Assignments.Assignment do
     has_many :assignment_tests, AssignmentTest
     has_many :assignment_submissions, AssignmentSubmission
     has_many :builds, Build
+    has_many :support_files, SupportFile, on_delete: :delete_all
+    has_many :solution_files, SolutionFile, on_delete: :delete_all
 
     timestamps()
   end
@@ -35,7 +39,8 @@ defmodule Handin.Assignments.Assignment do
     :max_attempts,
     :penalty_per_day,
     :module_id,
-    :programming_language_id
+    :programming_language_id,
+    :attempt_marks
   ]
   @doc false
   def changeset(assignment, attrs) do

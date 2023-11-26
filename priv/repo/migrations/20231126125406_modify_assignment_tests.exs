@@ -6,10 +6,10 @@ defmodule Handin.Repo.Migrations.ModifyAssignmentTests do
       remove :marks
       add :points_on_pass, :float
       add :points_on_fail, :float
-      add :commands, :text
+      add :command, :string
       add :expected_output_type, :string
-      add :expected_output_text, :text
-      add :expected_output_file, :text
+      add :expected_output_text, :string
+      add :expected_output_file, :string
       add :ttl, :integer
     end
   end
