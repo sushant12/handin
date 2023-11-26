@@ -1,9 +1,8 @@
-defmodule HandinWeb.AssignmentLive.Detail do
+defmodule HandinWeb.AssignmentLive.Tests do
   use HandinWeb, :live_view
 
   alias Handin.Modules
   alias Handin.Assignments
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -19,37 +18,21 @@ defmodule HandinWeb.AssignmentLive.Detail do
     </.breadcrumbs>
 
     <.tabs>
-      <:item
-        text="Details"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
-        current={true}
-      />
+      <:item text="Details" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"} />
       <:item
         text="Environment"
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/environment"}
       />
-      <:item text="Tests" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/tests"} />
+      <:item
+        text="Tests"
+        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/tests"}
+        current={true}
+      />
       <:item
         text="Submissions"
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
       />
     </.tabs>
-
-    <.header>
-      <%= @assignment.name %>
-      <span class="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300">
-        <%= @assignment.programming_language.name %>
-      </span>
-    </.header>
-
-    <.list>
-      <:item title="Total marks"><%= @assignment.total_marks %></:item>
-      <:item title="Max attempts"><%= @assignment.max_attempts %></:item>
-      <:item title="Penalty per day"><%= @assignment.penalty_per_day %></:item>
-      <:item title="Start Date"><%= @assignment.start_date %></:item>
-      <:item title="Due Date"><%= @assignment.due_date %></:item>
-      <:item title="Cut off Date"><%= @assignment.cutoff_date %></:item>
-    </.list>
     """
   end
 

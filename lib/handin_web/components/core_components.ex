@@ -654,6 +654,7 @@ defmodule HandinWeb.CoreComponents do
 
   def breadcrumbs(assigns) do
     size = Enum.count(assigns.item)
+    assigns = assign(assigns, :size, size)
 
     ~H"""
     <nav class="flex" aria-label="Breadcrumb">
@@ -662,7 +663,7 @@ defmodule HandinWeb.CoreComponents do
           :for={{item, index} <- Enum.with_index(@item)}
           text={item.text}
           href={item.href}
-          position={breadcrumb_position(index, size - 1)}
+          position={breadcrumb_position(index, @size - 1)}
         />
       </ol>
     </nav>
