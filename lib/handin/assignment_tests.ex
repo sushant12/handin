@@ -7,7 +7,7 @@ defmodule Handin.AssignmentTests do
 
   alias Handin.{Repo}
 
-  alias Handin.Assignments.{AssignmentTest, SupportFile, SolutionFile}
+  alias Handin.Assignments.AssignmentTest
 
   @doc """
   Returns the list of assignment_tests.
