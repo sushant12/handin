@@ -7,7 +7,7 @@ defmodule Handin.AssignmentTests do
 
   alias Handin.{Repo}
 
-  alias Handin.Assignments.{AssignmentTest, TestSupportFile, Log, Build, SolutionFile}
+  alias Handin.Assignments.{AssignmentTest, TestSupportFile, SolutionFile}
 
   @doc """
   Returns the list of assignment_tests.
@@ -39,7 +39,7 @@ defmodule Handin.AssignmentTests do
   def get_assignment_test!(id),
     do:
       Repo.get!(AssignmentTest, id)
-      |> Repo.preload([:test_support_files, :solution_files, builds: :logs])
+      |> Repo.preload([:test_support_files, :solution_files])
 
   @doc """
   Creates a assignment_test.
@@ -159,52 +159,10 @@ defmodule Handin.AssignmentTests do
     |> Repo.update!()
   end
 
-  @spec log(build_id :: Ecto.UUID, description :: String.t()) :: Log.t()
-  def log(build_id, description) do
-    Log.changeset(%{build_id: build_id, description: description})
-    |> Repo.insert()
-  end
-
-  @spec new_build(attrs :: %{assignment_test_id: Ecto.UUID, status: String.t()}) ::
-          {:ok, Build.t()}
-  def new_build(attrs) do
-    Build.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @spec update_build(
-          build :: Build.t(),
-          attrs :: %{status: String.t()} | %{status: String.t(), machine_id: String.t()}
-        ) :: {:ok, Build.t()}
-  def update_build(build, attrs) do
-    Build.update_changeset(build, attrs)
-    |> Repo.update()
-  end
-
-  def get_logs(build_id) do
-    Build
-    |> Repo.get!(build_id)
-    |> Repo.preload(:logs)
-    |> Map.get(:logs)
-  end
-
-  def get_recent_build_logs(assignment_test_id) do
-    assignment_test = get_assignment_test!(assignment_test_id)
-
-    build =
-      assignment_test.builds
-      |> Enum.sort_by(& &1.inserted_at, :desc)
-      |> List.first()
-
-    if build do
-      build |> Map.get(:logs) |> Enum.sort_by(& &1.inserted_at, :asc)
-    else
-      []
-    end
-  end
-
   def mark_solution_file(test_support_file) do
-    Ecto.Changeset.change(test_support_file, solution_file: !test_support_file.solution_file && true)
+    Ecto.Changeset.change(test_support_file,
+      solution_file: !test_support_file.solution_file && true
+    )
     |> Repo.update()
   end
 end

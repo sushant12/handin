@@ -1,12 +1,7 @@
 defmodule Handin.AssignmentSubmission.AssignmentSubmission do
   alias Handin.AssignmentSubmission.AssignmentSubmissionFile
   alias Handin.Accounts.User
-  alias Handin.Assignments.{Assignment, Build}
-
-  alias Handin.AssignmentSubmission.{
-    AssignmentSubmissionsBuilds,
-    LecturerAssignmentSubmissionsBuilds
-  }
+  alias Handin.Assignments.{Assignment}
 
   use Handin.Schema
 
@@ -19,9 +14,6 @@ defmodule Handin.AssignmentSubmission.AssignmentSubmission do
     belongs_to :user, User
     belongs_to :assignment, Assignment
     has_many :assignment_submission_files, AssignmentSubmissionFile
-
-    many_to_many :builds, Build, join_through: AssignmentSubmissionsBuilds
-    many_to_many :lecturer_builds, Build, join_through: LecturerAssignmentSubmissionsBuilds
 
     timestamps(type: :utc_datetime)
   end

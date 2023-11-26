@@ -4,7 +4,7 @@ defmodule Handin.Assignments.Assignment do
   import Ecto.Changeset
   alias Handin.Modules.Module
   alias Handin.ProgrammingLanguages.ProgrammingLanguage
-  alias Handin.Assignments.AssignmentTest
+  alias Handin.Assignments.{AssignmentTest, Build}
   alias Handin.AssignmentSubmission.AssignmentSubmission
 
   schema "assignments" do
@@ -21,6 +21,7 @@ defmodule Handin.Assignments.Assignment do
 
     has_many :assignment_tests, AssignmentTest
     has_many :assignment_submissions, AssignmentSubmission
+    has_many :builds, Build
 
     timestamps()
   end

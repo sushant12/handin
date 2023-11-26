@@ -17,9 +17,8 @@ defmodule Handin.Application do
       # Start Finch
       {Finch, name: Handin.Finch},
       # Start the Endpoint (http/https)
-      HandinWeb.Endpoint,
+      HandinWeb.Endpoint
       # Start a worker by calling: Handin.Worker.start_link(arg)
-      Handin.BuildSupervisor
       # {Handin.Worker, arg}
     ]
 

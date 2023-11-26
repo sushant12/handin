@@ -11,8 +11,8 @@ defmodule Handin.Repo.Migrations.AddReferences do
     end
 
     create unique_index(:logs, [
-      :command_id,
-      :build_id
-    ])
+             :command_id,
+             :build_id
+           ])
   end
 end
