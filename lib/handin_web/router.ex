@@ -90,10 +90,10 @@ defmodule HandinWeb.Router do
         live "/assignments/:assignment_id/edit", AssignmentLive.Index, :edit
 
         scope "/assignments/:assignment_id" do
-          live "details", AssignmentLive.Detail, :index
-          live "environment", AssignmentLive.Environment, :index
-          live "tests", AssignmentLive.Tests, :index
-          live "submissions", AssignmentLive.Submission, :index
+          live "/details", AssignmentLive.Detail, :index
+          live "/environment", AssignmentLive.Environment, :index
+          live "/tests", AssignmentLive.Tests, :index
+          live "/submissions", AssignmentLive.Submission, :index
         end
 
         live "/assignments/:assignment_id/add_test",

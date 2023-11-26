@@ -31,6 +31,7 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
         <.input field={@form[:due_date]} type="datetime-local" label="Due date" />
         <.input field={@form[:cutoff_date]} type="datetime-local" label="Cutoff date" />
         <.input field={@form[:max_attempts]} type="number" label="Max attempts" />
+        <.input field={@form[:attempt_marks]} type="number" label="Attempt marks" />
         <.input field={@form[:penalty_per_day]} type="number" label="Penalty per day" step="any" />
 
         <:actions>

@@ -6,9 +6,7 @@ defmodule Handin.Assignments do
   import Ecto.Query, warn: false
   alias Handin.Repo
 
-  alias Handin.Assignments.Assignment
-  alias Handin.Assignments.AssignmentTest
-  alias Handin.Assignments.TestSupportFile
+  alias Handin.Assignments.{Assignment, AssignmentTest, SupportFile, SolutionFile}
 
   @doc """
   Returns the list of assignments.
@@ -43,7 +41,9 @@ defmodule Handin.Assignments do
       |> Repo.preload([
         :assignment_submissions,
         :programming_language,
-        [assignment_tests: [:test_support_files, :solution_files]]
+        :assignment_tests,
+        :support_files,
+        :solution_files
       ])
 
   @doc """
@@ -125,9 +125,9 @@ defmodule Handin.Assignments do
     |> Repo.insert()
   end
 
-  def test_support_file_change(attrs \\ %{}) do
-    %TestSupportFile{}
-    |> TestSupportFile.changeset(attrs)
+  def support_file_change(attrs \\ %{}) do
+    %SupportFile{}
+    |> SupportFile.changeset(attrs)
   end
 
   def valid_submission_date?(assignment) do
@@ -135,5 +135,51 @@ defmodule Handin.Assignments do
 
     DateTime.compare(assignment.start_date, now) == :lt &&
       DateTime.compare(assignment.cutoff_date, now) == :gt
+  end
+
+  def create_support_file(attrs \\ %{}) do
+    %SupportFile{}
+    |> SupportFile.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def get_support_file!(id), do: Repo.get!(SupportFile, id)
+
+  def get_solution_file!(id), do: Repo.get!(SolutionFile, id)
+
+  def delete_support_file(%SupportFile{} = support_file) do
+    Repo.delete(support_file)
+  end
+
+  def delete_solution_file(%SolutionFile{} = solution_file) do
+    Repo.delete(solution_file)
+  end
+
+  def change_support_file(%SupportFile{} = support_file, attrs \\ %{}) do
+    SupportFile.changeset(support_file, attrs)
+  end
+
+  def save_support_file(attrs \\ %{}) do
+    %SupportFile{}
+    |> SupportFile.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def save_solution_file(attrs \\ %{}) do
+    %SolutionFile{}
+    |> SolutionFile.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def upload_support_file(support_file, attrs \\ %{}) do
+    support_file
+    |> SupportFile.file_changeset(attrs)
+    |> Repo.update!()
+  end
+
+  def upload_solution_file(solution_file, attrs \\ %{}) do
+    solution_file
+    |> SolutionFile.file_changeset(attrs)
+    |> Repo.update!()
   end
 end
