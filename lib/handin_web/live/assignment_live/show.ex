@@ -4,7 +4,7 @@ defmodule HandinWeb.AssignmentLive.Show do
   alias Handin.Assignments
   alias Handin.Assignments.AssignmentTest
   alias Handin.AssignmentTests
-  alias Handin.Assignments.{TestSupportFile, SolutionFile}
+  alias Handin.Assignments.{SupportFile, SolutionFile}
   alias Handin.AssignmentSubmission.AssignmentSubmission
 
   @impl true
@@ -29,7 +29,7 @@ defmodule HandinWeb.AssignmentLive.Show do
      |> assign(
        :submitted_assignment_submissions, []
      )
-     |> assign(:test_support_files, [])
+     |> assign(:support_files, [])
      |> assign(:solution_files, [])}
   end
 
@@ -50,7 +50,7 @@ defmodule HandinWeb.AssignmentLive.Show do
     |> assign(:page_title, "Add Test")
     |> assign(:assignment_test, %AssignmentTest{
       assignment_id: assignment_id,
-      test_support_files: [%TestSupportFile{}],
+      support_files: [%SupportFile{}],
       solution_files: [%SolutionFile{}]
     })
   end
@@ -85,9 +85,9 @@ defmodule HandinWeb.AssignmentLive.Show do
     {:noreply, assign(socket, :assignment_tests, assignment_tests)}
   end
 
-  def handle_event("delete", %{"test_support_file_id" => test_support_file_id}, socket) do
-    test_support_file = AssignmentTests.get_test_support_file!(test_support_file_id)
-    {:ok, _} = AssignmentTests.delete_test_support_file(test_support_file)
+  def handle_event("delete", %{"support_file_id" => support_file_id}, socket) do
+    support_file = AssignmentTests.get_support_file!(support_file_id)
+    {:ok, _} = AssignmentTests.delete_support_file(support_file)
 
     assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
 

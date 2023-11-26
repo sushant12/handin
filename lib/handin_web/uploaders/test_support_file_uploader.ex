@@ -1,4 +1,4 @@
-defmodule Handin.TestSupportFileUploader do
+defmodule Handin.SupportFileUploader do
   use Waffle.Definition
 
   # Include ecto support (requires package waffle_ecto installed):
@@ -40,8 +40,8 @@ defmodule Handin.TestSupportFileUploader do
   # end
 
   # Override the storage directory:
-  def storage_dir(_version, {_file, test_support_file}) do
-    "uploads/test/#{test_support_file.id}/"
+  def storage_dir(_version, {_file, support_file}) do
+    "uploads/assignment/#{support_file.id}/"
   end
 
   # Provide a default URL if there hasn't been a file uploaded
