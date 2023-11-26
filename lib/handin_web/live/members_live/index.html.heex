@@ -1,4 +1,7 @@
-<.module_tabs module_id={@module_id} current_tab={assigns[:current_tab]} />
+<.tabs>
+  <:item text="Assignments" href={~p"/modules/#{@module_id}/assignments"} />
+  <:item text="Members" href={~p"/modules/#{@module_id}/members"} current={true} />
+</.tabs>
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
   <.header>

@@ -5,7 +5,7 @@ defmodule Handin.MixProject do
     [
       app: :handin,
       version: "0.1.0",
-      elixir: "~> 1.16.0-rc.0",
+      elixir: "~> 1.15.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [],
       start_permanent: Mix.env() == :prod,

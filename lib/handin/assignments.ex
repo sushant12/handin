@@ -41,6 +41,7 @@ defmodule Handin.Assignments do
     do:
       Repo.get!(Assignment, id)
       |> Repo.preload([
+        :assignment_submissions,
         :programming_language,
         [assignment_tests: [:test_support_files, :solution_files]]
       ])

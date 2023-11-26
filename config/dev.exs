@@ -91,4 +91,4 @@ config :swoosh, :api_client, false
 config :handin,
   fly_base_url: "https://api.machines.dev/v1/apps/",
   fly_auth_token: System.get_env("FLY_AUTH_TOKEN"),
-  machine_api_module: Handin.FakeMachineApi
+  machine_api_module: Handin.MachineApi
