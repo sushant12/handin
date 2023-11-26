@@ -2,7 +2,8 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   use HandinWeb, :live_component
 
   alias Handin.AssignmentTests
-  alias Handin.TestSupportFileUploader
+  alias Handin.Assignments
+  alias Handin.SupportFileUploader
 
   @impl true
   def render(assigns) do
@@ -39,11 +40,11 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
         <div>
           <label>Add test support file</label>
           <.live_file_input
-            upload={@uploads.test_support_file}
+            upload={@uploads.support_file}
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           />
-          <%= for test_support_file <- @test_support_files do %>
-            <article :if={test_support_file.file} class="upload-entry">
+          <%= for support_file <- @support_files do %>
+            <article :if={support_file.file} class="upload-entry">
               <figure class="flex">
                 <svg
                   width="1.25rem"
@@ -65,12 +66,12 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
                     </path>
                   </g>
                 </svg>
-                <figcaption><%= test_support_file.file.file_name %></figcaption>&nbsp;
+                <figcaption><%= support_file.file.file_name %></figcaption>&nbsp;
                 <button
                   :if={@action == :add_assignment_test}
                   type="button"
                   phx-click="cancel-copy"
-                  phx-value-test_support_file_id={test_support_file.id}
+                  phx-value-support_file_id={support_file.id}
                   phx-target={@myself}
                   aria-label="cancel"
                 >
@@ -96,7 +97,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
               </figure>
             </article>
           <% end %>
-          <%= for entry <- @uploads.test_support_file.entries do %>
+          <%= for entry <- @uploads.support_file.entries do %>
             <article class="upload-entry">
               <figure class="flex">
                 <svg
@@ -150,7 +151,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
               </figure>
             </article>
           <% end %>
-          <%= for err <- upload_errors(@uploads.test_support_file) do %>
+          <%= for err <- upload_errors(@uploads.support_file) do %>
             <p class="alert alert-danger"><%= error_to_string(err) %></p>
           <% end %>
         </div>
@@ -300,7 +301,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
      |> assign(assigns)
      |> assign_form(changeset)
      |> assign(:uploaded_files, [])
-     |> allow_upload(:test_support_file, accept: :any, max_entries: 5, max_file_size: 1_500_000)
+     |> allow_upload(:support_file, accept: :any, max_entries: 5, max_file_size: 1_500_000)
      |> allow_upload(:solution_file, accept: :any, max_entries: 5, max_file_size: 1_500_000)}
   end
 
@@ -320,7 +321,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     assignment_test = AssignmentTests.get_assignment_test!(id)
     assignment_test_attrs = assignment_test |> get_attrs()
 
-    test_support_files = assignment_test.test_support_files
+    support_files = assignment_test.support_files
     solution_files = assignment_test.solution_files
 
     changeset =
@@ -330,20 +331,20 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
     {:noreply,
      assign_form(socket, changeset)
-     |> assign(:test_support_files, test_support_files)
+     |> assign(:support_files, support_files)
      |> assign(:solution_files, solution_files)}
   end
 
   def handle_event("cancel-copy", %{"test_support_file_id" => test_support_file_id}, socket) do
-    test_support_files =
-      socket.assigns.test_support_files
+    support_files =
+      socket.assigns.support_files
       |> Enum.reject(&(&1.id == test_support_file_id))
 
     {:noreply,
      assign(
        socket,
-       :test_support_files,
-       test_support_files
+       :support_files,
+       support_files
      )}
   end
 
@@ -362,7 +363,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
     {:noreply,
-     socket |> cancel_upload(:test_support_file, ref) |> cancel_upload(:solution_file, ref)}
+     socket |> cancel_upload(:support_file, ref) |> cancel_upload(:solution_file, ref)}
   end
 
   def handle_event("save", %{"assignment_test" => assignment_test_params}, socket) do
@@ -396,13 +397,13 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     case AssignmentTests.create_assignment_test(assignment_test_params) do
       {:ok, assignment_test} ->
         # Copies test support files from a selected assignment_test
-        socket.assigns.test_support_files
-        |> Enum.map(fn test_support_file ->
-          if test_support_file.file do
-            file_name = test_support_file.file.file_name
+        socket.assigns.support_files
+        |> Enum.map(fn support_file ->
+          if support_file.file do
+            file_name = support_file.file.file_name
 
             url =
-              TestSupportFileUploader.url({file_name, test_support_file},
+              SupportFileUploader.url({file_name, support_file},
                 signed: true
               )
 
@@ -410,17 +411,17 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
               Finch.build(:get, url)
               |> Finch.request(Handin.Finch)
 
-            {:ok, test_support_file} =
-              AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
+            {:ok, support_file} =
+              Assignments.save_support_file(%{"assignment_test_id" => assignment_test.id})
 
-            File.mkdir_p!("/tmp/uploads/#{test_support_file.id}")
-            File.write!("/tmp/uploads/#{test_support_file.id}/#{file_name}", body)
+            File.mkdir_p!("/tmp/uploads/#{support_file.id}")
+            File.write!("/tmp/uploads/#{support_file.id}/#{file_name}", body)
 
-            AssignmentTests.upload_test_support_file(test_support_file, %{
+            Assignments.upload_support_file(support_file, %{
               "file" => %Plug.Upload{
                 content_type: MIME.from_path(file_name),
                 filename: file_name,
-                path: "/tmp/uploads/#{test_support_file.id}/#{file_name}"
+                path: "/tmp/uploads/#{support_file.id}/#{file_name}"
               }
             })
           end
@@ -433,7 +434,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
             file_name = solution_file.file.file_name
 
             url =
-              TestSupportFileUploader.url({file_name, solution_file},
+              SupportFileUploader.url({file_name, solution_file},
                 signed: true
               )
 
@@ -442,12 +443,12 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
               |> Finch.request(Handin.Finch)
 
             {:ok, solution_file} =
-              AssignmentTests.save_solution_file(%{"assignment_test_id" => assignment_test.id})
+              Assignments.save_solution_file(%{"assignment_test_id" => assignment_test.id})
 
             File.mkdir_p!("/tmp/uploads/#{solution_file.id}")
             File.write!("/tmp/uploads/#{solution_file.id}/#{file_name}", body)
 
-            AssignmentTests.upload_solution_file(solution_file, %{
+            Assignments.upload_solution_file(solution_file, %{
               "file" => %Plug.Upload{
                 content_type: MIME.from_path(file_name),
                 filename: file_name,
@@ -472,12 +473,12 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   end
 
   defp consume_entries(socket, assignment_test) do
-    consume_uploaded_entries(socket, :test_support_file, fn meta, entry ->
+    consume_uploaded_entries(socket, :support_file, fn meta, entry ->
       Handin.Repo.transaction(fn ->
-        {:ok, test_support_file} =
-          AssignmentTests.save_test_support_file(%{"assignment_test_id" => assignment_test.id})
+        {:ok, support_file} =
+          Assignments.save_support_file(%{"assignment_test_id" => assignment_test.id})
 
-        AssignmentTests.upload_test_support_file(test_support_file, %{
+        Assignments.upload_support_file(support_file, %{
           "file" => %Plug.Upload{
             content_type: entry.client_type,
             filename: entry.client_name,
@@ -490,9 +491,9 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
     consume_uploaded_entries(socket, :solution_file, fn meta, entry ->
       Handin.Repo.transaction(fn ->
         {:ok, solution_file} =
-          AssignmentTests.save_solution_file(%{"assignment_test_id" => assignment_test.id})
+          Assignments.save_solution_file(%{"assignment_test_id" => assignment_test.id})
 
-        AssignmentTests.upload_solution_file(solution_file, %{
+        Assignments.upload_solution_file(solution_file, %{
           "file" => %Plug.Upload{
             content_type: entry.client_type,
             filename: entry.client_name,
