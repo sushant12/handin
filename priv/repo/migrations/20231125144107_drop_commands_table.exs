@@ -3,6 +3,7 @@ defmodule Handin.Repo.Migrations.DropCommandsTable do
 
   def change do
     drop index(:logs, [:command_id, :build_id])
+
     alter table(:logs) do
       remove :command_id
     end

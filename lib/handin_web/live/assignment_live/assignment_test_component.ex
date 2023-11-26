@@ -328,7 +328,10 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
       |> AssignmentTests.change_assignment_test(assignment_test_attrs)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign_form(socket, changeset) |> assign(:test_support_files, test_support_files) |> assign(:solution_files, solution_files)}
+    {:noreply,
+     assign_form(socket, changeset)
+     |> assign(:test_support_files, test_support_files)
+     |> assign(:solution_files, solution_files)}
   end
 
   def handle_event("cancel-copy", %{"test_support_file_id" => test_support_file_id}, socket) do
@@ -358,7 +361,8 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
-    {:noreply, socket |> cancel_upload(:test_support_file, ref) |> cancel_upload(:solution_file, ref)}
+    {:noreply,
+     socket |> cancel_upload(:test_support_file, ref) |> cancel_upload(:solution_file, ref)}
   end
 
   def handle_event("save", %{"assignment_test" => assignment_test_params}, socket) do

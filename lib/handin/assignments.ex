@@ -40,7 +40,10 @@ defmodule Handin.Assignments do
   def get_assignment!(id),
     do:
       Repo.get!(Assignment, id)
-      |> Repo.preload([:programming_language, [assignment_tests: [:test_support_files, :solution_files]]])
+      |> Repo.preload([
+        :programming_language,
+        [assignment_tests: [:test_support_files, :solution_files]]
+      ])
 
   @doc """
   Creates a assignment.
