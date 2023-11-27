@@ -92,6 +92,9 @@ defmodule HandinWeb.Router do
         scope "/assignments/:assignment_id" do
           live "/details", AssignmentLive.Detail, :index
           live "/environment", AssignmentLive.Environment, :index
+          live "/add_helper_files", AssignmentLive.Environment, :add_helper_files
+          live "/add_solution_files", AssignmentLive.Environment, :add_solution_files
+
           live "/tests", AssignmentLive.Tests, :index
           live "/submissions", AssignmentLive.Submission, :index
         end
