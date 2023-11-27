@@ -100,7 +100,7 @@ defmodule HandinWeb.UserSettingsLive do
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:trigger_submit, false)
 
-    {:ok, socket}
+    {:ok, socket |> assign(:current_page, :profile)}
   end
 
   def handle_event("validate_email", params, socket) do

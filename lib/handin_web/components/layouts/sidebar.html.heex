@@ -157,12 +157,13 @@
           <span class="ml-3">Language</span>
         </.link>
       </li>
+  
       <li :if={@current_user.role == "admin"}>
         <.link
           navigate={~p"/users/settings"}
           class={[
             "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 group",
-            @current_page == :programming_languages && " bg-gray-300 "
+            @current_page == :profile && " bg-gray-300 "
           ]}
         >
           <svg
