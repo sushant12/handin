@@ -33,30 +33,71 @@ defmodule HandinWeb.AssignmentLive.Environment do
     </.tabs>
 
     <div>
-      <.simple_form for={@form} id="environment-setup-form">
-        <.input
-          field={@form[:programming_language_id]}
-          label="Language"
-          type="select"
-          prompt="Select Programming Language"
-          options={@programming_languages}
-        />
-
-        <LiveMonacoEditor.code_editor
-          style="min-height: 450px; width: 100%;"
-          opts={
-            Map.merge(
-              LiveMonacoEditor.default_opts(),
-              %{"language" => "shell"}
-            )
-          }
-        />
+      <.simple_form for={@form} id="environment-setup-form" class="mb-4">
+        <div class="max-w-md mb-4">
+          <.input
+            field={@form[:programming_language_id]}
+            label="Language"
+            type="select"
+            prompt="Select Programming Language"
+            options={@programming_languages}
+          />
+        </div>
+        <div>
+          <.label for="Run Script">Run Script</.label>
+          <LiveMonacoEditor.code_editor
+            style="min-height: 450px; width: 100%;"
+            opts={
+              Map.merge(
+                LiveMonacoEditor.default_opts(),
+                %{"language" => "shell"}
+              )
+            }
+          />
+        </div>
       </.simple_form>
-      <div id="helper-files-container">
-        <%!-- use table component here to display helper files --%>
+
+      <div id="helper-files-container" class="max-w-md mb-4">
+        <.header class="mb-4">Helper Files</.header>
+        <.link
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
+          patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/add_helper_files"}
+        >
+          Add Helper Files
+        </.link>
+        <.table id="helper-files" rows={@assignment.support_files}>
+          <:col :let={{_id, file}} label="name"><%= file.name %></:col>
+          <:action :let={{id, file}}>
+            <.link
+              class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+              phx-click={JS.push("delete", value: %{id: file.id}) |> hide("##{id}")}
+              data-confirm="Are you sure?"
+            >
+              Delete
+            </.link>
+          </:action>
+        </.table>
       </div>
-      <div id="support-files-container">
-        <%!-- use table component here to display helper files --%>
+      <div id="solution-files-container " class="max-w-md mb-4">
+        <.header class="mb-4">Solution Files</.header>
+        <.link
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
+          patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/add_solution_files"}
+        >
+          Add Solution Files
+        </.link>
+        <.table id="solution-files" rows={@assignment.solution_files}>
+          <:col :let={{_id, file}} label="name"><%= file.name %></:col>
+          <:action :let={{id, file}}>
+            <.link
+              class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+              phx-click={JS.push("delete", value: %{id: file.id}) |> hide("##{id}")}
+              data-confirm="Are you sure?"
+            >
+              Delete
+            </.link>
+          </:action>
+        </.table>
       </div>
     </div>
     """

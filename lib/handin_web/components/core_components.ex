@@ -363,6 +363,10 @@ defmodule HandinWeb.CoreComponents do
 
   @doc """
   Renders a label.
+
+  ## Examples
+
+      <.label for="email">Email</.label>
   """
 
   attr :for, :string, default: nil

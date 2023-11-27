@@ -42,12 +42,8 @@ defmodule Handin.MixProject do
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.20.1"},
-      {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
-      {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 0.6"},
@@ -55,10 +51,7 @@ defmodule Handin.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:ex_machina, "~> 2.7.0", only: :test},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:nimble_csv, "~> 1.1"},
-      {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:waffle, "~> 1.1.7"},
       {:waffle_ecto, "~> 0.0.12"},
       {:ex_aws, "~> 2.1.2"},
@@ -66,7 +59,15 @@ defmodule Handin.MixProject do
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.6"},
       {:gen_smtp, "~> 1.0"},
-      {:live_monaco_editor, "~> 0.1"}
+      {:live_monaco_editor, "~> 0.1"},
+      {:timex, "~> 3.0"},
+      {:floki, ">= 0.30.0", only: :test},
+      {:ex_machina, "~> 2.7.0", only: :test},
+      {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
+      {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:phoenix_live_reload, "~> 1.2", only: :dev}
     ]
   end
 
