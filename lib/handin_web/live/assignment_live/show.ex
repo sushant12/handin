@@ -4,7 +4,7 @@ defmodule HandinWeb.AssignmentLive.Show do
   alias Handin.Modules
 
   @impl true
-  def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
+  def mount(%{"id" => id}, _session, socket) do
     {:ok,
      socket
      |> assign(current_page: :modules)

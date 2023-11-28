@@ -2,7 +2,6 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
   use HandinWeb, :live_component
 
   alias Handin.Assignments
-  alias Handin.SupportFileUploader
 
   @impl true
   def render(assigns) do
@@ -303,7 +302,7 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
     )
   end
 
-  defp save_assignment(socket, action) do
+  defp save_assignment(socket, _action) do
     consume_entries(socket, socket.assigns.assignment)
     notify_parent({:saved, socket.assigns.assignment})
 

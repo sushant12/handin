@@ -3,7 +3,7 @@ defmodule HandinWeb.AssignmentLive.Submission do
 
   alias Handin.Modules
   alias Handin.Assignments
-  alias Handin.ProgrammingLanguages
+
   @impl true
   def render(assigns) do
     ~H"""
