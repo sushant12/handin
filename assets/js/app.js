@@ -37,6 +37,15 @@ let liveSocket = new LiveSocket("/live", Socket, {
 topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+window.addEventListener("lme:editor_mounted", (ev) => {
+    const hook = ev.detail.hook
+
+    const editor = ev.detail.editor.standalone_code_editor
+
+    editor.onDidBlurEditorWidget(() => {
+        hook.pushEvent("code-editor-lost-focus", { value: editor.getValue() })
+    })
+})
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()

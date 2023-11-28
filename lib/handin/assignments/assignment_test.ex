@@ -20,8 +20,21 @@ defmodule Handin.Assignments.AssignmentTest do
     timestamps()
   end
 
-  @attrs [:name, :assignment_id, :points_on_pass, :points_on_fail, :command, :expected_output_type, :expected_output_text, :expected_output_file, :ttl]
-  @required_attrs [:name, :assignment_id, :points_on_pass, :points_on_fail, :command, :expected_output_type]
+  @required_attrs [
+    :name,
+    :assignment_id,
+    :points_on_pass,
+    :points_on_fail,
+    :command,
+    :expected_output_type
+  ]
+
+  @attrs @required_attrs ++ [
+    :expected_output_text,
+    :expected_output_file,
+    :ttl
+  ]
+
   @doc false
   def changeset(assignment_test, attrs) do
     assignment_test

@@ -362,8 +362,7 @@ defmodule HandinWeb.AssignmentLive.AssignmentTestComponent do
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
-    {:noreply,
-     socket |> cancel_upload(:support_file, ref) |> cancel_upload(:solution_file, ref)}
+    {:noreply, socket |> cancel_upload(:support_file, ref) |> cancel_upload(:solution_file, ref)}
   end
 
   def handle_event("save", %{"assignment_test" => assignment_test_params}, socket) do
