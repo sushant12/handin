@@ -51,7 +51,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   clip-rule="evenodd"
                 />
               </svg>
-              <span>sum.cc</span>
+              <span type="button" class="b" data-toggle="tooltip" data-placement="top" title="suasdfasdfam.cc">suasdfasdfasdfasdfm</span>
             </li>
             <li class="py-1 flex items-center">
               <svg
@@ -66,7 +66,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   clip-rule="evenodd"
                 />
               </svg>
-              <span>m1.in</span>
+              <span type="button" class="b" data-toggle="tooltip" data-placement="top" title="suasdfasdfasdfasdfm.cc">m1.in</span>
             </li>
           </ul>
         </div>

@@ -22,3 +22,15 @@
   display: inline-block;
   position: relative;
 }
+
+.b {
+  white-space: nowrap; 
+  width: 50px; 
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+
+.assignment-test-sidebar {
+  width: 180px;
+  height: 75vh; 
+}
