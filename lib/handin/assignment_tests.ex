@@ -71,7 +71,7 @@ defmodule Handin.AssignmentTests do
   """
   def update_assignment_test(%AssignmentTest{} = assignment_test, attrs) do
     assignment_test
-    |> AssignmentTest.changeset(attrs)
+    |> change_assignment_test(attrs)
     |> Repo.update()
   end
 
@@ -101,7 +101,9 @@ defmodule Handin.AssignmentTests do
 
   """
   def change_assignment_test(%AssignmentTest{} = assignment_test, attrs \\ %{}) do
-    AssignmentTest.changeset(assignment_test, attrs)
+    assignment_test
+    |> Repo.preload(assignment: [:support_files])
+    |> AssignmentTest.changeset(attrs)
   end
 
   def list_assignment_tests_for_assignment(id) do
