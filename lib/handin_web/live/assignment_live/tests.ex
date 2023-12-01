@@ -40,6 +40,9 @@ defmodule HandinWeb.AssignmentLive.Tests do
       <div class="assignment-test-sidebar bg-gray-200 p-4">
         <div class="assignment-test-files">
           <ul>
+            <li :if={@assignment.support_files == []} class="py-1 flex items-center">
+              No files added
+            </li>
             <li :for={support_file <- @assignment.support_files} class="py-1 flex items-center">
               <svg
                 class="w-4 h-4 mr-2"
@@ -89,13 +92,43 @@ defmodule HandinWeb.AssignmentLive.Tests do
               >
                 <.link phx-click="select-test" phx-value-id={test.id}><%= test.name %></.link>
                 <span class="delete-icon">
-                  <svg
-                    class="w-4 h-4 fill-current text-red-500 cursor-pointer"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 448 512"
-                  >
-                    <path d="M240 224V48a16 16 0 0 0-16-16h-32a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h32a16 16 0 0 0 16-16zM432 80h-80v16a16 16 0 0 1-16 16H112a16 16 0 0 1-16-16v-16H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h16v336a48 48 0 0 0 48 48h320a48 48 0 0 0 48-48V128h16a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16zM316.29 256l37.89-37.89a14.6 14.6 0 0 0-20.6-20.6L295.7 235.4l-37.89-37.89a14.6 14.6 0 0 0-20.6 20.6l37.89 37.89-37.89 37.89a14.6 14.6 0 0 0 20.6 20.6l37.89-37.89 37.89 37.89a14.6 14.6 0 0 0 20.6-20.6zM152 400a16 16 0 1 1 16-16 16 16 0 0 1-16 16zm96 0a16 16 0 1 1 16-16 16 16 0 0 1-16 16zm96 0a16 16 0 1 1 16-16 16 16 0 0 1-16 16z" />
-                  </svg>
+                  <.button phx-click="delete-test" phx-value-id={test.id}>
+                    <svg
+                      width="18px"
+                      height="18px"
+                      viewBox="0 0 24 24"
+                      id="Layer_1"
+                      data-name="Layer 1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="#ff0000"
+                      stroke="#ff0000"
+                    >
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                      </g>
+                      <g id="SVGRepo_iconCarrier">
+                        <defs>
+                          <style>
+                            .cls-1{fill:none;stroke:#ff0000;stroke-miterlimit:10;stroke-width:1.91px;}
+                          </style>
+                        </defs>
+                        <path
+                          class="cls-1"
+                          d="M16.88,22.5H7.12a1.9,1.9,0,0,1-1.9-1.8L4.36,5.32H19.64L18.78,20.7A1.9,1.9,0,0,1,16.88,22.5Z"
+                        >
+                        </path>
+                        <line class="cls-1" x1="2.45" y1="5.32" x2="21.55" y2="5.32"></line>
+                        <path
+                          class="cls-1"
+                          d="M10.09,1.5h3.82a1.91,1.91,0,0,1,1.91,1.91V5.32a0,0,0,0,1,0,0H8.18a0,0,0,0,1,0,0V3.41A1.91,1.91,0,0,1,10.09,1.5Z"
+                        >
+                        </path>
+                        <line class="cls-1" x1="12" y1="8.18" x2="12" y2="19.64"></line>
+                        <line class="cls-1" x1="15.82" y1="8.18" x2="15.82" y2="19.64"></line>
+                        <line class="cls-1" x1="8.18" y1="8.18" x2="8.18" y2="19.64"></line>
+                      </g>
+                    </svg>
+                  </.button>
                 </span>
               </li>
             </ul>
@@ -177,7 +210,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 />
               </span>
             </div>
-            <pre class="text-gray-700">pseudocode: if <%= @assignment_test && @assignment_test.command %> == <%= if @assignment_test.expected_output_type == "text", do: @assignment_test.expected_output_text, else: "cat(#{@assignment_test.expected_output_file})" %> then true else false</pre>
+            <pre class="text-gray-700">pseudocode: if <%= @assignment_test && @assignment_test.command %> == <%= if @assignment_test.expected_output_type == "file", do: "cat(#{@assignment_test.expected_output_file})", else: @assignment_test.expected_output_text %> then true else false</pre>
           </.simple_form>
         </div>
         <div class="assignment-test-output bg-gray-800 rounded shadow-md p-4 h-64 w-full">
@@ -212,19 +245,45 @@ defmodule HandinWeb.AssignmentLive.Tests do
   def handle_event("add-new-test", _, socket) do
     {:ok, assignment_test} =
       %{
-        name: "Lorem",
+        name: "Default Test",
         assignment_id: socket.assigns.assignment.id,
         points_on_pass: 0,
         points_on_fail: 0,
         command: "START",
-        expected_output_type: "SELECT ONE"
+        expected_output_type: "type"
       }
       |> AssignmentTests.create_assignment_test()
 
     {:noreply,
      socket
      |> assign(:assignment_test, assignment_test)
+     |> assign_form(AssignmentTests.change_assignment_test(assignment_test))
+     |> assign(
+       :assignment_tests,
+       AssignmentTests.list_assignment_tests_for_assignment(socket.assigns.assignment.id)
+     )}
+  end
+
+  def handle_event("select-test", %{"id" => id}, socket) do
+    assignment_test = AssignmentTests.get_assignment_test!(id)
+
+    {:noreply,
+     assign(socket, :assignment_test, assignment_test)
      |> assign_form(AssignmentTests.change_assignment_test(assignment_test))}
+  end
+
+  def handle_event("delete-test", %{"id" => id}, socket) do
+    assignment_test = AssignmentTests.get_assignment_test!(id)
+    {:ok, _} = AssignmentTests.delete_assignment_test(assignment_test)
+
+    {:noreply,
+     assign(
+       socket,
+       :assignment_tests,
+       Enum.reject(socket.assigns.assignment_tests, &(&1.id == assignment_test.id))
+     )
+     |> assign(:assignment_test, nil)
+     |> assign_form(AssignmentTests.change_assignment_test(%AssignmentTest{}))}
   end
 
   def handle_event("validate", %{"assignment_test" => assignment_test_params}, socket) do
@@ -234,14 +293,6 @@ defmodule HandinWeb.AssignmentLive.Tests do
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
-  end
-
-  def handle_event("select-test", %{"id" => id}, socket) do
-    assignment_test = AssignmentTests.get_assignment_test!(id)
-
-    {:noreply,
-     assign(socket, :assignment_test, assignment_test)
-     |> assign_form(AssignmentTests.change_assignment_test(assignment_test))}
   end
 
   def handle_event("save-field", %{"value" => name, "target" => "name"}, socket) do
