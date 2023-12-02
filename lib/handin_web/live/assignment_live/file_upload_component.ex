@@ -319,7 +319,7 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
           Assignments.save_support_file(%{"assignment_id" => assignment.id})
 
         Assignments.upload_support_file(support_file, %{
-          "file" => %Plug.Upload{
+          file: %Plug.Upload{
             content_type: entry.client_type,
             filename: entry.client_name,
             path: meta.path
@@ -334,7 +334,7 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
           Assignments.save_solution_file(%{"assignment_id" => assignment.id})
 
         Assignments.upload_solution_file(solution_file, %{
-          "file" => %Plug.Upload{
+          file: %Plug.Upload{
             content_type: entry.client_type,
             filename: entry.client_name,
             path: meta.path

@@ -40,7 +40,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
       <div class="assignment-test-sidebar bg-gray-200 p-4">
         <div class="assignment-test-files">
           <ul>
-            <li :if={@assignment.support_files == []} class="py-1 flex items-center">
+            <li
+              :if={@assignment.support_files == [] && @assignment.solution_files == []}
+              class="py-1 flex items-center"
+            >
               No files added
             </li>
             <li :for={support_file <- @assignment.support_files} class="py-1 flex items-center">
@@ -142,44 +145,24 @@ defmodule HandinWeb.AssignmentLive.Tests do
             for={@form}
             id="test-creation-form"
             class="mb-4"
-            phx-change="validate"
+            phx-change="validate_and_save"
           >
             <div class="grid grid-cols-12 gap-4">
               <label class="col-span-3 p-4">Name</label>
               <span class="col-span-9">
-                <.input
-                  field={@form[:name]}
-                  type="text"
-                  phx-blur="save-field"
-                  phx-value-target="name"
-                />
+                <.input field={@form[:name]} type="text" />
               </span>
               <label class="col-span-3 p-4">Points on pass</label>
               <span class="col-span-9">
-                <.input
-                  field={@form[:points_on_pass]}
-                  type="number"
-                  phx-blur="save-field"
-                  phx-value-target="points_on_pass"
-                />
+                <.input field={@form[:points_on_pass]} type="number" />
               </span>
               <label class="col-span-3 p-4">Points on fail</label>
               <span class="col-span-9">
-                <.input
-                  field={@form[:points_on_fail]}
-                  type="number"
-                  phx-blur="save-field"
-                  phx-value-target="points_on_fail"
-                />
+                <.input field={@form[:points_on_fail]} type="number" />
               </span>
               <label class="col-span-3 p-4">Run command</label>
               <span class="col-span-9">
-                <.input
-                  field={@form[:command]}
-                  type="text"
-                  phx-blur="save-field"
-                  phx-value-target="command"
-                />
+                <.input field={@form[:command]} type="text" />
               </span>
               <label class="col-span-3 p-4">Expected output</label>
               <span class="col-span-9">
@@ -188,29 +171,16 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   type="select"
                   options={["text", "file"]}
                   prompt="Select expected output type"
-                  phx-blur="save-field"
-                  phx-value-target="expected_output_type"
                 />
               </span>
               <span :if={@form[:expected_output_type].value == "text"} class="col-span-9 col-start-4">
-                <.input
-                  field={@form[:expected_output_text]}
-                  type="text"
-                  phx-blur="save-field"
-                  phx-value-target="expected_output_text"
-                />
+                <.input field={@form[:expected_output_text]} type="text" />
               </span>
               <span :if={@form[:expected_output_type].value == "file"} class="col-span-9 col-start-4">
-                <.input
-                  field={@form[:expected_output_file]}
-                  type="text"
-                  placeholder="Filename"
-                  phx-blur="save-field"
-                  phx-value-target="expected_output_file"
-                />
+                <.input field={@form[:expected_output_file]} type="text" placeholder="Filename" />
               </span>
             </div>
-            <pre class="text-gray-700">pseudocode: if <%= @assignment_test && @assignment_test.command %> == <%= if @assignment_test.expected_output_type == "file", do: "cat(#{@assignment_test.expected_output_file})", else: @assignment_test.expected_output_text %> then true else false</pre>
+            <pre class="text-gray-700">pseudocode: if <%=  @assignment_test.command %> == <%= if @assignment_test.expected_output_type == "file", do: "cat(#{@assignment_test.expected_output_file})", else: @assignment_test.expected_output_text %> then true else false</pre>
           </.simple_form>
         </div>
         <div class="assignment-test-output bg-gray-800 rounded shadow-md p-4 h-64 w-full">
@@ -286,79 +256,34 @@ defmodule HandinWeb.AssignmentLive.Tests do
      |> assign_form(AssignmentTests.change_assignment_test(%AssignmentTest{}))}
   end
 
-  def handle_event("validate", %{"assignment_test" => assignment_test_params}, socket) do
+  def handle_event("validate_and_save", %{"assignment_test" => assignment_test_params}, socket) do
     changeset =
       socket.assigns.assignment_test
       |> AssignmentTests.change_assignment_test(assignment_test_params)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign_form(socket, changeset)}
-  end
+    changeset.changes
+    |> Enum.each(fn {k, v} ->
+      AssignmentTests.update_assignment_test(socket.assigns.assignment_test, %{k => v})
+    end)
 
-  def handle_event("save-field", %{"value" => name, "target" => "name"}, socket) do
-    save_field(socket, %{name: name})
-  end
+    assignment_test = AssignmentTests.get_assignment_test!(socket.assigns.assignment_test.id)
 
-  def handle_event(
-        "save-field",
-        %{"value" => points_on_pass, "target" => "points_on_pass"},
-        socket
-      ) do
-    save_field(socket, %{points_on_pass: points_on_pass})
-  end
+    changeset =
+      assignment_test
+      |> AssignmentTests.change_assignment_test(assignment_test_params)
+      |> Map.put(:action, :validate)
 
-  def handle_event(
-        "save-field",
-        %{"value" => points_on_fail, "target" => "points_on_fail"},
-        socket
-      ) do
-    save_field(socket, %{points_on_fail: points_on_fail})
-  end
-
-  def handle_event("save-field", %{"value" => command, "target" => "command"}, socket) do
-    save_field(socket, %{command: command})
-  end
-
-  def handle_event(
-        "save-field",
-        %{"value" => expected_output_type, "target" => "expected_output_type"},
-        socket
-      ) do
-    save_field(socket, %{expected_output_type: expected_output_type})
-  end
-
-  def handle_event(
-        "save-field",
-        %{"value" => expected_output_text, "target" => "expected_output_text"},
-        socket
-      ) do
-    save_field(socket, %{expected_output_text: expected_output_text})
-  end
-
-  def handle_event(
-        "save-field",
-        %{"value" => expected_output_file, "target" => "expected_output_file"},
-        socket
-      ) do
-    save_field(socket, %{expected_output_file: expected_output_file})
-  end
-
-  defp save_field(socket, param) do
-    case AssignmentTests.update_assignment_test(socket.assigns.assignment_test, param) do
-      {:ok, assignment_test} ->
-        changeset = AssignmentTests.change_assignment_test(assignment_test)
-
-        {:noreply,
-         assign(socket, :assignment_test, assignment_test)
-         |> assign_form(changeset)
-         |> assign(
-           :assignment_tests,
-           AssignmentTests.list_assignment_tests_for_assignment(socket.assigns.assignment.id)
-         )}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
-    end
+    {:noreply,
+     assign_form(socket, changeset)
+     |> assign(
+       :assignment_test,
+       assignment_test
+     )
+     |> assign(
+       :assignment_tests,
+       AssignmentTests.list_assignment_tests_for_assignment(socket.assigns.assignment.id)
+     )}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

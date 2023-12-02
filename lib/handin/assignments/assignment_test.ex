@@ -46,11 +46,10 @@ defmodule Handin.Assignments.AssignmentTest do
   end
 
   defp maybe_validate_expected_output_type(changeset) do
-    if get_field(changeset, :expected_output_type) == "file" do
-      changeset
-      |> validate_required([:expected_output_file])
-    else
-      changeset
+    case get_change(changeset, :expected_output_type) do
+      "file" -> changeset |> validate_required([:expected_output_file])
+      "text" -> changeset |> validate_required([:expected_output_text])
+      _ -> changeset
     end
   end
 
