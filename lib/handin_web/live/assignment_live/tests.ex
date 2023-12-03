@@ -35,9 +35,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
       />
     </.tabs>
-
-    <div class="assignment-test-container flex">
-      <div class="assignment-test-sidebar bg-gray-200 p-4">
+    <div class="flex h-screen">
+      <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-full p-4">
         <div class="assignment-test-files">
           <ul>
             <li
@@ -91,7 +90,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
             <ul>
               <li
                 :for={test <- @assignment_tests}
-                class="py-1 relative flex justify-between items-center"
+                class="py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700"
               >
                 <.link phx-click="select-test" phx-value-id={test.id}><%= test.name %></.link>
                 <span class="delete-icon">
@@ -138,8 +137,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
           </div>
         </div>
       </div>
-      <div class="assignment-test-container flex-1 p-2">
-        <div class="assignment-test-form bg-white rounded shadow-md px-4 mb-4 h-[57%] w-full">
+      <div class="flex-1 ml-4">
+        <div class="assignment-test-form bg-white rounded shadow-md px-4 mb-4  w-full">
           <.simple_form
             :if={@assignment_test}
             for={@form}
@@ -180,12 +179,20 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 <.input field={@form[:expected_output_file]} type="text" placeholder="Filename" />
               </span>
             </div>
-            <pre class="text-gray-700">pseudocode: if <%=  @assignment_test.command %> == <%= if @assignment_test.expected_output_type == "file", do: "cat(#{@assignment_test.expected_output_file})", else: @assignment_test.expected_output_text %> then true else false</pre>
+            <pre>
+              pseudocode: if <span class="text-blue-500"><%=  @assignment_test.command %></span> == <span class="text-blue-500"><%= if @assignment_test.expected_output_type == "file", do: "cat(#{@assignment_test.expected_output_file})", else: @assignment_test.expected_output_text %> </span> then <span class="text-green-500"> true </span> else <span class="text-red-600">false</span></pre>
           </.simple_form>
         </div>
-        <div class="assignment-test-output bg-gray-800 rounded shadow-md p-4 h-64 w-full">
-          <p>Welcome to Terminal</p>
-          <p>></p>
+        <div class="flex">
+          <button
+            type="button"
+            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+          >
+            Run Tests
+          </button>
+        </div>
+        <div class="assignment-test-output bg-gray-800 rounded shadow-md p-4  w-full h-[42%]">
+          <p>output goes here</p>
         </div>
       </div>
     </div>
