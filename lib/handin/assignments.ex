@@ -6,7 +6,7 @@ defmodule Handin.Assignments do
   import Ecto.Query, warn: false
   alias Handin.Repo
 
-  alias Handin.Assignments.{Assignment, AssignmentTest, SupportFile, SolutionFile}
+  alias Handin.Assignments.{Assignment, AssignmentTest, SupportFile, SolutionFile, Build, Log}
 
   @doc """
   Returns the list of assignments.
@@ -181,5 +181,36 @@ defmodule Handin.Assignments do
     solution_file
     |> SolutionFile.file_changeset(attrs)
     |> Repo.update!()
+  end
+
+  @spec log(build_id :: Ecto.UUID, description :: String.t()) :: Log.t()
+  def log(build_id, description) do
+    Log.changeset(%{build_id: build_id, description: description})
+    |> Repo.insert()
+  end
+
+  @spec new_build(
+          attrs :: %{assignment_test_id: Ecto.UUID, assignment_id: Ecto.UUID, status: String.t()}
+        ) ::
+          {:ok, Build.t()}
+  def new_build(attrs) do
+    Build.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec update_build(
+          build :: Build.t(),
+          attrs :: %{status: String.t()} | %{machine_id: String.t()}
+        ) :: {:ok, Build.t()}
+  def update_build(build, attrs) do
+    Build.update_changeset(build, attrs)
+    |> Repo.update()
+  end
+
+  def get_logs(build_id) do
+    Build
+    |> Repo.get!(build_id)
+    |> Repo.preload(:logs)
+    |> Map.get(:logs)
   end
 end

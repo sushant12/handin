@@ -204,6 +204,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
      |> assign(:assignment, assignment)
      |> assign(:assignment_test, assignment_test)
      |> assign(:assignment_tests, assignment.assignment_tests)
+     |> assign(:logs, [])
      |> assign_form(
        AssignmentTests.change_assignment_test(
          assignment_test || %AssignmentTest{assignment_id: assignment.id}
@@ -284,6 +285,35 @@ defmodule HandinWeb.AssignmentLive.Tests do
        :assignment_tests,
        AssignmentTests.list_assignment_tests_for_assignment(socket.assigns.assignment.id)
      )}
+  end
+
+  def handle_event("run-test", %{"test_id" => assignment_test_id}, socket) do
+    HandinWeb.Endpoint.subscribe("build:assignment_test:#{assignment_test_id}")
+
+    DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
+      id: Handin.BuildServer,
+      start:
+        {Handin.BuildServer, :start_link,
+         [
+           %{
+             assignment_test_id: assignment_test_id,
+             type: "assignment_test",
+             image: socket.assigns.assignment.programming_language.docker_file_url
+           }
+         ]},
+      restart: :temporary
+    })
+
+    {:noreply, socket}
+  end
+
+  # Note: get logs needs to be fixed. logs are not being casted
+  @impl true
+  def handle_info(
+        %Phoenix.Socket.Broadcast{event: "new_log", payload: build_id},
+        socket
+      ) do
+    {:noreply, assign(socket, :logs, Assignments.get_logs(build_id))}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
