@@ -35,7 +35,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
     </.tabs>
 
     <div class="assignment-test-container flex">
-      <div class="assignment-test-sidebar bg-gray-200 p-4 w-[180px] h-[75vh]">
+      <div class="bg-gray-200 p-4 w-[180px] h-[75vh]">
         <div class="assignment-test-files">
           <ul>
             <li class="py-1 flex items-center">
