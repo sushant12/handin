@@ -35,7 +35,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
     </.tabs>
 
     <div class="assignment-test-container flex">
-      <div class="assignment-test-sidebar bg-gray-200 p-4 w-180px h-75vh">
+      <div class="assignment-test-sidebar bg-gray-200 p-4 w-[180px] h-[75vh]">
         <div class="assignment-test-files">
           <ul>
             <li class="py-1 flex items-center">
@@ -51,7 +51,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   clip-rule="evenodd"
                 />
               </svg>
-              <span type="button" class="wrap-text" data-toggle="tooltip" data-placement="top" title="sum.cc">sum.cc</span>
+              <span class="truncate hover:text-clip wrap-text w-[50px]" title="sum.cc">sum.cc</span>
             </li>
             <li class="py-1 flex items-center">
               <svg
@@ -66,7 +66,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   clip-rule="evenodd"
                 />
               </svg>
-              <span type="button" class="wrap-text" data-toggle="tooltip" data-placement="top" title="m1.in">m1.in</span>
+              <span class="truncate hover:text-clip wrap-text w-[50px]" title="m1.in">m1.in</span>
             </li>
           </ul>
         </div>

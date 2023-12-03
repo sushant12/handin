@@ -22,10 +22,3 @@
   display: inline-block;
   position: relative;
 }
-
-.wrap-text {
-  white-space: nowrap; 
-  width: 50px; 
-  overflow: hidden;
-  text-overflow: ellipsis; 
-}
