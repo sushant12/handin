@@ -37,7 +37,8 @@ defmodule Handin.AssignmentTests do
 
   """
   def get_assignment_test!(id),
-    do: Repo.get!(AssignmentTest, id)
+    do:
+      Repo.get!(AssignmentTest, id) |> Repo.preload(assignment: [:solution_files, :support_files])
 
   @doc """
   Creates a assignment_test.

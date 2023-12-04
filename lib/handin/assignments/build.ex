@@ -8,7 +8,7 @@ defmodule Handin.Assignments.Build do
   @type t :: %__MODULE__{}
   schema "builds" do
     field :machine_id, :string
-    field :status, :string
+    field :status, Ecto.Enum, values: [:running, :failed, :completed]
     belongs_to :assignment, Assignment
     has_many :logs, Log, on_delete: :delete_all
 
