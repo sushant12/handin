@@ -183,9 +183,9 @@ defmodule Handin.Assignments do
     |> Repo.update!()
   end
 
-  @spec log(build_id :: Ecto.UUID, description :: String.t()) :: Log.t()
-  def log(build_id, description) do
-    Log.changeset(%{build_id: build_id, description: description})
+  @spec log(build_id :: Ecto.UUID, command :: String.t(), description :: String.t()) :: Log.t()
+  def log(build_id, command, description) do
+    Log.changeset(%{build_id: build_id, description: description, command: command})
     |> Repo.insert()
   end
 
