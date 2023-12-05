@@ -51,7 +51,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   clip-rule="evenodd"
                 />
               </svg>
-              <span class="truncate ... white-space: nowrap;" title="sum.cdfasdfasdfc">sum.cc</span>
+              <span class="truncate ... white-space: nowrap;" title="sum.cc">sum.cc</span>
             </li>
             <li class="py-1 flex items-center">
               <svg
