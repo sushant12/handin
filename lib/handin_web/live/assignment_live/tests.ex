@@ -35,6 +35,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
       />
     </.tabs>
+
     <div class="flex h-screen">
       <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-full p-4">
         <div class="assignment-test-files">
@@ -46,34 +47,39 @@ defmodule HandinWeb.AssignmentLive.Tests do
               No files added
             </li>
             <li :for={support_file <- @assignment.support_files} class="py-1 flex items-center">
-              <svg
-                class="w-4 h-4 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.586 2H15a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm10 4v2h-4V6h4zM6 9h8v2H6V9zm0 4h8v2H6v-2z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              <span><%= support_file.file.file_name %></span>
+              <span>
+                <svg
+                  class="w-4 h-4 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.586 2H15a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm10 4v2h-4V6h4zM6 9h8v2H6V9zm0 4h8v2H6v-2z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </span>
+              <span class="truncate" title={support_file.file.file_name}><%= support_file.file.file_name %></span>
             </li>
             <li :for={solution_file <- @assignment.solution_files} class="py-1 flex items-center">
-              <svg
-                class="w-4 h-4 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.586 2H15a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm10 4v2h-4V6h4zM6 9h8v2H6V9zm0 4h8v2H6v-2z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              <span><%= solution_file.file.file_name %></span>
+              <span>
+                <svg
+                  class="w-4 h-4 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.586 2H15a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm10 4v2h-4V6h4zM6 9h8v2H6V9zm0 4h8v2H6v-2z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </span>
+
+              <span class="truncate" title={solution_file.file.file_name}><%= solution_file.file.file_name %></span>
             </li>
           </ul>
         </div>
@@ -92,7 +98,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 :for={test <- @assignment_tests}
                 class="py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                <.link phx-click="select-test" phx-value-id={test.id}><%= test.name %></.link>
+                <.link phx-click="select-test" phx-value-id={test.id} class="truncate" title={test.name}>
+                  <%= test.name %>
+                </.link>
+
                 <span class="delete-icon">
                   <.button phx-click="delete-test" phx-value-id={test.id}>
                     <svg
