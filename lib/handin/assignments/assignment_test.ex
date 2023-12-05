@@ -29,16 +29,44 @@ defmodule Handin.Assignments.AssignmentTest do
     :expected_output_type
   ]
 
-  @attrs @required_attrs ++ [
-    :expected_output_text,
-    :expected_output_file,
-    :ttl
-  ]
+  @attrs @required_attrs ++
+           [
+             :expected_output_text,
+             :expected_output_file,
+             :ttl
+           ]
 
   @doc false
   def changeset(assignment_test, attrs) do
     assignment_test
     |> cast(attrs, @attrs)
     |> validate_required(@required_attrs)
+    |> maybe_validate_expected_output_type()
+    |> maybe_validate_file_name(attrs)
+  end
+
+  defp maybe_validate_expected_output_type(changeset) do
+    case get_change(changeset, :expected_output_type) do
+      "file" -> changeset |> validate_required([:expected_output_file])
+      "text" -> changeset |> validate_required([:expected_output_text])
+      _ -> changeset
+    end
+  end
+
+  defp maybe_validate_file_name(changeset, _attrs) do
+    case get_change(changeset, :expected_output_file) do
+      nil ->
+        changeset
+
+      file_name ->
+        changeset
+        |> get_field(:assignment)
+        |> Map.get(:support_files)
+        |> Enum.find(&(&1.file.file_name == file_name))
+        |> case do
+          nil -> add_error(changeset, :expected_output_file, "File does not exist")
+          _ -> changeset
+        end
+    end
   end
 end

@@ -184,7 +184,7 @@ defmodule HandinWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-10 space-y-8 bg-white">
+      <div class="space-y-8 bg-white">
         <%= render_slot(@inner_block, f) %>
         <div
           :for={action <- @actions}
@@ -595,7 +595,7 @@ defmodule HandinWeb.CoreComponents do
 
   def tabs(assigns) do
     ~H"""
-    <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
+    <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 mb-5">
       <ul class="flex flex-wrap -mb-px">
         <.tab_item
           :for={item <- @item}
