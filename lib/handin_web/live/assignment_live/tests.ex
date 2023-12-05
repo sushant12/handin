@@ -51,7 +51,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   clip-rule="evenodd"
                 />
               </svg>
-              <span class="truncate ... white-space: nowrap;" title="sum.cc">sum.cc</span>
+              <span class="truncate" title="sum.c">sum.c</span>
             </li>
             <li class="py-1 flex items-center">
               <svg
@@ -66,7 +66,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   clip-rule="evenodd"
                 />
               </svg>
-              <span class="truncate ... white-space: nowrap;" title="m1.in">m1.in</span>
+              <span class="truncate" title="m1.in">m1.in</span>
             </li>
           </ul>
         </div>
