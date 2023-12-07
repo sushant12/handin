@@ -51,11 +51,12 @@ defmodule Handin.BuildServer do
                config: %{
                  auto_destroy: true,
                  image: state.image,
-                 files: build_files(assignment, state.type)
+                 files: build_files(assignment, state.type) ++ build_main_script(assignment) ++ build_tests_scripts(assignment)
                }
              })
            ),
          true <- machine_started?(machine),
+         {:ok, build} <- Assignments.update_build(build, %{machine_id: machine["id"]}),
          {:ok, response} <- @machine_api.exec(machine["id"], "sh ./main.sh") do
       message =
         if String.trim(response["stdout"]) == "" do
@@ -67,15 +68,15 @@ defmodule Handin.BuildServer do
       log_and_broadcast(build, "sh ./main.sh", message, state)
 
       assignment.assignment_tests
-      |> Enum.map(&"#{&1.name}_#{&1.id}.sh")
-      |> Enum.each(fn file_name ->
+      |> Enum.map(&{"#{&1.name}_#{&1.id}.sh", &1})
+      |> Enum.each(fn {file_name, assignment_test} ->
         case @machine_api.exec(machine["id"], "sh ./#{file_name}") do
           {:ok, response} ->
             message =
               if String.trim(response["stdout"]) == "" do
                 response["stderr"]
               else
-                response["stdout"]
+                compare_output(assignment_test, response)
               end
 
             log_and_broadcast(build, "sh ./#{file_name}", message, state)
@@ -141,5 +142,49 @@ defmodule Handin.BuildServer do
         "raw_value" => Base.encode64(body)
       }
     end)
+  end
+
+  defp build_main_script(assignment) do
+    template = """
+      #!bin/bash
+      #{assignment.run_script}
+    """
+    [%{
+      "guest_path" => "/main.sh",
+      "raw_value" => Base.encode64(template)
+    }]
+  end
+
+  defp build_tests_scripts(assignment) do
+    assignment.assignment_tests
+    |> Enum.map(fn assignment_test ->
+      template = """
+        #!bin/bash
+        #{assignment_test.command}
+      """
+
+      %{
+        "guest_path" => "/#{assignment_test.name}_#{assignment_test.id}.sh",
+        "raw_value" => Base.encode64(template)
+      }
+    end)
+  end
+
+  defp compare_output(assignment_test, response) do
+    if assignment_test.expected_output_type == "text" do
+      if response["stdout"] == assignment_test.expected_output_text, do: "PASS", else: "FAIL"
+    else
+      url =
+        SupportFileUploader.url({assignment_test.expected_output_file, Assignments.get_support_file_by_name!(assignment, assignment_test.expected_output_file)},
+        signed: true
+        )
+
+      {:ok, %Finch.Response{status: 200, body: body}} =
+        Finch.build(:get, url)
+        |> Finch.request(Handin.Finch)
+
+      # response body has \n. need to strip them
+      if response["stdout"] == body, do: "PASS", else: "FAIL"
+    end
   end
 end

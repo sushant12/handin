@@ -202,8 +202,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
             Run All Tests
           </button>
         </div>
-        <div class="assignment-test-output bg-gray-800 rounded shadow-md p-4  w-full h-[42%]">
-          <p>output goes here</p>
+        <div class="assignment-test-output bg-gray-800 rounded shadow-md p-4 text-white w-full h-[42%]">
+          <%= for logs <- @logs do %>
+            <%= logs.output %> <br />
+          <% end %>
         </div>
       </div>
     </div>
@@ -222,7 +224,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
      |> assign(:assignment, assignment)
      |> assign(:assignment_test, assignment_test)
      |> assign(:assignment_tests, assignment.assignment_tests)
-     |> assign(:logs, [])
+     |> assign(:logs, Assignments.get_recent_build_logs(assignment_id))
      |> assign_form(
        AssignmentTests.change_assignment_test(
          assignment_test || %AssignmentTest{assignment_id: assignment.id}
@@ -306,7 +308,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
   end
 
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
-    HandinWeb.Endpoint.subscribe("build:assignment:#{assignment_id}")
+    HandinWeb.Endpoint.subscribe("build:assignment_tests:#{assignment_id}")
 
     DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
       id: Handin.BuildServer,
@@ -322,7 +324,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
       restart: :temporary
     })
 
-    {:noreply, socket}
+    {:noreply, assign(socket, :logs, [])}
   end
 
   # Note: get logs needs to be fixed. logs are not being casted
