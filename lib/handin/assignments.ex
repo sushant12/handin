@@ -43,7 +43,8 @@ defmodule Handin.Assignments do
         :programming_language,
         :assignment_tests,
         :support_files,
-        :solution_files
+        :solution_files,
+        builds: [:logs]
       ])
 
   @doc """
@@ -145,6 +146,9 @@ defmodule Handin.Assignments do
 
   def get_support_file!(id), do: Repo.get!(SupportFile, id)
 
+  def get_support_file_by_name!(assignment, file_name),
+    do: Enum.find(assignment.support_files, &(&1.file.file_name == file_name))
+
   def get_solution_file!(id), do: Repo.get!(SolutionFile, id)
 
   def delete_support_file(%SupportFile{} = support_file) do
@@ -183,9 +187,10 @@ defmodule Handin.Assignments do
     |> Repo.update!()
   end
 
-  @spec log(build_id :: Ecto.UUID, command :: String.t(), description :: String.t()) :: Log.t()
-  def log(build_id, command, description) do
-    Log.changeset(%{build_id: build_id, description: description, command: command})
+  @spec log(build_id :: Ecto.UUID, assignment_test_id :: Ecto.UUID, output :: String.t()) ::
+          Log.t()
+  def log(build_id, assignment_test_id, output) do
+    Log.changeset(%{build_id: build_id, output: output, assignment_test_id: assignment_test_id})
     |> Repo.insert()
   end
 
@@ -212,5 +217,20 @@ defmodule Handin.Assignments do
     |> Repo.get!(build_id)
     |> Repo.preload(:logs)
     |> Map.get(:logs)
+  end
+
+  def get_recent_build_logs(assignment_id) do
+    assignment = get_assignment!(assignment_id)
+
+    build =
+      assignment.builds
+      |> Enum.sort_by(& &1.inserted_at, :desc)
+      |> List.first()
+
+    if build do
+      build |> Map.get(:logs) |> Enum.sort_by(& &1.inserted_at, :asc)
+    else
+      []
+    end
   end
 end
