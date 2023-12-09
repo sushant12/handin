@@ -187,6 +187,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
               <span :if={@form[:expected_output_type].value == "file"} class="col-span-9 col-start-4">
                 <.input field={@form[:expected_output_file]} type="text" placeholder="Filename" />
               </span>
+              <label class="col-span-3 p-4">TTL</label>
+              <span class="col-span-9">
+                <.input field={@form[:ttl]} type="number" />
+              </span>
             </div>
             <pre>
               pseudocode: if <span class="text-blue-500"><%=  @assignment_test.command %></span> == <span class="text-blue-500"><%= if @assignment_test.expected_output_type == "file", do: "cat(#{@assignment_test.expected_output_file})", else: @assignment_test.expected_output_text %> </span> then <span class="text-green-500"> true </span> else <span class="text-red-600">false</span></pre>
