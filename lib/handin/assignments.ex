@@ -146,8 +146,13 @@ defmodule Handin.Assignments do
 
   def get_support_file!(id), do: Repo.get!(SupportFile, id)
 
-  def get_support_file_by_name!(assignment, file_name),
-    do: Enum.find(assignment.support_files, &(&1.file.file_name == file_name))
+  @spec get_support_file_by_name!(assignment_id :: Ecto.UUID, support_file_name :: String.t()) ::
+          SupportFile.t()
+  def get_support_file_by_name!(assignment_id, support_file_name) do
+    get_assignment!(assignment_id)
+    |> Map.get(:support_files)
+    |> Enum.find(&(&1.file.file_name == support_file_name))
+  end
 
   def get_solution_file!(id), do: Repo.get!(SolutionFile, id)
 

@@ -4,7 +4,7 @@ defmodule Handin.Assignments.SupportFile do
   use Waffle.Ecto.Schema
 
   alias Handin.Assignments.Assignment
-
+  @type t :: %__MODULE__{}
   schema "support_files" do
     field :file, Handin.SupportFileUploader.Type
 
