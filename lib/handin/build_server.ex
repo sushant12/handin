@@ -67,6 +67,7 @@ defmodule Handin.BuildServer do
       |> Enum.each(fn {file_name, assignment_test} ->
         case @machine_api.exec(machine["id"], "sh ./#{file_name}") do
           {:ok, %{"exit_code" => 0} = response} ->
+            match_output?(assignment_test, response["stdout"])
             log_and_broadcast(build, assignment_test.id, response["stdout"], state)
 
           {:ok, %{"exit_code" => 1} = response} ->
@@ -168,22 +169,25 @@ defmodule Handin.BuildServer do
     end)
   end
 
-  # defp compare_output(_assignment_test, _response) do
-  #   "PASS"
-  #   # if assignment_test.expected_output_type == "text" do
-  #   #   if response["stdout"] == assignment_test.expected_output_text, do: "PASS", else: "FAIL"
-  #   # else
-  #   #   url =
-  #   #     SupportFileUploader.url({assignment_test.expected_output_file, Assignments.get_support_file_by_name!(assignment, assignment_test.expected_output_file)},
-  #   #     signed: true
-  #   #     )
+  defp match_output?(assignment_test, output) do
+    if assignment_test.expected_output_type == "text" do
+      output == assignment_test.expected_output_text
+    else
+      url =
+        SupportFileUploader.url(
+          {assignment_test.expected_output_file,
+           Assignments.get_support_file_by_name!(
+             assignment_test.assignment_id,
+             assignment_test.expected_output_file
+           )},
+          signed: true
+        )
 
-  #   #   {:ok, %Finch.Response{status: 200, body: body}} =
-  #   #     Finch.build(:get, url)
-  #   #     |> Finch.request(Handin.Finch)
+      {:ok, %Finch.Response{status: 200, body: body}} =
+        Finch.build(:get, url)
+        |> Finch.request(Handin.Finch)
 
-  #   #   # response body has \n. need to strip them
-  #   #   if response["stdout"] == body, do: "PASS", else: "FAIL"
-  #   # end
-  # end
+      output == body
+    end
+  end
 end
