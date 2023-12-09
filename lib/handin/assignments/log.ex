@@ -13,10 +13,9 @@ defmodule Handin.Assignments.Log do
     timestamps(type: :utc_datetime_usec)
   end
 
-  @attrs [:output, :build_id, :command]
+  @attrs [:output, :build_id, :command, :assignment_test_id]
   def changeset(attrs) do
     %__MODULE__{}
     |> cast(attrs, @attrs)
-    |> validate_required(@attrs)
   end
 end
