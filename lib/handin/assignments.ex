@@ -146,7 +146,8 @@ defmodule Handin.Assignments do
 
   def get_support_file!(id), do: Repo.get!(SupportFile, id)
 
-  def get_support_file_by_name!(assignment, file_name), do: Enum.find(assignment.support_files, &(&1.file.file_name == file_name))
+  def get_support_file_by_name!(assignment, file_name),
+    do: Enum.find(assignment.support_files, &(&1.file.file_name == file_name))
 
   def get_solution_file!(id), do: Repo.get!(SolutionFile, id)
 
@@ -186,9 +187,10 @@ defmodule Handin.Assignments do
     |> Repo.update!()
   end
 
-  @spec log(build_id :: Ecto.UUID, command :: String.t(), output :: String.t()) :: Log.t()
-  def log(build_id, command, output) do
-    Log.changeset(%{build_id: build_id, output: output, command: command})
+  @spec log(build_id :: Ecto.UUID, assignment_test_id :: Ecto.UUID, output :: String.t()) ::
+          Log.t()
+  def log(build_id, assignment_test_id, output) do
+    Log.changeset(%{build_id: build_id, output: output, assignment_test_id: assignment_test_id})
     |> Repo.insert()
   end
 
