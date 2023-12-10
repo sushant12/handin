@@ -58,6 +58,7 @@ defmodule Handin.BuildServer do
   def handle_continue(:process_build, state) do
     with {:ok, %{"exit_code" => 0} = response} <-
            @machine_api.exec(state.machine_id, "sh ./main.sh") do
+      # TODO: save to run_script_result table
       log_and_broadcast(
         state.build,
         %{command: "sh ./main.sh", output: response["stdout"]},
@@ -69,7 +70,11 @@ defmodule Handin.BuildServer do
       |> Enum.each(fn {file_name, assignment_test} ->
         case @machine_api.exec(state.machine_id, "sh ./#{file_name}") do
           {:ok, %{"exit_code" => 0} = response} ->
-            match_output?(assignment_test, response["stdout"])
+            if match_output?(assignment_test, response["stdout"]) do
+              # TODO: save to test_results table as passed
+            else
+              # TODO: save to test_results table as failed
+            end
 
             log_and_broadcast(
               state.build,
@@ -82,6 +87,8 @@ defmodule Handin.BuildServer do
             )
 
           {:ok, %{"exit_code" => 1} = response} ->
+            # TODO: save to test_results table as failed
+
             log_and_broadcast(
               state.build,
               %{
@@ -93,6 +100,8 @@ defmodule Handin.BuildServer do
             )
 
           {:error, reason} ->
+            # TODO: save to test_results table as failed
+
             log_and_broadcast(
               state.build,
               %{
@@ -109,6 +118,7 @@ defmodule Handin.BuildServer do
     else
       {:ok, %{"exit_code" => 1} = reason} ->
         Assignments.update_build(state.build, %{status: :failed})
+        # TODO: save to run_script_result table
 
         log_and_broadcast(
           state.build,
