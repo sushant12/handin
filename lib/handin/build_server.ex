@@ -58,7 +58,13 @@ defmodule Handin.BuildServer do
   def handle_continue(:process_build, state) do
     with {:ok, %{"exit_code" => 0} = response} <-
            @machine_api.exec(state.machine_id, "sh ./main.sh") do
-      # TODO: save to run_script_result table
+      Assignments.save_run_script_results(%{
+        assignment_id: state.assignment.id,
+        state: :pass,
+        build_id: state.build.id,
+        user_id: state.user_id
+      })
+
       log_and_broadcast(
         state.build,
         %{command: "sh ./main.sh", output: response["stdout"]},
@@ -118,7 +124,13 @@ defmodule Handin.BuildServer do
     else
       {:ok, %{"exit_code" => 1} = reason} ->
         Assignments.update_build(state.build, %{status: :failed})
-        # TODO: save to run_script_result table
+
+        Assignments.save_run_script_results(%{
+          assignment_id: state.assignment.id,
+          state: :fail,
+          build_id: state.build.id,
+          user_id: state.user_id
+        })
 
         log_and_broadcast(
           state.build,
