@@ -76,11 +76,14 @@ defmodule Handin.BuildServer do
       |> Enum.each(fn {file_name, assignment_test} ->
         case @machine_api.exec(state.machine_id, "sh ./#{file_name}") do
           {:ok, %{"exit_code" => 0} = response} ->
-            if match_output?(assignment_test, response["stdout"]) do
-              # TODO: save to test_results table as passed
-            else
-              # TODO: save to test_results table as failed
-            end
+            test_state = if match_output?(assignment_test, response["stdout"]), do: :pass, else: :fail
+
+            Assignments.save_test_results(%{
+              assignment_test_id: assignment_test.id,
+              state: test_state,
+              build_id: state.build.id,
+              user_id: state.user_id
+            })
 
             log_and_broadcast(
               state.build,
