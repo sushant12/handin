@@ -12,6 +12,6 @@ defmodule Handin.Repo.Migrations.CreateRunScriptResults do
       timestamps()
     end
 
-    create unique_index(:test_results, [:build_id, :assignment_id])
+    create unique_index(:run_script_results, [:build_id, :assignment_id])
   end
 end
