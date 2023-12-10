@@ -13,7 +13,8 @@ defmodule Handin.Assignments do
     SolutionFile,
     Build,
     Log,
-    RunScriptResult
+    RunScriptResult,
+    TestResult
   }
 
   @doc """
@@ -247,6 +248,11 @@ defmodule Handin.Assignments do
 
   def save_run_script_results(attrs) do
     RunScriptResult.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def save_test_results(attrs) do
+    TestResult.changeset(attrs)
     |> Repo.insert()
   end
 end
