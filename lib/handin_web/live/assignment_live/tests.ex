@@ -96,10 +96,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
             <ul>
               <li
                 :for={test <- @assignment_tests}
-                class="py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700"
+                class={["py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded", test.id == @assignment_test.id && "bg-gray-300"]}
               >
                 <.link phx-click="select-test" phx-value-id={test.id} class="truncate" title={test.name}>
-                  <%= test.name %> <%= if test.id == @assignment_test.id, do: "active"%>
+                  <%= test.name %>
                 </.link>
 
                 <span class="delete-icon">
