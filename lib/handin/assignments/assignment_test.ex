@@ -1,7 +1,7 @@
 defmodule Handin.Assignments.AssignmentTest do
   use Handin.Schema
   import Ecto.Changeset
-  alias Handin.Assignments.{Assignment, Log}
+  alias Handin.Assignments.{Assignment, Log, TestResult}
 
   schema "assignment_tests" do
     field :name, :string
@@ -16,6 +16,7 @@ defmodule Handin.Assignments.AssignmentTest do
     belongs_to :assignment, Assignment
 
     has_many :logs, Log
+    has_many :test_results, TestResult
 
     timestamps()
   end
