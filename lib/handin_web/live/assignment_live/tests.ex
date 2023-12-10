@@ -521,7 +521,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
            %{
              assignment_id: assignment_id,
              type: "assignment_tests",
-             image: socket.assigns.assignment.programming_language.docker_file_url
+             image: socket.assigns.assignment.programming_language.docker_file_url,
+             user_id: socket.assigns.current_user.id
            }
          ]},
       restart: :temporary

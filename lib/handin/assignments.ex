@@ -6,7 +6,15 @@ defmodule Handin.Assignments do
   import Ecto.Query, warn: false
   alias Handin.Repo
 
-  alias Handin.Assignments.{Assignment, AssignmentTest, SupportFile, SolutionFile, Build, Log}
+  alias Handin.Assignments.{
+    Assignment,
+    AssignmentTest,
+    SupportFile,
+    SolutionFile,
+    Build,
+    Log,
+    RunScriptResult
+  }
 
   @doc """
   Returns the list of assignments.
@@ -235,5 +243,10 @@ defmodule Handin.Assignments do
     else
       []
     end
+  end
+
+  def save_run_script_results(attrs) do
+    RunScriptResult.changeset(attrs)
+    |> Repo.insert()
   end
 end
