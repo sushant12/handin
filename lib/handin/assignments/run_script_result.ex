@@ -6,7 +6,7 @@ defmodule Handin.Assignments.RunScriptResult do
   alias Handin.Accounts.User
   alias Handin.Assignments.Assignment
 
-  schema "test_results" do
+  schema "run_script_results" do
     field :state, Ecto.Enum, values: [:pass, :fail]
 
     belongs_to :assignment, Assignment
