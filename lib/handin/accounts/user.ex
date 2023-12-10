@@ -2,6 +2,7 @@ defmodule Handin.Accounts.User do
   alias Handin.Universities
   alias Handin.Modules.ModulesUsers
   alias Handin.Modules.Module
+  alias Handin.Assignments.{TestResult, RunScriptResult}
   use Handin.Schema
   import Ecto.Changeset
 
@@ -15,6 +16,8 @@ defmodule Handin.Accounts.User do
     field :university, :string, virtual: true
     field :role, :string, default: "student"
 
+    has_many :test_results, TestResult
+    has_many :run_script_results, RunScriptResult
     many_to_many :modules, Module, join_through: ModulesUsers
     timestamps()
   end
