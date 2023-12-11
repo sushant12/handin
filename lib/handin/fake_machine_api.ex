@@ -48,6 +48,6 @@ defmodule Handin.FakeMachineApi do
   end
 
   def exec(_machine_id, _cmd) do
-    {:ok, %{"stdout" => "some randome string form FakeMachineAPI"}}
+    {:ok, %{"stdout" => "some randome string form FakeMachineAPI", "exit_code" => 0}}
   end
 end

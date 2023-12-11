@@ -11,7 +11,7 @@ defmodule Handin.Assignments.Build do
     belongs_to :assignment, Assignment
     has_many :logs, Log, on_delete: :delete_all
     has_many :test_results, TestResult
-    has_many :run_script_results, RunScriptResult
+    has_one :run_script_result, RunScriptResult
 
     timestamps(type: :utc_datetime)
   end
