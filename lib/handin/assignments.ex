@@ -313,7 +313,7 @@ defmodule Handin.Assignments do
           }
         ]
 
-        run_script_results ++ test_results
+        Enum.with_index(run_script_results ++ test_results, &({&2, &1}))
     end
   end
 end
