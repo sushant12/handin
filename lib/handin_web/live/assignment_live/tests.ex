@@ -427,7 +427,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
      |> assign(:assignment, assignment)
      |> assign(:assignment_test, assignment_test)
      |> assign(:assignment_tests, assignment.assignment_tests)
-     |> assign(:logs, Assignments.get_recent_build_logs(assignment_id))
+     |> assign(:logs, Assignments.build_recent_test_results(assignment_id))
      |> assign_form(
        AssignmentTests.change_assignment_test(
          assignment_test || %AssignmentTest{assignment_id: assignment.id}
@@ -533,7 +533,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
 
   @impl true
   def handle_info(
-        %Phoenix.Socket.Broadcast{event: "new_log", payload: build_id},
+        %Phoenix.Socket.Broadcast{event: "test_result", payload: build_id},
         socket
       ) do
     {:noreply, assign(socket, :logs, Assignments.get_logs(build_id))}

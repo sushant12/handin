@@ -255,4 +255,65 @@ defmodule Handin.Assignments do
     TestResult.changeset(attrs)
     |> Repo.insert()
   end
+
+  def build_recent_test_results(assignment_id) do
+    build =
+      Build
+      |> where([b], b.assignment_id == ^assignment_id)
+      |> order_by([b], desc: b.inserted_at)
+      |> limit(1)
+      |> Repo.one()
+
+    case build do
+      nil ->
+        []
+
+      build ->
+        build =
+          build
+          |> Repo.preload([
+            :run_script_result,
+            logs: [:assignment_test],
+            test_results: [:assignment_test]
+          ])
+
+        test_results =
+          build.test_results
+          |> Enum.sort_by(& &1.inserted_at, :asc)
+          |> Enum.map(fn test_result ->
+            %{
+              type: "test_result",
+              state: test_result.state,
+              name: test_result.assignment_test.name,
+              command: test_result.assignment_test.command,
+              output:
+                build.logs
+                |> Enum.find(&(&1.assignment_test_id == test_result.assignment_test_id))
+                |> Map.get(:output),
+              expected_output:
+                if test_result.assignment_test.expected_output_type == "text" do
+                  test_result.assignment_test.expected_output_text
+                else
+                  test_result.assignment_test.expected_output_file_content
+                end
+            }
+          end)
+
+        run_script_results = [
+          %{
+            type: "run_script_result",
+            state: build.run_script_result.state,
+            name: "Compiling files",
+            command: "sh ./main.sh",
+            output:
+              build.logs
+              |> Enum.find(&is_nil(&1.assignment_test_id))
+              |> Map.get(:output),
+            expected_output: ""
+          }
+        ]
+
+        run_script_results ++ test_results
+    end
+  end
 end

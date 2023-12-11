@@ -76,7 +76,8 @@ defmodule Handin.BuildServer do
       |> Enum.each(fn {file_name, assignment_test} ->
         case @machine_api.exec(state.machine_id, "sh ./#{file_name}") do
           {:ok, %{"exit_code" => 0} = response} ->
-            test_state = if match_output?(assignment_test, response["stdout"]), do: :pass, else: :fail
+            test_state =
+              if match_output?(assignment_test, response["stdout"]), do: :pass, else: :fail
 
             Assignments.save_test_results(%{
               assignment_test_id: assignment_test.id,
@@ -96,7 +97,12 @@ defmodule Handin.BuildServer do
             )
 
           {:ok, %{"exit_code" => 1} = response} ->
-            # TODO: save to test_results table as failed
+            Assignments.save_test_results(%{
+              assignment_test_id: assignment_test.id,
+              state: :fail,
+              build_id: state.build.id,
+              user_id: state.user_id
+            })
 
             log_and_broadcast(
               state.build,
@@ -109,7 +115,12 @@ defmodule Handin.BuildServer do
             )
 
           {:error, reason} ->
-            # TODO: save to test_results table as failed
+            Assignments.save_test_results(%{
+              assignment_test_id: assignment_test.id,
+              state: :fail,
+              build_id: state.build.id,
+              user_id: state.user_id
+            })
 
             log_and_broadcast(
               state.build,
@@ -164,7 +175,7 @@ defmodule Handin.BuildServer do
 
     HandinWeb.Endpoint.broadcast!(
       "build:#{state.type}:#{state.assignment_id}",
-      "new_log",
+      "test_result",
       build.id
     )
   end
@@ -228,21 +239,7 @@ defmodule Handin.BuildServer do
     if assignment_test.expected_output_type == "text" do
       output == assignment_test.expected_output_text
     else
-      url =
-        SupportFileUploader.url(
-          {assignment_test.expected_output_file,
-           Assignments.get_support_file_by_name!(
-             assignment_test.assignment_id,
-             assignment_test.expected_output_file
-           )},
-          signed: true
-        )
-
-      {:ok, %Finch.Response{status: 200, body: body}} =
-        Finch.build(:get, url)
-        |> Finch.request(Handin.Finch)
-
-      output == body
+      output == assignment_test.expected_output_file_content
     end
   end
 end
