@@ -189,7 +189,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               </span>
               <label class="col-span-3 p-4">TTL (in seconds)</label>
               <span class="col-span-9">
-                <.input field={@form[:ttl]} type="number"  min = "0" max = "60"  value={@form[:ttl].value || 0} />
+                <.input field={@form[:ttl]} type="number"/>
               </span>
             </div>
             <pre>
