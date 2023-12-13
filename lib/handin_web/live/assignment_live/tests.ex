@@ -196,9 +196,9 @@ defmodule HandinWeb.AssignmentLive.Tests do
               <span :if={@form[:expected_output_type].value == "file"} class="col-span-9 col-start-4">
                 <.input field={@form[:expected_output_file]} type="text" placeholder="Filename" />
               </span>
-              <label class="col-span-3 p-4">TTL</label>
+              <label class="col-span-3 p-4">TTL (in seconds)</label>
               <span class="col-span-9">
-                <.input field={@form[:ttl]} type="number" />
+                <.input field={@form[:ttl]} type="number"/>
               </span>
             </div>
             <pre>

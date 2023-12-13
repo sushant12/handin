@@ -14,7 +14,7 @@ defmodule Handin.Assignments.AssignmentTest do
     field :expected_output_text, :string
     field :expected_output_file, :string
     field :expected_output_file_content, :string
-    field :ttl, :integer
+    field :ttl, :integer, default: 0
 
     belongs_to :assignment, Assignment
 
@@ -48,6 +48,7 @@ defmodule Handin.Assignments.AssignmentTest do
     |> validate_required(@required_attrs)
     |> maybe_validate_expected_output_type()
     |> maybe_validate_file_name(attrs)
+    |> validate_number(:ttl , less_than_or_equal_to: 60, greater_than_or_equal_to: 0)
     |> maybe_parse_and_save_expected_output_file_content()
   end
 
