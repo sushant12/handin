@@ -3,14 +3,15 @@ defmodule Handin.Assignments.Build do
 
   import Ecto.Changeset
 
-  alias Handin.Assignments.Assignment
-  alias Handin.Assignments.Log
+  alias Handin.Assignments.{Assignment, TestResult, Log, RunScriptResult}
   @type t :: %__MODULE__{}
   schema "builds" do
     field :machine_id, :string
     field :status, Ecto.Enum, values: [:running, :failed, :completed]
     belongs_to :assignment, Assignment
     has_many :logs, Log, on_delete: :delete_all
+    has_many :test_results, TestResult
+    has_one :run_script_result, RunScriptResult
 
     timestamps(type: :utc_datetime)
   end

@@ -15,29 +15,7 @@ defmodule Handin.BuildServer do
 
   @impl true
   def init(state) do
-    {:ok, state, {:continue, :process_build}}
-  end
-
-  @impl true
-  def handle_continue(:process_build, state) do
-    process_build(state)
-
-    {:stop, "Server terminated gracefully", state}
-  end
-
-  @impl true
-  def terminate(_reason, state) do
-    state
-  end
-
-  @impl true
-  def handle_info({:EXIT, _pid, reason}, state) do
-    {:stop, reason, state}
-  end
-
-  defp process_build(state) do
-    assignment =
-      Assignments.get_assignment!(state.assignment_id)
+    assignment = Assignments.get_assignment!(state.assignment_id)
 
     {:ok, build} =
       Assignments.new_build(%{
@@ -45,6 +23,13 @@ defmodule Handin.BuildServer do
         status: :running
       })
 
+    state = state |> Map.put(:assignment, assignment) |> Map.put(:build, build)
+
+    {:ok, state, {:continue, :create_machine}}
+  end
+
+  @impl true
+  def handle_continue(:create_machine, state) do
     with {:ok, machine} <-
            @machine_api.create(
              Jason.encode!(%{
@@ -52,45 +37,125 @@ defmodule Handin.BuildServer do
                  auto_destroy: true,
                  image: state.image,
                  files:
-                   build_files(assignment, state.type) ++
-                     build_main_script(assignment) ++ build_tests_scripts(assignment)
+                   build_files(state.assignment, state.type) ++
+                     build_main_script(state.assignment) ++ build_tests_scripts(state.assignment)
                }
              })
            ),
          true <- machine_started?(machine),
-         {:ok, build} <- Assignments.update_build(build, %{machine_id: machine["id"]}),
-         {:ok, %{"exit_code" => 0} = response} <- @machine_api.exec(machine["id"], "sh ./main.sh") do
-      log_and_broadcast(build, "sh ./main.sh", response["stdout"], state)
+         {:ok, build} <- Assignments.update_build(state.build, %{machine_id: machine["id"]}) do
+      state = state |> Map.put(:machine_id, machine["id"]) |> Map.put(:build, build)
 
-      assignment.assignment_tests
+      {:noreply, state, {:continue, :process_build}}
+    else
+      _ ->
+        Assignments.update_build(state.build, %{status: :failed})
+
+        {:stop, "Failed To Create Container", state}
+    end
+  end
+
+  def handle_continue(:process_build, state) do
+    with {:ok, %{"exit_code" => 0} = response} <-
+           @machine_api.exec(state.machine_id, "sh ./main.sh") do
+      Assignments.save_run_script_results(%{
+        assignment_id: state.assignment.id,
+        state: :pass,
+        build_id: state.build.id,
+        user_id: state.user_id
+      })
+
+      log_and_broadcast(
+        state.build,
+        %{command: "sh ./main.sh", output: response["stdout"]},
+        state
+      )
+
+      state.assignment.assignment_tests
       |> Enum.map(&{"#{&1.name}_#{&1.id}.sh", &1})
       |> Enum.each(fn {file_name, assignment_test} ->
-        case @machine_api.exec(machine["id"], "sh ./#{file_name}") do
+        case @machine_api.exec(state.machine_id, "sh ./#{file_name}") do
           {:ok, %{"exit_code" => 0} = response} ->
-            match_output?(assignment_test, response["stdout"])
-            log_and_broadcast(build, assignment_test.id, response["stdout"], state)
+            test_state =
+              if match_output?(assignment_test, response["stdout"]), do: :pass, else: :fail
+
+            Assignments.save_test_results(%{
+              assignment_test_id: assignment_test.id,
+              state: test_state,
+              build_id: state.build.id,
+              user_id: state.user_id
+            })
+
+            log_and_broadcast(
+              state.build,
+              %{
+                command: assignment_test.command,
+                assignment_test_id: assignment_test.id,
+                output: response["stdout"]
+              },
+              state
+            )
 
           {:ok, %{"exit_code" => 1} = response} ->
-            log_and_broadcast(build, assignment_test.id, response["stderr"], state)
+            Assignments.save_test_results(%{
+              assignment_test_id: assignment_test.id,
+              state: :fail,
+              build_id: state.build.id,
+              user_id: state.user_id
+            })
+
+            log_and_broadcast(
+              state.build,
+              %{
+                command: assignment_test.command,
+                assignment_test_id: assignment_test.id,
+                output: response["stderr"]
+              },
+              state
+            )
 
           {:error, reason} ->
-            log_and_broadcast(build, assignment_test.id, reason, state)
+            Assignments.save_test_results(%{
+              assignment_test_id: assignment_test.id,
+              state: :fail,
+              build_id: state.build.id,
+              user_id: state.user_id
+            })
+
+            log_and_broadcast(
+              state.build,
+              %{
+                command: assignment_test.command,
+                assignment_test_id: assignment_test.id,
+                output: reason
+              },
+              state
+            )
         end
       end)
 
-      {:ok, _} =
-        @machine_api.stop(machine["id"])
-
-      Assignments.update_build(build, %{status: :completed})
+      Assignments.update_build(state.build, %{status: :completed})
     else
-      {:error, reason} ->
-        Assignments.update_build(build, %{status: :failed})
-        log_and_broadcast(build, "", reason, state)
-
       {:ok, %{"exit_code" => 1} = reason} ->
-        Assignments.update_build(build, %{status: :failed})
-        log_and_broadcast(build, "", reason, state)
+        Assignments.update_build(state.build, %{status: :failed})
+
+        Assignments.save_run_script_results(%{
+          assignment_id: state.assignment.id,
+          state: :fail,
+          build_id: state.build.id,
+          user_id: state.user_id
+        })
+
+        log_and_broadcast(
+          state.build,
+          %{command: "sh ./main.sh", output: reason["stderr"]},
+          state
+        )
     end
+
+    Assignments.get_logs(state.build.id)
+    @machine_api.stop(state.machine_id)
+    {:stop, "Server terminated gracefully", state}
   end
 
   defp machine_started?(machine) do
@@ -104,12 +169,13 @@ defmodule Handin.BuildServer do
     end
   end
 
-  defp log_and_broadcast(build, test_id, message, state) do
-    Assignments.log(build.id, test_id, message)
+  defp log_and_broadcast(build, log_map, state) do
+    log_map = log_map |> Map.put(:build_id, build.id)
+    Assignments.log(log_map)
 
     HandinWeb.Endpoint.broadcast!(
       "build:#{state.type}:#{state.assignment_id}",
-      "new_log",
+      "test_result",
       build.id
     )
   end
@@ -173,21 +239,7 @@ defmodule Handin.BuildServer do
     if assignment_test.expected_output_type == "text" do
       output == assignment_test.expected_output_text
     else
-      url =
-        SupportFileUploader.url(
-          {assignment_test.expected_output_file,
-           Assignments.get_support_file_by_name!(
-             assignment_test.assignment_id,
-             assignment_test.expected_output_file
-           )},
-          signed: true
-        )
-
-      {:ok, %Finch.Response{status: 200, body: body}} =
-        Finch.build(:get, url)
-        |> Finch.request(Handin.Finch)
-
-      output == body
+      output == assignment_test.expected_output_file_content
     end
   end
 end

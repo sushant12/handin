@@ -1,7 +1,9 @@
 defmodule Handin.Assignments.AssignmentTest do
   use Handin.Schema
   import Ecto.Changeset
-  alias Handin.Assignments.{Assignment, Log}
+  alias Handin.Assignments
+  alias Handin.Assignments.{Assignment, Log, TestResult}
+  alias Handin.SupportFileUploader
 
   schema "assignment_tests" do
     field :name, :string
@@ -11,11 +13,13 @@ defmodule Handin.Assignments.AssignmentTest do
     field :expected_output_type, :string
     field :expected_output_text, :string
     field :expected_output_file, :string
+    field :expected_output_file_content, :string
     field :ttl, :integer, default: 0
 
     belongs_to :assignment, Assignment
 
     has_many :logs, Log
+    has_many :test_results, TestResult
 
     timestamps()
   end
@@ -33,6 +37,7 @@ defmodule Handin.Assignments.AssignmentTest do
            [
              :expected_output_text,
              :expected_output_file,
+             :expected_output_file_content,
              :ttl
            ]
 
@@ -44,6 +49,35 @@ defmodule Handin.Assignments.AssignmentTest do
     |> maybe_validate_expected_output_type()
     |> maybe_validate_file_name(attrs)
     |> validate_number(:ttl , less_than_or_equal_to: 60, greater_than_or_equal_to: 0)
+    |> maybe_parse_and_save_expected_output_file_content()
+  end
+
+  defp maybe_parse_and_save_expected_output_file_content(changeset) do
+    if changeset.errors[:expected_output_file] do
+      changeset
+    else
+      case get_change(changeset, :expected_output_file) do
+        nil ->
+          changeset
+
+        expected_output_file ->
+          url =
+            SupportFileUploader.url(
+              {expected_output_file,
+               Assignments.get_support_file_by_name!(
+                 get_field(changeset, :assignment_id),
+                 expected_output_file
+               )},
+              signed: true
+            )
+
+          {:ok, %Finch.Response{status: 200, body: body}} =
+            Finch.build(:get, url)
+            |> Finch.request(Handin.Finch)
+
+          put_change(changeset, :expected_output_file_content, body)
+      end
+    end
   end
 
   defp maybe_validate_expected_output_type(changeset) do
