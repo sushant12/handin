@@ -74,7 +74,7 @@ defmodule Handin.BuildServer do
       state.assignment.assignment_tests
       |> Enum.map(&{"#{&1.name}_#{&1.id}.sh", &1})
       |> Enum.each(fn {file_name, assignment_test} ->
-        case @machine_api.exec(state.machine_id, "sh ./#{file_name}") do
+        case @machine_api.exec(state.machine_id, "sh ./'#{file_name}'") do
           {:ok, %{"exit_code" => 0} = response} ->
             test_state =
               if match_output?(assignment_test, response["stdout"]), do: :pass, else: :fail
@@ -96,7 +96,7 @@ defmodule Handin.BuildServer do
               state
             )
 
-          {:ok, %{"exit_code" => 1} = response} ->
+          {:ok, response} ->
             Assignments.save_test_results(%{
               assignment_test_id: assignment_test.id,
               state: :fail,
@@ -239,7 +239,7 @@ defmodule Handin.BuildServer do
     if assignment_test.expected_output_type == "text" do
       output == assignment_test.expected_output_text
     else
-      output == assignment_test.expected_output_file_content
+      String.trim(output) == assignment_test.expected_output_file_content
     end
   end
 end

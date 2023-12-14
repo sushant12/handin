@@ -100,7 +100,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
             <ul>
               <li
                 :for={test <- @assignment_tests}
-                class={["py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded", test.id == @assignment_test.id && "bg-gray-300"]}
+                class={[
+                  "py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded",
+                  test.id == @assignment_test.id && "bg-gray-300"
+                ]}
               >
                 <.link
                   phx-click="select-test"
@@ -198,7 +201,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               </span>
               <label class="col-span-3 p-4">TTL (in seconds)</label>
               <span class="col-span-9">
-                <.input field={@form[:ttl]} type="number"/>
+                <.input field={@form[:ttl]} type="number" />
               </span>
             </div>
             <pre>
@@ -220,7 +223,6 @@ defmodule HandinWeb.AssignmentLive.Tests do
           <%= for {index, log} <- @logs do %>
             <h2 id={"accordion-open-heading-#{index}"}>
               <button
-
                 type="button"
                 class={["flex items-center justify-between w-full p-5 font-medium rtl:text-right border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3", log.state == :pass && "text-green-500", log.state == :fail && "text-red-600"]}
                 data-accordion-target={"#accordion-open-body-#{index}"}
@@ -348,14 +350,17 @@ defmodule HandinWeb.AssignmentLive.Tests do
     assignment_test = AssignmentTests.get_assignment_test!(id)
     {:ok, _} = AssignmentTests.delete_assignment_test(assignment_test)
 
+    assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
+    assignment_test = Enum.at(assignment.assignment_tests, 0)
+
     {:noreply,
      assign(
        socket,
        :assignment_tests,
-       Enum.reject(socket.assigns.assignment_tests, &(&1.id == assignment_test.id))
+       Enum.reject(socket.assigns.assignment_tests, &(&1.id == id))
      )
-     |> assign(:assignment_test, nil)
-     |> assign_form(AssignmentTests.change_assignment_test(%AssignmentTest{}))}
+     |> assign(:assignment_test, assignment_test)
+     |> assign_form(AssignmentTests.change_assignment_test(assignment_test || %AssignmentTest{}))}
   end
 
   def handle_event("validate_and_save", %{"assignment_test" => assignment_test_params}, socket) do
@@ -414,7 +419,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
         %Phoenix.Socket.Broadcast{event: "test_result", payload: build_id},
         socket
       ) do
-    {:noreply, assign(socket, :logs, Assignments.get_logs(build_id))}
+    {:noreply, assign(socket, :logs, Assignments.get_test_results_for_build(build_id))}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

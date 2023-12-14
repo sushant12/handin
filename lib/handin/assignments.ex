@@ -269,51 +269,56 @@ defmodule Handin.Assignments do
         []
 
       build ->
-        build =
-          build
-          |> Repo.preload([
-            :run_script_result,
-            logs: [:assignment_test],
-            test_results: [:assignment_test]
-          ])
-
-        test_results =
-          build.test_results
-          |> Enum.sort_by(& &1.inserted_at, :asc)
-          |> Enum.map(fn test_result ->
-            %{
-              type: "test_result",
-              state: test_result.state,
-              name: test_result.assignment_test.name,
-              command: test_result.assignment_test.command,
-              output:
-                build.logs
-                |> Enum.find(&(&1.assignment_test_id == test_result.assignment_test_id))
-                |> Map.get(:output),
-              expected_output:
-                if test_result.assignment_test.expected_output_type == "text" do
-                  test_result.assignment_test.expected_output_text
-                else
-                  test_result.assignment_test.expected_output_file_content
-                end
-            }
-          end)
-
-        run_script_results = [
-          %{
-            type: "run_script_result",
-            state: build.run_script_result.state,
-            name: "Compiling files",
-            command: "sh ./main.sh",
-            output:
-              build.logs
-              |> Enum.find(&is_nil(&1.assignment_test_id))
-              |> Map.get(:output),
-            expected_output: ""
-          }
-        ]
-
-        Enum.with_index(run_script_results ++ test_results, &({&2, &1}))
+        get_test_results_for_build(build.id)
     end
+  end
+
+  def get_test_results_for_build(build_id) do
+    build =
+      Build
+      |> Repo.get!(build_id)
+      |> Repo.preload([
+        :run_script_result,
+        logs: [:assignment_test],
+        test_results: [:assignment_test]
+      ])
+
+    test_results =
+      build.test_results
+      |> Enum.sort_by(& &1.inserted_at, :asc)
+      |> Enum.map(fn test_result ->
+        %{
+          type: "test_result",
+          state: test_result.state,
+          name: test_result.assignment_test.name,
+          command: test_result.assignment_test.command,
+          output:
+            build.logs
+            |> Enum.find(%{}, &(&1.assignment_test_id == test_result.assignment_test_id))
+            |> Map.get(:output),
+          expected_output:
+            if test_result.assignment_test.expected_output_type == "text" do
+              test_result.assignment_test.expected_output_text
+            else
+              test_result.assignment_test.expected_output_file_content
+            end
+        }
+      end)
+
+    run_script_results = [
+      %{
+        type: "run_script_result",
+        state: build.run_script_result.state,
+        name: "Compiling files",
+        command: "sh ./main.sh",
+        output:
+          build.logs
+          |> Enum.find(&is_nil(&1.assignment_test_id))
+          |> Map.get(:output),
+        expected_output: ""
+      }
+    ]
+
+    Enum.with_index(run_script_results ++ test_results, &{&2, &1})
   end
 end

@@ -19,7 +19,7 @@ defmodule Handin.Assignments.AssignmentTest do
     belongs_to :assignment, Assignment
 
     has_many :logs, Log
-    has_many :test_results, TestResult
+    has_many :test_results, TestResult, on_delete: :delete_all
 
     timestamps()
   end
@@ -48,7 +48,7 @@ defmodule Handin.Assignments.AssignmentTest do
     |> validate_required(@required_attrs)
     |> maybe_validate_expected_output_type()
     |> maybe_validate_file_name(attrs)
-    |> validate_number(:ttl , less_than_or_equal_to: 60, greater_than_or_equal_to: 0)
+    |> validate_number(:ttl, less_than_or_equal_to: 60, greater_than_or_equal_to: 0)
     |> maybe_parse_and_save_expected_output_file_content()
   end
 
@@ -75,7 +75,7 @@ defmodule Handin.Assignments.AssignmentTest do
             Finch.build(:get, url)
             |> Finch.request(Handin.Finch)
 
-          put_change(changeset, :expected_output_file_content, body)
+          put_change(changeset, :expected_output_file_content, String.trim(body))
       end
     end
   end
