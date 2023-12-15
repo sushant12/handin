@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: postgres # Replace 'myapp_user' with your desired username
+      POSTGRES_PASSWORD: postgres # Replace 'myapp_password' with your desired password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # If you want to access the database externally, map the container port to a host port
+volumes:
+  db-data:

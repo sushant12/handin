@@ -54,7 +54,7 @@ defmodule Handin.AssignmentTests do
   """
   def create_assignment_test(attrs \\ %{}) do
     %AssignmentTest{}
-    |> AssignmentTest.changeset(attrs)
+    |> AssignmentTest.new_changeset(attrs)
     |> Repo.insert()
   end
 
