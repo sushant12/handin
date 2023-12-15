@@ -21,9 +21,12 @@ defmodule Handin.Assignments.Assignment do
     belongs_to :module, Module
     belongs_to :programming_language, ProgrammingLanguage, on_replace: :nilify
 
-    has_many :assignment_tests, AssignmentTest, on_delete: :delete_all
+    has_many :assignment_tests, AssignmentTest,
+      on_delete: :delete_all,
+      preload_order: [asc: :inserted_at]
+
     has_many :assignment_submissions, AssignmentSubmission
-    has_many :builds, Build
+    has_many :builds, Build, preload_order: [asc: :inserted_at]
     has_many :support_files, SupportFile, on_delete: :delete_all
     has_many :solution_files, SolutionFile, on_delete: :delete_all
     has_many :run_script_results, RunScriptResult

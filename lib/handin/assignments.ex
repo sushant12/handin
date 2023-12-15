@@ -285,7 +285,6 @@ defmodule Handin.Assignments do
 
     test_results =
       build.test_results
-      |> Enum.sort_by(& &1.inserted_at, :asc)
       |> Enum.map(fn test_result ->
         %{
           type: "test_result",
@@ -305,20 +304,34 @@ defmodule Handin.Assignments do
         }
       end)
 
-    run_script_results = [
-      %{
-        type: "run_script_result",
-        state: build.run_script_result.state,
-        name: "Compiling files",
-        command: "sh ./main.sh",
-        output:
-          build.logs
-          |> Enum.find(&is_nil(&1.assignment_test_id))
-          |> Map.get(:output),
-        expected_output: ""
-      }
-    ]
+    run_script_results =
+      if build.run_script_result do
+        [
+          %{
+            type: "run_script_result",
+            state: build.run_script_result.state,
+            name: "Compiling files",
+            command: "sh ./main.sh",
+            output:
+              build.logs
+              |> Enum.find(&is_nil(&1.assignment_test_id))
+              |> Map.get(:output),
+            expected_output: ""
+          }
+        ]
+      else
+        []
+      end
 
     Enum.with_index(run_script_results ++ test_results, &{&2, &1})
+  end
+
+  def get_running_build(assignment_id) do
+    Build
+    |> where([b], b.assignment_id == ^assignment_id)
+    |> where([b], b.status == :running)
+    |> order_by([b], desc: b.inserted_at)
+    |> limit(1)
+    |> Repo.one()
   end
 end

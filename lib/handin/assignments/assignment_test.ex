@@ -7,14 +7,14 @@ defmodule Handin.Assignments.AssignmentTest do
 
   schema "assignment_tests" do
     field :name, :string
-    field :points_on_pass, :float
-    field :points_on_fail, :float
+    field :points_on_pass, :float, default: 0.0
+    field :points_on_fail, :float, default: 0.0
     field :command, :string
-    field :expected_output_type, :string
+    field :expected_output_type, :string, default: "text"
     field :expected_output_text, :string
     field :expected_output_file, :string
     field :expected_output_file_content, :string
-    field :ttl, :integer, default: 0
+    field :ttl, :integer, default: 60
 
     belongs_to :assignment, Assignment
 
@@ -47,12 +47,24 @@ defmodule Handin.Assignments.AssignmentTest do
     |> cast(attrs, @attrs)
     |> validate_required(@required_attrs)
     |> maybe_validate_expected_output_type()
-    |> maybe_validate_file_name(attrs)
     |> validate_number(:ttl, less_than_or_equal_to: 60, greater_than_or_equal_to: 0)
+  end
+
+  def new_changeset(assignment_test, attrs) do
+    assignment_test
+    |> cast(attrs, @attrs)
+  end
+
+  def output_file_changeset(assignment_test, attrs) do
+    assignment_test
+    |> cast(attrs, @attrs)
+    |> maybe_validate_file_name(attrs)
     |> maybe_parse_and_save_expected_output_file_content()
   end
 
   defp maybe_parse_and_save_expected_output_file_content(changeset) do
+    IO.inspect(changeset.errors)
+
     if changeset.errors[:expected_output_file] do
       changeset
     else
