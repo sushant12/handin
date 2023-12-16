@@ -4,7 +4,7 @@
   <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
   <:item
     text="Assignments"
-    href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}"}
+    href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
     current={true}
   />
 </.breadcrumbs>
@@ -371,7 +371,7 @@
   :if={@live_action == :edit}
   id="assignment-modal"
   show
-  on_cancel={JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment}")}
+  on_cancel={JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment}/details")}
 >
   <.live_component
     module={HandinWeb.AssignmentLive.FormComponent}
@@ -381,14 +381,14 @@
     assignment={@assignment}
     module_id={@module_id}
     programming_languages={@programming_languages}
-    patch={~p"/modules/#{@module_id}/assignments/#{@assignment}"}
+    patch={~p"/modules/#{@module_id}/assignments/#{@assignment}/details"}
   />
 </.modal>
 <.modal
   :if={@live_action in [:add_assignment_test, :edit_assignment_test]}
   id="assignment_test-modal"
   show
-  on_cancel={JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment.id}")}
+  on_cancel={JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment}/details")}
 >
   <.live_component
     module={HandinWeb.AssignmentLive.AssignmentTestComponent}
@@ -400,14 +400,14 @@
     available_tests={@available_tests}
     test_support_files={@test_support_files}
     solution_files={@solution_files}
-    patch={~p"/modules/#{@module_id}/assignments/#{@assignment.id}"}
+    patch={~p"/modules/#{@module_id}/assignments/#{@assignment.id}/details"}
   />
 </.modal>
 <.modal
   :if={@live_action in [:upload_submissions]}
   id="assignment_upload-modal"
   show
-  on_cancel={JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment.id}")}
+  on_cancel={JS.patch(~p"/modules/#{@module_id}/assignments/#{@assignment.id}/details")}
 >
   <.live_component
     module={HandinWeb.AssignmentSubmission.AssignmentUploadComponent}
@@ -416,6 +416,6 @@
     action={@live_action}
     assignment_submission_schema={@assignment_submission_schema}
     assignment_id={@assignment.id}
-    patch={~p"/modules/#{@module_id}/assignments/#{@assignment.id}"}
+    patch={~p"/modules/#{@module_id}/assignments/#{@assignment.id}/details"}
   />
 </.modal>

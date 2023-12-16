@@ -90,7 +90,6 @@ defmodule HandinWeb.Router do
         live "/assignments/:assignment_id/edit", AssignmentLive.Index, :edit
 
         scope "/assignments/:assignment_id" do
-          live "/details", AssignmentLive.Detail, :index
           live "/environment", AssignmentLive.Environment, :index
           live "/add_helper_files", AssignmentLive.Environment, :add_helper_files
           live "/add_solution_files", AssignmentLive.Environment, :add_solution_files
@@ -124,7 +123,11 @@ defmodule HandinWeb.Router do
 
       scope "/modules/:id" do
         live "/assignments", AssignmentLive.Index, :index
-        live "/assignments/:assignment_id", AssignmentLive.Show, :show
+
+        scope "/assignments/:assignment_id" do
+          live "/details", AssignmentLive.Detail, :index
+          live "/submit", AssignmentLive.Submit, :index
+        end
 
         live "/assignments/:assignment_id/upload_submissions",
              AssignmentLive.Show,
