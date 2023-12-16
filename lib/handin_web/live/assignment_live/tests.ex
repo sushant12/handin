@@ -338,14 +338,17 @@ defmodule HandinWeb.AssignmentLive.Tests do
     assignment_test = AssignmentTests.get_assignment_test!(id)
     {:ok, _} = AssignmentTests.delete_assignment_test(assignment_test)
 
+    assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
+    assignment_test = Enum.at(assignment.assignment_tests, 0)
+
     {:noreply,
      assign(
        socket,
        :assignment_tests,
-       Enum.reject(socket.assigns.assignment_tests, &(&1.id == assignment_test.id))
+       Enum.reject(socket.assigns.assignment_tests, &(&1.id == id))
      )
-     |> assign(:assignment_test, nil)
-     |> assign_form(AssignmentTests.change_assignment_test(%AssignmentTest{}))}
+     |> assign(:assignment_test, assignment_test)
+     |> assign_form(AssignmentTests.change_assignment_test(assignment_test || %AssignmentTest{}))}
   end
 
   def handle_event("validate_and_save", %{"assignment_test" => assignment_test_params}, socket) do
@@ -404,7 +407,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
         %Phoenix.Socket.Broadcast{event: "test_result", payload: build_id},
         socket
       ) do
-    {:noreply, assign(socket, :logs, Assignments.get_logs(build_id))}
+    {:noreply, assign(socket, :logs, Assignments.get_test_results_for_build(build_id))}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

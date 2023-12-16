@@ -19,7 +19,7 @@ defmodule Handin.Assignments.AssignmentTest do
     belongs_to :assignment, Assignment
 
     has_many :logs, Log
-    has_many :test_results, TestResult
+    has_many :test_results, TestResult, on_delete: :delete_all
 
     timestamps()
   end
@@ -75,7 +75,7 @@ defmodule Handin.Assignments.AssignmentTest do
             Finch.build(:get, url)
             |> Finch.request(Handin.Finch)
 
-          put_change(changeset, :expected_output_file_content, body)
+          put_change(changeset, :expected_output_file_content, String.trim(body))
       end
     end
   end
