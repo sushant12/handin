@@ -100,7 +100,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
             <ul>
               <li
                 :for={test <- @assignment_tests}
-                class={["py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded", test.id == @assignment_test.id && "bg-gray-300"]}
+                class={[
+                  "py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded",
+                  test.id == @assignment_test.id && "bg-gray-300"
+                ]}
               >
                 <.link
                   phx-click="select-test"
@@ -113,9 +116,21 @@ defmodule HandinWeb.AssignmentLive.Tests do
 
                 <span class="delete-icon">
                   <.button phx-click="delete-test" phx-value-id={test.id}>
-                  <svg class="w-[21px] h-[21px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
-                  <path stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M1 5h16M7 8v8m4-8v8M7 1h4a1 1 0 0 1 1 1v3H6V2a1 1 0 0 1 1-1ZM3 5h12v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5Z"/>
-                </svg>
+                    <svg
+                      class="w-[21px] h-[21px] text-gray-800 dark:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 18 20"
+                    >
+                      <path
+                        stroke="red"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M1 5h16M7 8v8m4-8v8M7 1h4a1 1 0 0 1 1 1v3H6V2a1 1 0 0 1 1-1ZM3 5h12v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5Z"
+                      />
+                    </svg>
                   </.button>
                 </span>
               </li>
@@ -166,7 +181,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               </span>
               <label class="col-span-3 p-4">TTL (in seconds)</label>
               <span class="col-span-9">
-                <.input field={@form[:ttl]} type="number"/>
+                <.input field={@form[:ttl]} type="number" />
               </span>
             </div>
             <pre>
@@ -188,9 +203,12 @@ defmodule HandinWeb.AssignmentLive.Tests do
           <%= for {index, log} <- @logs do %>
             <h2 id={"accordion-open-heading-#{index}"}>
               <button
-
                 type="button"
-                class={["flex items-center justify-between w-full p-5 font-medium rtl:text-right border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3", log.state == :pass && "text-green-500", log.state == :fail && "text-red-600"]}
+                class={[
+                  "flex items-center justify-between w-full p-5 font-medium rtl:text-right border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3",
+                  log.state == :pass && "text-green-500",
+                  log.state == :fail && "text-red-600"
+                ]}
                 data-accordion-target={"#accordion-open-body-#{index}"}
                 aria-expanded="false"
                 aria-controls={"accordion-open-body-#{index}"}
@@ -242,7 +260,11 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 </svg>
               </button>
             </h2>
-            <div id={"accordion-open-body-#{index}"} class="hidden" aria-labelledby={"accordion-open-heading-#{index}"}>
+            <div
+              id={"accordion-open-body-#{index}"}
+              class="hidden"
+              aria-labelledby={"accordion-open-heading-#{index}"}
+            >
               <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
                 <p class="font-semibold">Expected Output:</p>
                 <p class="mb-2 text-gray-500 dark:text-gray-400">
