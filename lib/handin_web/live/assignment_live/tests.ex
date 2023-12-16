@@ -117,39 +117,19 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 <span class="delete-icon">
                   <.button phx-click="delete-test" phx-value-id={test.id}>
                     <svg
-                      width="18px"
-                      height="18px"
-                      viewBox="0 0 24 24"
-                      id="Layer_1"
-                      data-name="Layer 1"
+                      class="w-[21px] h-[21px] text-gray-800 dark:text-white"
+                      aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
-                      fill="#ff0000"
-                      stroke="#ff0000"
+                      fill="none"
+                      viewBox="0 0 18 20"
                     >
-                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                      </g>
-                      <g id="SVGRepo_iconCarrier">
-                        <defs>
-                          <style>
-                            .cls-1{fill:none;stroke:#ff0000;stroke-miterlimit:10;stroke-width:1.91px;}
-                          </style>
-                        </defs>
-                        <path
-                          class="cls-1"
-                          d="M16.88,22.5H7.12a1.9,1.9,0,0,1-1.9-1.8L4.36,5.32H19.64L18.78,20.7A1.9,1.9,0,0,1,16.88,22.5Z"
-                        >
-                        </path>
-                        <line class="cls-1" x1="2.45" y1="5.32" x2="21.55" y2="5.32"></line>
-                        <path
-                          class="cls-1"
-                          d="M10.09,1.5h3.82a1.91,1.91,0,0,1,1.91,1.91V5.32a0,0,0,0,1,0,0H8.18a0,0,0,0,1,0,0V3.41A1.91,1.91,0,0,1,10.09,1.5Z"
-                        >
-                        </path>
-                        <line class="cls-1" x1="12" y1="8.18" x2="12" y2="19.64"></line>
-                        <line class="cls-1" x1="15.82" y1="8.18" x2="15.82" y2="19.64"></line>
-                        <line class="cls-1" x1="8.18" y1="8.18" x2="8.18" y2="19.64"></line>
-                      </g>
+                      <path
+                        stroke="red"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M1 5h16M7 8v8m4-8v8M7 1h4a1 1 0 0 1 1 1v3H6V2a1 1 0 0 1 1-1ZM3 5h12v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5Z"
+                      />
                     </svg>
                   </.button>
                 </span>
@@ -224,7 +204,11 @@ defmodule HandinWeb.AssignmentLive.Tests do
             <h2 id={"accordion-open-heading-#{index}"}>
               <button
                 type="button"
-                class={["flex items-center justify-between w-full p-5 font-medium rtl:text-right border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3", log.state == :pass && "text-green-500", log.state == :fail && "text-red-600"]}
+                class={[
+                  "flex items-center justify-between w-full p-5 font-medium rtl:text-right border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3",
+                  log.state == :pass && "text-green-500",
+                  log.state == :fail && "text-red-600"
+                ]}
                 data-accordion-target={"#accordion-open-body-#{index}"}
                 aria-expanded="false"
                 aria-controls={"accordion-open-body-#{index}"}
@@ -276,7 +260,11 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 </svg>
               </button>
             </h2>
-            <div id={"accordion-open-body-#{index}"} class="hidden" aria-labelledby={"accordion-open-heading-#{index}"}>
+            <div
+              id={"accordion-open-body-#{index}"}
+              class="hidden"
+              aria-labelledby={"accordion-open-heading-#{index}"}
+            >
               <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
                 <p class="font-semibold">Expected Output:</p>
                 <p class="mb-2 text-gray-500 dark:text-gray-400">
