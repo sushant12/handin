@@ -207,7 +207,11 @@ defmodule Handin.Assignments do
   end
 
   @spec new_build(
-          attrs :: %{assignment_test_id: Ecto.UUID, assignment_id: Ecto.UUID, status: String.t()}
+          attrs :: %{
+            assignment_id: Ecto.UUID,
+            status: String.t(),
+            user_id: Ecto.UUID
+          }
         ) ::
           {:ok, Build.t()}
   def new_build(attrs) do
@@ -256,10 +260,11 @@ defmodule Handin.Assignments do
     |> Repo.insert()
   end
 
-  def build_recent_test_results(assignment_id) do
+  def build_recent_test_results(assignment_id, user_id) do
     build =
       Build
       |> where([b], b.assignment_id == ^assignment_id)
+      |> where([b], b.user_id == ^user_id)
       |> order_by([b], desc: b.inserted_at)
       |> limit(1)
       |> Repo.one()
@@ -326,12 +331,24 @@ defmodule Handin.Assignments do
     Enum.with_index(run_script_results ++ test_results, &{&2, &1})
   end
 
-  def get_running_build(assignment_id) do
+  def get_running_build(assignment_id, user_id) do
     Build
     |> where([b], b.assignment_id == ^assignment_id)
     |> where([b], b.status == :running)
+    |> where([b], b.user_id == ^user_id)
     |> order_by([b], desc: b.inserted_at)
     |> limit(1)
     |> Repo.one()
+  end
+
+  def get_submission_files(assignment_id, user_id) do
+    AssignmentSubmission
+    |> where([as], as.assignment_id == ^assignment_id)
+    |> where([as], as.user_id == ^user_id)
+    |> order_by([as], desc: as.inserted_at)
+    |> limit(1)
+    |> join(:inner, [as], asf in assoc(as, :assignment_submission_files))
+    |> select([as, asf], asf)
+    |> Repo.all()
   end
 end

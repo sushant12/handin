@@ -259,8 +259,14 @@ defmodule HandinWeb.AssignmentLive.Submit do
        :assignment_tests,
        assignment.assignment_tests
      )
-     |> assign(:logs, Assignments.build_recent_test_results(assignment_id))
-     |> assign(:build, Assignments.get_running_build(assignment_id))
+     |> assign(
+       :logs,
+       Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
+     )
+     |> assign(
+       :build,
+       Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
+     )
      |> assign_form(
        AssignmentTests.change_assignment_test(
          assignment_test || %AssignmentTest{assignment_id: assignment.id}
@@ -389,8 +395,15 @@ defmodule HandinWeb.AssignmentLive.Submit do
     })
 
     {:noreply,
-     assign(socket, :logs, Assignments.build_recent_test_results(assignment_id))
-     |> assign(:build, Assignments.get_running_build(assignment_id))}
+     assign(
+       socket,
+       :logs,
+       Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
+     )
+     |> assign(
+       :build,
+       Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
+     )}
   end
 
   @impl true
@@ -400,7 +413,10 @@ defmodule HandinWeb.AssignmentLive.Submit do
       ) do
     {:noreply,
      assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
-     |> assign(:build, Assignments.get_running_build(socket.assigns.assignment.id))}
+     |> assign(
+       :build,
+       Assignments.get_running_build(socket.assigns.assignment.id, socket.assigns.current_user.id)
+     )}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

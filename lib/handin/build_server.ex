@@ -38,7 +38,7 @@ defmodule Handin.BuildServer do
                  auto_destroy: true,
                  image: state.image,
                  files:
-                   build_files(state.assignment, state.type) ++
+                   build_files(state.assignment, state.type, state.user_id) ++
                      build_main_script(state.assignment) ++ build_tests_scripts(state.assignment)
                }
              })
@@ -181,12 +181,12 @@ defmodule Handin.BuildServer do
     )
   end
 
-  defp build_files(assignment, type) do
+  defp build_files(assignment, type, user_id) do
     assignment_files =
       if type == "assignment_tests" do
         assignment.support_files ++ assignment.solution_files
       else
-        assignment.support_files ++ submission_files(assignment, type)
+        assignment.support_files ++ Assignments.get_submission_files(assignment.id, user_id)
       end
 
     assignment_files
@@ -205,10 +205,6 @@ defmodule Handin.BuildServer do
         "raw_value" => Base.encode64(body)
       }
     end)
-  end
-
-  defp submission_files(_assignment, _type) do
-    []
   end
 
   defp build_main_script(assignment) do
