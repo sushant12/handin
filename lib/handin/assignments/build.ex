@@ -4,6 +4,7 @@ defmodule Handin.Assignments.Build do
   import Ecto.Changeset
 
   alias Handin.Assignments.{Assignment, TestResult, Log, RunScriptResult}
+  alias Handin.Accounts.User
   @type t :: %__MODULE__{}
   schema "builds" do
     field :machine_id, :string
@@ -12,7 +13,7 @@ defmodule Handin.Assignments.Build do
     has_many :logs, Log, on_delete: :delete_all
     has_many :test_results, TestResult
     has_one :run_script_result, RunScriptResult
-
+    belongs_to :user, User
     timestamps(type: :utc_datetime)
   end
 

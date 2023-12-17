@@ -20,7 +20,8 @@ defmodule Handin.BuildServer do
     {:ok, build} =
       Assignments.new_build(%{
         assignment_id: assignment.id,
-        status: :running
+        status: :running,
+        user_id: state.user_id
       })
 
     state = state |> Map.put(:assignment, assignment) |> Map.put(:build, build)
@@ -185,7 +186,7 @@ defmodule Handin.BuildServer do
       if type == "assignment_tests" do
         assignment.support_files ++ assignment.solution_files
       else
-        assignment.support_files
+        assignment.support_files ++ submission_files(assignment, type)
       end
 
     assignment_files
@@ -204,6 +205,10 @@ defmodule Handin.BuildServer do
         "raw_value" => Base.encode64(body)
       }
     end)
+  end
+
+  defp submission_files(_assignment, _type) do
+    []
   end
 
   defp build_main_script(assignment) do
