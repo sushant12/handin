@@ -130,7 +130,7 @@ defmodule HandinWeb.Router do
         end
 
         live "/assignments/:assignment_id/upload_submissions",
-             AssignmentLive.Show,
+             AssignmentLive.Submit,
              :upload_submissions
 
         live "/assignments/:assignment_id/submission/:submission_id",

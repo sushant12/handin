@@ -5,6 +5,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
   alias Handin.Modules
   alias Handin.{Assignments, AssignmentTests}
   alias Handin.Assignments.AssignmentTest
+  alias Handin.AssignmentSubmission.AssignmentSubmission
 
   @impl true
   def render(assigns) do
@@ -52,104 +53,36 @@ defmodule HandinWeb.AssignmentLive.Submit do
     <div class="grid grid-rows-2">
       <div class="items-center justify-between mb-4">
         <h2 class="text-xl font-semibold">Assignment Submission</h2>
-        <.button>Upload Files</.button>
-
-        <ul class="space-y-4 text-left text-gray-500 dark:text-gray-400">
-          <li class="flex items-center space-x-3 rtl:space-x-reverse">
-            <svg
-              class="flex-shrink-0 w-3.5 h-3.5 text-green-500 dark:text-green-400"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 16 12"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5.917 5.724 10.5 15 1.5"
-              />
-            </svg>
-            <span>Individual configuration</span>
-          </li>
-          <li class="flex items-center space-x-3 rtl:space-x-reverse">
-            <svg
-              class="flex-shrink-0 w-3.5 h-3.5 text-green-500 dark:text-green-400"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 16 12"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5.917 5.724 10.5 15 1.5"
-              />
-            </svg>
-            <span>No setup, or hidden fees</span>
-          </li>
-          <li class="flex items-center space-x-3 rtl:space-x-reverse">
-            <svg
-              class="flex-shrink-0 w-3.5 h-3.5 text-green-500 dark:text-green-400"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 16 12"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5.917 5.724 10.5 15 1.5"
-              />
-            </svg>
-            <span>
-              Team size: <span class="font-semibold text-gray-900 dark:text-white">1 developer</span>
-            </span>
-          </li>
-          <li class="flex items-center space-x-3 rtl:space-x-reverse">
-            <svg
-              class="flex-shrink-0 w-3.5 h-3.5 text-green-500 dark:text-green-400"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 16 12"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5.917 5.724 10.5 15 1.5"
-              />
-            </svg>
-            <span>
-              Premium support:
-              <span class="font-semibold text-gray-900 dark:text-white">6 months</span>
-            </span>
-          </li>
-          <li class="flex items-center space-x-3 rtl:space-x-reverse">
-            <svg
-              class="flex-shrink-0 w-3.5 h-3.5 text-green-500 dark:text-green-400"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 16 12"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 5.917 5.724 10.5 15 1.5"
-              />
-            </svg>
-            <span>
-              Free updates: <span class="font-semibold text-gray-900 dark:text-white">6 months</span>
+        <.link
+          class="block w-[8rem] text-white bg-blue-700 hover:bg-ble-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 "
+          patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/upload_submissions"}
+        >
+          Upload Files
+        </.link>
+        <ul class="space-y-4 text-left text-gray-500 dark:text-gray-400 p-5">
+          <li
+            :for={file <- @assignment_submission_files}
+            class="flex items-center space-x-3 rtl:space-x-reverse"
+          >
+            <%= file.file.file_name %>
+            <span class="delete-icon">
+              <.button phx-click="delete-submission-file" phx-value-id={file.id}>
+                <svg
+                  class="w-[21px] h-[21px] text-gray-800 dark:text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 18 20"
+                >
+                  <path
+                    stroke="red"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M1 5h16M7 8v8m4-8v8M7 1h4a1 1 0 0 1 1 1v3H6V2a1 1 0 0 1 1-1ZM3 5h12v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5Z"
+                  />
+                </svg>
+              </.button>
             </span>
           </li>
         </ul>
@@ -242,6 +175,25 @@ defmodule HandinWeb.AssignmentLive.Submit do
         <% end %>
       </div>
     </div>
+    <.modal
+      :if={@live_action == :upload_submissions}
+      id="assignment_submissions-modal"
+      show
+      on_cancel={JS.patch(~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submit")}
+    >
+      <.live_component
+        module={HandinWeb.AssignmentLive.FileUploadComponent}
+        title={@page_title}
+        id={@assignment.id}
+        live_action={@live_action}
+        assignment={@assignment}
+        patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submit"}
+        current_user={@current_user}
+        assignment_submission={
+          @assignment_submission || %AssignmentSubmission{assignment_submission_files: []}
+        }
+      />
+    </.modal>
     """
   end
 
@@ -249,6 +201,9 @@ defmodule HandinWeb.AssignmentLive.Submit do
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
     assignment = Assignments.get_assignment!(assignment_id)
     assignment_test = Enum.at(assignment.assignment_tests, 0)
+
+    assignment_submission =
+      Assignments.get_submission(assignment_id, socket.assigns.current_user.id)
 
     {:ok,
      socket
@@ -267,11 +222,30 @@ defmodule HandinWeb.AssignmentLive.Submit do
        :build,
        Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
      )
+     |> assign(:assignment_submission, assignment_submission)
+     |> assign(
+       :assignment_submission_files,
+       (assignment_submission && assignment_submission.assignment_submission_files) || []
+     )
      |> assign_form(
        AssignmentTests.change_assignment_test(
          assignment_test || %AssignmentTest{assignment_id: assignment.id}
        )
      )}
+  end
+
+  @impl true
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  defp apply_action(socket, :upload_submissions, _) do
+    socket
+    |> assign(:page_title, "Upload Submissions")
+  end
+
+  defp apply_action(socket, _, _) do
+    socket
   end
 
   @impl true
@@ -406,6 +380,20 @@ defmodule HandinWeb.AssignmentLive.Submit do
      )}
   end
 
+  def handle_event("delete-submission-file", %{"id" => id}, socket) do
+    Enum.find(socket.assigns.assignment_submission.assignment_submission_files, fn sf ->
+      sf.id == id
+    end)
+    |> Assignments.delete_assignment_submission_file()
+
+    submission =
+      Assignments.get_submission(socket.assigns.assignment.id, socket.assigns.current_user.id)
+
+    {:noreply,
+     assign(socket, :assignment_submission, submission)
+     |> assign(:assignment_submission_files, submission.assignment_submission_files)}
+  end
+
   @impl true
   def handle_info(
         %Phoenix.Socket.Broadcast{event: "test_result", payload: build_id},
@@ -417,6 +405,15 @@ defmodule HandinWeb.AssignmentLive.Submit do
        :build,
        Assignments.get_running_build(socket.assigns.assignment.id, socket.assigns.current_user.id)
      )}
+  end
+
+  def handle_info({HandinWeb.AssignmentLive.FileUploadComponent, {:saved, assignment}}, socket) do
+    assignment_submission =
+      Assignments.get_submission(assignment.id, socket.assigns.current_user.id)
+
+    {:noreply,
+     assign(socket, :assignment_submission, assignment_submission)
+     |> assign(:assignment_submission_files, assignment_submission.assignment_submission_files)}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

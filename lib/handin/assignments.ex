@@ -17,6 +17,8 @@ defmodule Handin.Assignments do
     TestResult
   }
 
+  alias Handin.AssignmentSubmission.{AssignmentSubmission, AssignmentSubmissionFile}
+
   @doc """
   Returns the list of assignments.
 
@@ -135,11 +137,6 @@ defmodule Handin.Assignments do
     |> Repo.insert()
   end
 
-  def support_file_change(attrs \\ %{}) do
-    %SupportFile{}
-    |> SupportFile.changeset(attrs)
-  end
-
   def valid_submission_date?(assignment) do
     now = DateTime.utc_now()
 
@@ -151,6 +148,18 @@ defmodule Handin.Assignments do
     %SupportFile{}
     |> SupportFile.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def create_or_update_submission(
+        %{user_id: user_id, assignment_id: assignment_id} = attrs \\ %{}
+      ) do
+    if submission = get_submission(assignment_id, user_id) do
+      submission
+    else
+      %AssignmentSubmission{}
+    end
+    |> AssignmentSubmission.changeset(attrs)
+    |> Repo.insert_or_update()
   end
 
   def get_support_file!(id), do: Repo.get!(SupportFile, id)
@@ -173,6 +182,10 @@ defmodule Handin.Assignments do
     Repo.delete(solution_file)
   end
 
+  def delete_assignment_submission_file(%AssignmentSubmissionFile{} = submission_file) do
+    Repo.delete(submission_file)
+  end
+
   def change_support_file(%SupportFile{} = support_file, attrs \\ %{}) do
     SupportFile.changeset(support_file, attrs)
   end
@@ -189,6 +202,13 @@ defmodule Handin.Assignments do
     |> Repo.insert()
   end
 
+  def save_assignment_submission_file!(attrs \\ %{}) do
+    attrs
+    |> AssignmentSubmissionFile.changeset()
+    |> Repo.insert!()
+    |> Repo.preload(assignment_submission: [:user, :assignment])
+  end
+
   def upload_support_file(support_file, attrs \\ %{}) do
     support_file
     |> SupportFile.file_changeset(attrs)
@@ -198,6 +218,12 @@ defmodule Handin.Assignments do
   def upload_solution_file(solution_file, attrs \\ %{}) do
     solution_file
     |> SolutionFile.file_changeset(attrs)
+    |> Repo.update!()
+  end
+
+  def upload_assignment_submission_file(submission_file, attrs \\ %{}) do
+    submission_file
+    |> AssignmentSubmissionFile.file_changeset(attrs)
     |> Repo.update!()
   end
 
@@ -337,6 +363,16 @@ defmodule Handin.Assignments do
     |> where([b], b.status == :running)
     |> where([b], b.user_id == ^user_id)
     |> order_by([b], desc: b.inserted_at)
+    |> limit(1)
+    |> Repo.one()
+  end
+
+  def get_submission(assignment_id, user_id) do
+    AssignmentSubmission
+    |> where([as], as.assignment_id == ^assignment_id)
+    |> where([as], as.user_id == ^user_id)
+    |> order_by([as], desc: as.inserted_at)
+    |> preload([:assignment_submission_files])
     |> limit(1)
     |> Repo.one()
   end

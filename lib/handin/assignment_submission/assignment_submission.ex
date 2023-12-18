@@ -18,12 +18,13 @@ defmodule Handin.AssignmentSubmission.AssignmentSubmission do
     timestamps(type: :utc_datetime)
   end
 
-  @attrs [:submitted_at, :user_id, :assignment_id, :retries]
+  @required_attrs [:user_id, :assignment_id]
+  @attrs [:submitted_at, :retries] ++ @required_attrs
   def changeset(assignment_submission, attrs) do
     assignment_submission
     |> cast(attrs, @attrs)
     |> cast_assoc(:assignment_submission_files)
-    |> validate_required(@attrs)
+    |> validate_required(@required_attrs)
     |> unique_constraint([:assignment_id, :user_id])
   end
 end
