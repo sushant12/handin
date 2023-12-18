@@ -50,7 +50,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
       </.tabs>
     <% end %>
 
-    <div class="grid grid-rows-2">
+    <div>
       <div class="items-center justify-between mb-4">
         <h2 class="text-xl font-semibold">Assignment Submission</h2>
         <.link
