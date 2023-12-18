@@ -387,4 +387,13 @@ defmodule Handin.Assignments do
     |> select([as, asf], asf)
     |> Repo.all()
   end
+
+  def submit_assignment(assignment_submission_id) do
+    now = DateTime.utc_now()
+
+    AssignmentSubmission
+    |> where([as], as.id == ^assignment_submission_id)
+    |> update([as], inc: [retries: 1], set: [submitted_at: ^now])
+    |> Repo.update_all([])
+  end
 end

@@ -154,6 +154,8 @@ defmodule Handin.BuildServer do
         )
     end
 
+    if state.type == "assignment_submission", do: Assignments.get_submission(state.assignment_id, state.user_id) |> Map.get(:id) |> Assignments.submit_assignment()
+
     Assignments.get_logs(state.build.id)
     @machine_api.stop(state.machine_id)
     {:stop, "Server terminated gracefully", state}
