@@ -25,11 +25,11 @@ defmodule Handin.Assignments.Assignment do
       on_delete: :delete_all,
       preload_order: [asc: :inserted_at]
 
-    has_many :assignment_submissions, AssignmentSubmission
+    has_many :assignment_submissions, AssignmentSubmission, on_delete: :delete_all
     has_many :builds, Build, preload_order: [asc: :inserted_at]
     has_many :support_files, SupportFile, on_delete: :delete_all
     has_many :solution_files, SolutionFile, on_delete: :delete_all
-    has_many :run_script_results, RunScriptResult
+    has_many :run_script_results, RunScriptResult, on_delete: :delete_all
 
     timestamps()
   end
