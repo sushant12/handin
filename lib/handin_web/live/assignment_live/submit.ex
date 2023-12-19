@@ -194,8 +194,8 @@ defmodule HandinWeb.AssignmentLive.Submit do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    with true <- Modules.assignment_exists?(id, assignment_id),
-         true <- Accounts.enrolled_module?(socket.assigns.current_user, id) do
+    with true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
+         true <- Modules.assignment_exists?(id, assignment_id) do
       assignment = Assignments.get_assignment!(assignment_id)
 
       assignment_submission =
