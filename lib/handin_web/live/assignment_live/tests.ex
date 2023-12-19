@@ -316,32 +316,38 @@ defmodule HandinWeb.AssignmentLive.Tests do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    assignment = Assignments.get_assignment!(assignment_id)
-    assignment_test = Enum.at(assignment.assignment_tests, 0)
+    if Modules.assignment_exists?(id, assignment_id) do
+      assignment = Assignments.get_assignment!(assignment_id)
+      assignment_test = Enum.at(assignment.assignment_tests, 0)
 
-    {:ok,
-     socket
-     |> assign(current_page: :modules)
-     |> assign(:module, Modules.get_module!(id))
-     |> assign(:assignment, assignment)
-     |> assign(:assignment_test, assignment_test)
-     |> assign(
-       :assignment_tests,
-       assignment.assignment_tests
-     )
-     |> assign(
-       :logs,
-       Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
-     )
-     |> assign(
-       :build,
-       Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
-     )
-     |> assign_form(
-       AssignmentTests.change_assignment_test(
-         assignment_test || %AssignmentTest{assignment_id: assignment.id}
+      {:ok,
+       socket
+       |> assign(current_page: :modules)
+       |> assign(:module, Modules.get_module!(id))
+       |> assign(:assignment, assignment)
+       |> assign(:assignment_test, assignment_test)
+       |> assign(
+         :assignment_tests,
+         assignment.assignment_tests
        )
-     )}
+       |> assign(
+         :logs,
+         Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
+       )
+       |> assign(
+         :build,
+         Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
+       )
+       |> assign_form(
+         AssignmentTests.change_assignment_test(
+           assignment_test || %AssignmentTest{assignment_id: assignment.id}
+         )
+       )}
+    else
+      {:ok,
+       push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+       |> put_flash(:error, "You are not authorized to view this page")}
+    end
   end
 
   @impl true

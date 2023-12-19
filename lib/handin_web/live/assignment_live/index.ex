@@ -1,22 +1,28 @@
 defmodule HandinWeb.AssignmentLive.Index do
   use HandinWeb, :live_view
 
-  alias Handin.{Assignments, Modules, ProgrammingLanguages}
+  alias Handin.{Assignments, Modules, ProgrammingLanguages, Accounts}
   alias Handin.Assignments.Assignment
 
   @impl true
   def mount(%{"id" => id} = _params, _session, socket) do
-    %{assignments: assignments} = Modules.get_module!(id)
+    with %{assignments: assignments} <- Modules.get_module!(id),
+         true <- Accounts.enrolled_module?(socket.assigns.current_user, id) do
+      programming_languages =
+        ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
 
-    programming_languages =
-      ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
-
-    {:ok,
-     socket
-     |> stream(:assignments, assignments)
-     |> assign(:programming_languages, programming_languages)
-     |> assign(:module_id, id)
-     |> assign(:current_page, :modules)}
+      {:ok,
+       socket
+       |> stream(:assignments, assignments)
+       |> assign(:programming_languages, programming_languages)
+       |> assign(:module_id, id)
+       |> assign(:current_page, :modules)}
+    else
+      false ->
+        {:ok,
+         push_navigate(socket, to: ~p"/modules")
+         |> put_flash(:error, "You are not authorized to view this page")}
+    end
   end
 
   @impl true

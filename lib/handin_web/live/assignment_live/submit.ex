@@ -1,8 +1,7 @@
 defmodule HandinWeb.AssignmentLive.Submit do
   use HandinWeb, :live_view
 
-  alias Handin.Modules
-  alias Handin.Assignments
+  alias Handin.{Modules, Assignments, Accounts}
 
   @impl true
   def render(assigns) do
@@ -195,36 +194,44 @@ defmodule HandinWeb.AssignmentLive.Submit do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    assignment = Assignments.get_assignment!(assignment_id)
+    with true <- Modules.assignment_exists?(id, assignment_id),
+         true <- Accounts.enrolled_module?(socket.assigns.current_user, id) do
+      assignment = Assignments.get_assignment!(assignment_id)
 
-    assignment_submission =
-      Assignments.get_submission(assignment_id, socket.assigns.current_user.id) ||
-        Assignments.create_submission(assignment_id, socket.assigns.current_user.id)
+      assignment_submission =
+        Assignments.get_submission(assignment_id, socket.assigns.current_user.id) ||
+          Assignments.create_submission(assignment_id, socket.assigns.current_user.id)
 
-    {
-      :ok,
-      socket
-      |> assign(current_page: :modules)
-      |> assign(:module, Modules.get_module!(id))
-      |> assign(:assignment, assignment)
-      |> assign(
-        :assignment_tests,
-        assignment.assignment_tests
-      )
-      |> assign(
-        :logs,
-        Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
-      )
-      |> assign(
-        :build,
-        Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
-      )
-      |> assign(:assignment_submission, assignment_submission)
-      |> assign(
-        :assignment_submission_files,
-        Map.get(assignment_submission, :assignment_submission_files, [])
-      )
-    }
+      {
+        :ok,
+        socket
+        |> assign(current_page: :modules)
+        |> assign(:module, Modules.get_module!(id))
+        |> assign(:assignment, assignment)
+        |> assign(
+          :assignment_tests,
+          assignment.assignment_tests
+        )
+        |> assign(
+          :logs,
+          Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
+        )
+        |> assign(
+          :build,
+          Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
+        )
+        |> assign(:assignment_submission, assignment_submission)
+        |> assign(
+          :assignment_submission_files,
+          Map.get(assignment_submission, :assignment_submission_files, [])
+        )
+      }
+    else
+      false ->
+        {:ok,
+         push_navigate(socket, to: ~p"/modules")
+         |> put_flash(:error, "You are not authorized to view this page")}
+    end
   end
 
   @impl true

@@ -1,8 +1,7 @@
 defmodule HandinWeb.AssignmentLive.Detail do
   use HandinWeb, :live_view
   use Timex
-  alias Handin.Modules
-  alias Handin.Assignments
+  alias Handin.{Modules, Accounts, Assignments}
 
   @impl true
   def render(assigns) do
@@ -79,10 +78,18 @@ defmodule HandinWeb.AssignmentLive.Detail do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    {:ok,
-     socket
-     |> assign(current_page: :modules)
-     |> assign(:module, Modules.get_module!(id))
-     |> assign(:assignment, Assignments.get_assignment!(assignment_id))}
+    with true <- Modules.assignment_exists?(id, assignment_id),
+         true <- Accounts.enrolled_module?(socket.assigns.current_user, id) do
+      {:ok,
+       socket
+       |> assign(current_page: :modules)
+       |> assign(:module, Modules.get_module!(id))
+       |> assign(:assignment, Assignments.get_assignment!(assignment_id))}
+    else
+      false ->
+        {:ok,
+         push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+         |> put_flash(:error, "You are not authorized to view this page")}
+    end
   end
 end
