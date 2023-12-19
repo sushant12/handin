@@ -116,4 +116,10 @@ defmodule Handin.Modules do
       })
     end)
   end
+
+  def assignment_exists?(module_id, assignment_id) do
+    get_module!(module_id)
+    |> Map.get(:assignments)
+    |> Enum.any?(&(&1.id == assignment_id))
+  end
 end
