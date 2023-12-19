@@ -50,11 +50,11 @@ defmodule Handin.Assignments do
     do:
       Repo.get!(Assignment, id)
       |> Repo.preload([
-        :assignment_submissions,
         :programming_language,
         :assignment_tests,
         :support_files,
         :solution_files,
+        assignment_submissions: [:user],
         builds: [:logs]
       ])
 
@@ -386,6 +386,14 @@ defmodule Handin.Assignments do
     |> join(:inner, [as], asf in assoc(as, :assignment_submission_files))
     |> select([as, asf], asf)
     |> Repo.all()
+  end
+
+  def get_submissions_for_assignment(assignment_id) do
+    AssignmentSubmission
+    |> where([as], as.assignment_id == ^assignment_id)
+    |> preload([as], :user)
+    |> Repo.all()
+    |> Enum.with_index(1)
   end
 
   def submit_assignment(assignment_submission_id) do
