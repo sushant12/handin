@@ -14,8 +14,8 @@ defmodule Handin.AssignmentSubmission.AssignmentSubmissionFile do
     timestamps(type: :utc_datetime)
   end
 
-  def changeset(attrs) do
-    %__MODULE__{}
+  def changeset(assignment_submission, attrs) do
+    assignment_submission
     |> cast(attrs, [:assignment_submission_id])
     |> validate_required([:assignment_submission_id])
   end

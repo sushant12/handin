@@ -203,8 +203,8 @@ defmodule Handin.Assignments do
   end
 
   def save_assignment_submission_file!(attrs \\ %{}) do
-    attrs
-    |> AssignmentSubmissionFile.changeset()
+    %AssignmentSubmissionFile{}
+    |> AssignmentSubmissionFile.changeset(attrs)
     |> Repo.insert!()
     |> Repo.preload(assignment_submission: [:user, :assignment])
   end
@@ -395,5 +395,14 @@ defmodule Handin.Assignments do
     |> where([as], as.id == ^assignment_submission_id)
     |> update([as], inc: [retries: 1], set: [submitted_at: ^now])
     |> Repo.update_all([])
+  end
+
+  def create_submission(assignment_id, user_id) do
+    %AssignmentSubmission{}
+    |> AssignmentSubmission.changeset(%{
+      assignment_id: assignment_id,
+      user_id: user_id
+    })
+    |> Repo.insert()
   end
 end

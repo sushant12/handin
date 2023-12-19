@@ -476,30 +476,22 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
       end)
     end)
 
-    if socket.assigns.uploads.assignment_submission.entries != [] do
-      {:ok, assignment_submission} =
-        Assignments.create_or_update_submission(%{
-          user_id: socket.assigns.current_user.id,
-          assignment_id: assignment.id
-        })
-
-      consume_uploaded_entries(socket, :assignment_submission, fn meta, entry ->
-        Handin.Repo.transaction(fn ->
-          assignment_submission_file =
-            Assignments.save_assignment_submission_file!(%{
-              "assignment_submission_id" => assignment_submission.id
-            })
-
-          Assignments.upload_assignment_submission_file(assignment_submission_file, %{
-            file: %Plug.Upload{
-              content_type: entry.client_type,
-              filename: entry.client_name,
-              path: meta.path
-            }
+    consume_uploaded_entries(socket, :assignment_submission, fn meta, entry ->
+      Handin.Repo.transaction(fn ->
+        assignment_submission_file =
+          Assignments.save_assignment_submission_file!(%{
+            "assignment_submission_id" => socket.assigns.assignment_submission.id
           })
-        end)
+
+        Assignments.upload_assignment_submission_file(assignment_submission_file, %{
+          file: %Plug.Upload{
+            content_type: entry.client_type,
+            filename: entry.client_name,
+            path: meta.path
+          }
+        })
       end)
-    end
+    end)
   end
 
   defp assign_form(socket, changeset) do

@@ -1,11 +1,8 @@
 defmodule HandinWeb.AssignmentLive.Submit do
   use HandinWeb, :live_view
 
-  alias Handin.Repo
   alias Handin.Modules
-  alias Handin.{Assignments, AssignmentTests}
-  alias Handin.Assignments.AssignmentTest
-  alias Handin.AssignmentSubmission.AssignmentSubmission
+  alias Handin.Assignments
 
   @impl true
   def render(assigns) do
@@ -86,6 +83,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
             </span>
           </li>
         </ul>
+
         <button
           type="button"
           class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
@@ -189,9 +187,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
         assignment={@assignment}
         patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submit"}
         current_user={@current_user}
-        assignment_submission={
-          @assignment_submission || %AssignmentSubmission{assignment_submission_files: []}
-        }
+        assignment_submission={@assignment_submission}
       />
     </.modal>
     """
@@ -200,38 +196,35 @@ defmodule HandinWeb.AssignmentLive.Submit do
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
     assignment = Assignments.get_assignment!(assignment_id)
-    assignment_test = Enum.at(assignment.assignment_tests, 0)
 
     assignment_submission =
-      Assignments.get_submission(assignment_id, socket.assigns.current_user.id)
+      Assignments.get_submission(assignment_id, socket.assigns.current_user.id) ||
+        Assignments.create_submission(assignment_id, socket.assigns.current_user.id)
 
-    {:ok,
-     socket
-     |> assign(current_page: :modules)
-     |> assign(:module, Modules.get_module!(id))
-     |> assign(:assignment, assignment)
-     |> assign(
-       :assignment_tests,
-       assignment.assignment_tests
-     )
-     |> assign(
-       :logs,
-       Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
-     )
-     |> assign(
-       :build,
-       Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
-     )
-     |> assign(:assignment_submission, assignment_submission)
-     |> assign(
-       :assignment_submission_files,
-       (assignment_submission && assignment_submission.assignment_submission_files) || []
-     )
-     |> assign_form(
-       AssignmentTests.change_assignment_test(
-         assignment_test || %AssignmentTest{assignment_id: assignment.id}
-       )
-     )}
+    {
+      :ok,
+      socket
+      |> assign(current_page: :modules)
+      |> assign(:module, Modules.get_module!(id))
+      |> assign(:assignment, assignment)
+      |> assign(
+        :assignment_tests,
+        assignment.assignment_tests
+      )
+      |> assign(
+        :logs,
+        Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
+      )
+      |> assign(
+        :build,
+        Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
+      )
+      |> assign(:assignment_submission, assignment_submission)
+      |> assign(
+        :assignment_submission_files,
+        Map.get(assignment_submission, :assignment_submission_files, [])
+      )
+    }
   end
 
   @impl true
@@ -249,106 +242,6 @@ defmodule HandinWeb.AssignmentLive.Submit do
   end
 
   @impl true
-  def handle_event("add-new-test", _, socket) do
-    {:ok, assignment_test} =
-      %{
-        name: "New Test",
-        assignment_id: socket.assigns.assignment.id
-      }
-      |> AssignmentTests.create_assignment_test()
-
-    {:noreply,
-     socket
-     |> assign(:assignment_test, assignment_test)
-     |> assign_form(AssignmentTests.change_assignment_test(assignment_test))
-     |> assign(
-       :assignment_tests,
-       socket.assigns.assignment_tests ++ [assignment_test]
-     )}
-  end
-
-  def handle_event("select-test", %{"id" => id}, socket) do
-    assignment_test = AssignmentTests.get_assignment_test!(id)
-
-    {:noreply,
-     assign(socket, :assignment_test, assignment_test)
-     |> assign_form(AssignmentTests.change_assignment_test(assignment_test))}
-  end
-
-  def handle_event("delete-test", %{"id" => id}, socket) do
-    assignment_test = AssignmentTests.get_assignment_test!(id)
-    {:ok, _} = AssignmentTests.delete_assignment_test(assignment_test)
-
-    assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
-    assignment_test = Enum.at(assignment.assignment_tests, 0)
-
-    if assignment_test do
-      {:noreply,
-       assign(
-         socket,
-         :assignment_tests,
-         assignment.assignment_tests
-       )
-       |> assign(:assignment_test, assignment_test)
-       |> assign_form(AssignmentTests.change_assignment_test(assignment_test))}
-    else
-      {:noreply,
-       assign(socket, :assignment_tests, assignment.assignment_tests)
-       |> assign(:assignment_test, nil)}
-    end
-  end
-
-  def handle_event("validate", %{"assignment_test" => assignment_test_params}, socket) do
-    changeset =
-      socket.assigns.assignment_test
-      |> AssignmentTests.change_assignment_test(assignment_test_params)
-      |> Map.put(:action, :validate)
-
-    {:noreply, assign_form(socket, changeset)}
-  end
-
-  def handle_event("update_name", %{"value" => value}, socket) do
-    {:ok, assignment_test} =
-      Handin.Assignments.AssignmentTest.new_changeset(socket.assigns.assignment_test, %{
-        name: value
-      })
-      |> Repo.update()
-
-    assignment = socket.assigns.assignment |> Repo.preload(:assignment_tests, force: true)
-
-    {:noreply,
-     assign(socket, :assignment_test, assignment_test)
-     |> assign(
-       :assignment_tests,
-       assignment.assignment_tests
-     )}
-  end
-
-  def handle_event("update_expected_output_file", %{"value" => value}, socket) do
-    socket.assigns.assignment_test
-    |> Repo.preload(assignment: [:support_files])
-    |> Handin.Assignments.AssignmentTest.output_file_changeset(%{
-      expected_output_file: value
-    })
-    |> Repo.update()
-    |> case do
-      {:ok, assignment_test} ->
-        {:noreply, assign(socket, :assignment_test, assignment_test)}
-
-      {:error, changeset} ->
-        {:noreply, assign_form(socket, changeset)}
-    end
-  end
-
-  def handle_event("update_" <> key, %{"value" => value}, socket) do
-    {:ok, assignment_test} =
-      Handin.Assignments.AssignmentTest.new_changeset(socket.assigns.assignment_test, %{
-        "#{key}": value
-      })
-      |> Repo.update()
-
-    {:noreply, assign(socket, :assignment_test, assignment_test)}
-  end
 
   def handle_event("submit_assignment", %{"assignment_id" => assignment_id}, socket) do
     HandinWeb.Endpoint.subscribe("build:assignment_submission:#{assignment_id}")
@@ -414,9 +307,5 @@ defmodule HandinWeb.AssignmentLive.Submit do
     {:noreply,
      assign(socket, :assignment_submission, assignment_submission)
      |> assign(:assignment_submission_files, assignment_submission.assignment_submission_files)}
-  end
-
-  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
-    assign(socket, :form, to_form(changeset))
   end
 end

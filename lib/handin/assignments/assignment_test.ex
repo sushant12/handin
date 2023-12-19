@@ -63,8 +63,6 @@ defmodule Handin.Assignments.AssignmentTest do
   end
 
   defp maybe_parse_and_save_expected_output_file_content(changeset) do
-    IO.inspect(changeset.errors)
-
     if changeset.errors[:expected_output_file] do
       changeset
     else
