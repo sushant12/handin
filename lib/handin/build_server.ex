@@ -20,7 +20,8 @@ defmodule Handin.BuildServer do
     {:ok, build} =
       Assignments.new_build(%{
         assignment_id: assignment.id,
-        status: :running
+        status: :running,
+        user_id: state.user_id
       })
 
     state = state |> Map.put(:assignment, assignment) |> Map.put(:build, build)
@@ -37,7 +38,7 @@ defmodule Handin.BuildServer do
                  auto_destroy: true,
                  image: state.image,
                  files:
-                   build_files(state.assignment, state.type) ++
+                   build_files(state.assignment, state.type, state.user_id) ++
                      build_main_script(state.assignment) ++ build_tests_scripts(state.assignment)
                }
              })
@@ -153,6 +154,12 @@ defmodule Handin.BuildServer do
         )
     end
 
+    if state.type == "assignment_submission" do
+      Assignments.get_submission(state.assignment_id, state.user_id)
+      |> Map.get(:id)
+      |> Assignments.submit_assignment()
+    end
+
     Assignments.get_logs(state.build.id)
     @machine_api.stop(state.machine_id)
     {:stop, "Server terminated gracefully", state}
@@ -180,12 +187,12 @@ defmodule Handin.BuildServer do
     )
   end
 
-  defp build_files(assignment, type) do
+  defp build_files(assignment, type, user_id) do
     assignment_files =
       if type == "assignment_tests" do
         assignment.support_files ++ assignment.solution_files
       else
-        assignment.support_files
+        assignment.support_files ++ Assignments.get_submission_files(assignment.id, user_id)
       end
 
     assignment_files

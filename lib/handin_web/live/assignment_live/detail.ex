@@ -13,27 +13,42 @@ defmodule HandinWeb.AssignmentLive.Detail do
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
         text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}"}
-        current={true}
+        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
       />
-    </.breadcrumbs>
-
-    <.tabs>
       <:item
-        text="Details"
+        text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
       />
-      <:item
-        text="Environment"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/environment"}
-      />
-      <:item text="Tests" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/tests"} />
-      <:item
-        text="Submissions"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
-      />
-    </.tabs>
+    </.breadcrumbs>
+    <%= if @current_user.role != "student" do %>
+      <.tabs>
+        <:item
+          text="Details"
+          href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
+          current={true}
+        />
+        <:item
+          text="Environment"
+          href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/environment"}
+        />
+        <:item text="Tests" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/tests"} />
+        <:item
+          text="Submissions"
+          href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
+        />
+      </.tabs>
+    <% end %>
+    <%= if @current_user.role == "student" do %>
+      <.tabs>
+        <:item
+          text="Details"
+          href={~p"/modules/#{@module}/assignments/#{@assignment}/details"}
+          current={true}
+        />
+        <:item text="Submit" href={~p"/modules/#{@module}/assignments/#{@assignment}/submit"} />
+      </.tabs>
+    <% end %>
 
     <.header>
       <%= @assignment.name %>

@@ -1,11 +1,10 @@
 defmodule Handin.Accounts.User do
+  use Handin.Schema
+  import Ecto.Changeset
   alias Handin.Universities
   alias Handin.Modules.ModulesUsers
   alias Handin.Modules.Module
-  alias Handin.Assignments.{TestResult, RunScriptResult}
-  use Handin.Schema
-  import Ecto.Changeset
-
+  alias Handin.Assignments.{TestResult, RunScriptResult, Build}
   @type t :: %__MODULE__{}
 
   schema "users" do
@@ -19,6 +18,7 @@ defmodule Handin.Accounts.User do
     has_many :test_results, TestResult
     has_many :run_script_results, RunScriptResult
     many_to_many :modules, Module, join_through: ModulesUsers
+    has_many :builds, Build
     timestamps()
   end
 

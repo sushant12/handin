@@ -4,6 +4,7 @@ defmodule Handin.Assignments.Build do
   import Ecto.Changeset
 
   alias Handin.Assignments.{Assignment, TestResult, Log, RunScriptResult}
+  alias Handin.Accounts.User
   @type t :: %__MODULE__{}
   schema "builds" do
     field :machine_id, :string
@@ -12,15 +13,15 @@ defmodule Handin.Assignments.Build do
     has_many :logs, Log, on_delete: :delete_all
     has_many :test_results, TestResult
     has_one :run_script_result, RunScriptResult
-
+    belongs_to :user, User
     timestamps(type: :utc_datetime)
   end
 
-  @attrs [:machine_id, :assignment_id, :status]
+  @attrs [:machine_id, :assignment_id, :status, :user_id]
   def changeset(attrs) do
     %__MODULE__{}
-    |> cast(attrs, [:assignment_id, :status])
-    |> validate_required([:assignment_id, :status])
+    |> cast(attrs, [:assignment_id, :status, :user_id])
+    |> validate_required([:assignment_id, :status, :user_id])
   end
 
   def update_changeset(build, attrs) do
