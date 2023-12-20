@@ -1,7 +1,8 @@
 defmodule Handin.BuildServer do
   use GenServer
   alias Handin.Assignments
-  alias Handin.SupportFileUploader
+  alias Handin.{SupportFileUploader, AssignmentSubmissionFileUploader}
+  alias Handin.AssignmentSubmission.AssignmentSubmissionFile
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
 
@@ -158,6 +159,8 @@ defmodule Handin.BuildServer do
       Assignments.get_submission(state.assignment_id, state.user_id)
       |> Map.get(:id)
       |> Assignments.submit_assignment()
+
+      Assignments.evaluate_marks(state.assignment_id, state.user_id)
     end
 
     Assignments.get_logs(state.build.id)
@@ -198,9 +201,18 @@ defmodule Handin.BuildServer do
     assignment_files
     |> Enum.map(fn assignment_file ->
       url =
-        SupportFileUploader.url({assignment_file.file.file_name, assignment_file},
-          signed: true
-        )
+        case assignment_file do
+          %AssignmentSubmissionFile{} = assignment_file ->
+            AssignmentSubmissionFileUploader.url(
+              {assignment_file.file.file_name, assignment_file},
+              signed: true
+            )
+
+          _ ->
+            SupportFileUploader.url({assignment_file.file.file_name, assignment_file},
+              signed: true
+            )
+        end
 
       {:ok, %Finch.Response{status: 200, body: body}} =
         Finch.build(:get, url)
