@@ -8,7 +8,7 @@ defmodule Handin.AssignmentSubmission.AssignmentSubmissionFile do
   @type t :: %__MODULE__{}
 
   schema "assignment_submission_files" do
-    field :file, Handin.SupportFileUploader.Type
+    field :file, Handin.AssignmentSubmissionFileUploader.Type
 
     belongs_to :assignment_submission, AssignmentSubmission
     timestamps(type: :utc_datetime)

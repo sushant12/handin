@@ -386,6 +386,7 @@ defmodule Handin.Assignments do
     |> join(:inner, [as], asf in assoc(as, :assignment_submission_files))
     |> select([as, asf], asf)
     |> Repo.all()
+    |> Enum.map(&(Repo.preload(&1, assignment_submission: [:user, :assignment])))
   end
 
   def get_submissions_for_assignment(assignment_id) do
