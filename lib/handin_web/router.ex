@@ -123,6 +123,7 @@ defmodule HandinWeb.Router do
 
       scope "/modules/:id" do
         live "/assignments", AssignmentLive.Index, :index
+        live "/grades", AssignmentLive.Grade, :index
 
         scope "/assignments/:assignment_id" do
           live "/details", AssignmentLive.Detail, :index
