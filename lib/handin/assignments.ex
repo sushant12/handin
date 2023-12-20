@@ -367,6 +367,16 @@ defmodule Handin.Assignments do
     |> Repo.one()
   end
 
+  def get_submission_by_id(submission_id) do
+    AssignmentSubmission
+    |> where([as], as.id == ^submission_id)
+    |> Repo.one()
+    |> case do
+      nil -> nil
+      submission -> Repo.preload(submission, [:assignment_submission_files, :user])
+    end
+  end
+
   def get_submission(assignment_id, user_id) do
     AssignmentSubmission
     |> where([as], as.assignment_id == ^assignment_id)
