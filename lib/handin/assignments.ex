@@ -2,7 +2,7 @@ defmodule Handin.Assignments do
   @moduledoc """
   The Assignments context.
   """
-
+  use Timex
   import Ecto.Query, warn: false
   alias Handin.Repo
 
@@ -436,32 +436,36 @@ defmodule Handin.Assignments do
     |> Repo.preload([:assignment_submission_files, :assignment])
   end
 
-  def evaluate_marks(assignment_id, user_id) do
-    assignment = get_assignment!(assignment_id)
+  def evaluate_marks(submission_id, build_id) do
+    submission = Repo.get(AssignmentSubmission, submission_id) |> Repo.preload(:assignment)
 
-    test_results =
-      assignment.assignment_tests
-      |> Enum.map(fn test ->
-        TestResult
-        |> where([tr], tr.assignment_test_id == ^test.id)
-        |> where([tr], tr.user_id == ^user_id)
-        |> order_by([tr], desc: tr.inserted_at)
-        |> limit(1)
-        |> preload(:assignment_test)
-        |> Repo.one()
+    build =
+      Repo.get(Build, build_id)
+      |> Repo.preload([:run_script_result, test_results: [:assignment_test]])
+
+    total_passed_tests_points =
+      build.test_results
+      |> Enum.filter(&(&1.state == :pass))
+      |> Enum.reduce(0, fn test_result, acc ->
+        acc + test_result.assignment_test.points_on_pass
       end)
 
-    total_points =
-      Enum.reduce(test_results, 0, fn test_result, acc ->
-        if test_result.state == :pass do
-          acc + test_result.assignment_test.points_on_pass
-        end
-      end)
+    total_points_after_penalty =
+      if Timex.after?(submission.submitted_at, submission.assignment.due_date) do
+        days_after_due_date =
+          Interval.new(from: submission.assignment.due_date, until: submission.submitted_at)
+          |> Interval.duration(:days)
 
-    create_or_update_submission(%{
-      total_points: total_points,
-      user_id: user_id,
-      assignment_id: assignment_id
+        penalty_percentage = submission.assignment.penalty_per_day * days_after_due_date / 100
+        total_passed_tests_points * (1 - penalty_percentage)
+      else
+        total_passed_tests_points
+      end
+
+    submission
+    |> Handin.AssignmentSubmission.AssignmentSubmission.changeset(%{
+      total_points: total_points_after_penalty
     })
+    |> Repo.update()
   end
 end

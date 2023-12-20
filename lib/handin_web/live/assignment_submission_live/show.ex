@@ -70,12 +70,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
         <div class="assignment-test-form bg-white rounded shadow-md px-4 mb-4  w-full">
           <LiveMonacoEditor.code_editor
             style="min-height: 450px; width: 100%;"
-            opts={
-              Map.merge(
-                LiveMonacoEditor.default_opts(),
-                %{"language" => "shell"}
-              )
-            }
+            opts={LiveMonacoEditor.default_opts()}
           />
         </div>
         <div class="flex">
