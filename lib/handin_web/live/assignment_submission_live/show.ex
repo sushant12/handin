@@ -201,6 +201,9 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
   end
 
   @impl true
+  def handle_event("code-editor-lost-focus", _, socket) do
+    {:noreply, socket}
+  end
 
   def handle_event("select_file", %{"submission_file_id" => id}, socket) do
     submission_file =
@@ -231,9 +234,9 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
          [
            %{
              assignment_id: assignment_id,
-             type: "assignment_tests",
+             type: "assignment_submission",
              image: socket.assigns.assignment.programming_language.docker_file_url,
-             user_id: socket.assigns.current_user.id
+             user_id: socket.assigns.submission.user.id
            }
          ]},
       restart: :temporary
@@ -243,11 +246,11 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
      assign(
        socket,
        :logs,
-       Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
+       Assignments.build_recent_test_results(assignment_id, socket.assigns.submission.user.id)
      )
      |> assign(
        :build,
-       Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
+       Assignments.get_running_build(assignment_id, socket.assigns.submission.user.id)
      )}
   end
 
@@ -260,7 +263,10 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
      assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
      |> assign(
        :build,
-       Assignments.get_running_build(socket.assigns.assignment.id, socket.assigns.current_user.id)
+       Assignments.get_running_build(
+         socket.assigns.assignment.id,
+         socket.assigns.submission.user.id
+       )
      )}
   end
 end

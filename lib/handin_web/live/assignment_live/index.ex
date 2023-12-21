@@ -44,7 +44,7 @@ defmodule HandinWeb.AssignmentLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing Assignments")
+    |> assign(:page_title, "Assignments")
     |> assign(:assignment, nil)
     |> assign(:current_tab, :assignments)
   end

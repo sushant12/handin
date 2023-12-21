@@ -19,9 +19,11 @@ defmodule HandinWeb.ModulesLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    module = Modules.get_module!(id)
+
     socket
-    |> assign(:page_title, "Edit Module")
-    |> assign(:module, Modules.get_module!(id))
+    |> assign(:page_title, "Edit Module #{module.name}")
+    |> assign(:module, module)
   end
 
   defp apply_action(socket, :new, _params) do
@@ -32,7 +34,7 @@ defmodule HandinWeb.ModulesLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing Modulees")
+    |> assign(:page_title, "Modules")
     |> assign(:module, nil)
   end
 
