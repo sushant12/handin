@@ -14,6 +14,10 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:item
         text="Assignments"
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
+      />
+      <:item
+        text={@assignment.name}
+        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
       />
     </.breadcrumbs>

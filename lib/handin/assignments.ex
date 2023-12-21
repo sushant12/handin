@@ -2,7 +2,7 @@ defmodule Handin.Assignments do
   @moduledoc """
   The Assignments context.
   """
-
+  use Timex
   import Ecto.Query, warn: false
   alias Handin.Repo
 
@@ -367,12 +367,22 @@ defmodule Handin.Assignments do
     |> Repo.one()
   end
 
+  def get_submission_by_id(submission_id) do
+    AssignmentSubmission
+    |> where([as], as.id == ^submission_id)
+    |> Repo.one()
+    |> case do
+      nil -> nil
+      submission -> Repo.preload(submission, [:assignment_submission_files, :user])
+    end
+  end
+
   def get_submission(assignment_id, user_id) do
     AssignmentSubmission
     |> where([as], as.assignment_id == ^assignment_id)
     |> where([as], as.user_id == ^user_id)
     |> order_by([as], desc: as.inserted_at)
-    |> preload([:assignment_submission_files])
+    |> preload([:assignment_submission_files, :assignment])
     |> limit(1)
     |> Repo.one()
   end
@@ -386,7 +396,7 @@ defmodule Handin.Assignments do
     |> join(:inner, [as], asf in assoc(as, :assignment_submission_files))
     |> select([as, asf], asf)
     |> Repo.all()
-    |> Enum.map(&(Repo.preload(&1, assignment_submission: [:user, :assignment])))
+    |> Enum.map(&Repo.preload(&1, assignment_submission: [:user, :assignment]))
   end
 
   def get_submissions_for_assignment(assignment_id) do
@@ -395,6 +405,16 @@ defmodule Handin.Assignments do
     |> preload([as], :user)
     |> Repo.all()
     |> Enum.with_index(1)
+  end
+
+  def get_submissions_for_user(module_id, user_id) do
+    Assignment
+    |> where([a], a.module_id == ^module_id)
+    |> join(:inner, [a], as in assoc(a, :assignment_submissions))
+    |> where([a, as], as.user_id == ^user_id)
+    |> select([a, as], as)
+    |> Repo.all()
+    |> Enum.map(&Repo.preload(&1, [:assignment]))
   end
 
   def submit_assignment(assignment_submission_id) do
@@ -412,6 +432,40 @@ defmodule Handin.Assignments do
       assignment_id: assignment_id,
       user_id: user_id
     })
-    |> Repo.insert()
+    |> Repo.insert!()
+    |> Repo.preload([:assignment_submission_files, :assignment])
+  end
+
+  def evaluate_marks(submission_id, build_id) do
+    submission = Repo.get(AssignmentSubmission, submission_id) |> Repo.preload(:assignment)
+
+    build =
+      Repo.get(Build, build_id)
+      |> Repo.preload([:run_script_result, test_results: [:assignment_test]])
+
+    total_passed_tests_points =
+      build.test_results
+      |> Enum.filter(&(&1.state == :pass))
+      |> Enum.reduce(0, fn test_result, acc ->
+        acc + test_result.assignment_test.points_on_pass
+      end)
+
+    total_points_after_penalty =
+      if Timex.after?(submission.submitted_at, submission.assignment.due_date) do
+        days_after_due_date =
+          Interval.new(from: submission.assignment.due_date, until: submission.submitted_at)
+          |> Interval.duration(:days)
+
+        penalty_percentage = submission.assignment.penalty_per_day * days_after_due_date / 100
+        total_passed_tests_points * (1 - penalty_percentage)
+      else
+        total_passed_tests_points
+      end
+
+    submission
+    |> Handin.AssignmentSubmission.AssignmentSubmission.changeset(%{
+      total_points: total_points_after_penalty
+    })
+    |> Repo.update()
   end
 end

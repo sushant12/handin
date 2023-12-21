@@ -436,7 +436,7 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
   end
 
   defp save_assignment(socket, _action) do
-    consume_entries(socket, socket.assigns.assignment)
+    consume_entries(socket, socket.assigns.assignment) |> IO.inspect()
     notify_parent({:saved, socket.assigns.assignment})
 
     {:noreply,

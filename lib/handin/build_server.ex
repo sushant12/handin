@@ -40,7 +40,8 @@ defmodule Handin.BuildServer do
                  image: state.image,
                  files:
                    build_files(state.assignment, state.type, state.user_id) ++
-                     build_main_script(state.assignment) ++ build_tests_scripts(state.assignment)
+                     build_main_script(state.assignment) ++
+                     build_tests_scripts(state.assignment)
                }
              })
            ),
@@ -156,9 +157,12 @@ defmodule Handin.BuildServer do
     end
 
     if state.type == "assignment_submission" do
-      Assignments.get_submission(state.assignment_id, state.user_id)
-      |> Map.get(:id)
+      submission = Assignments.get_submission(state.assignment_id, state.user_id)
+
+      Map.get(submission, :id)
       |> Assignments.submit_assignment()
+
+      Assignments.evaluate_marks(submission.id, state.build.id)
     end
 
     Assignments.get_logs(state.build.id)
@@ -200,13 +204,16 @@ defmodule Handin.BuildServer do
     |> Enum.map(fn assignment_file ->
       url =
         case assignment_file do
-          %AssignmentSubmissionFile{} = assignment_file -> AssignmentSubmissionFileUploader.url({assignment_file.file.file_name, assignment_file},
-            signed: true
-          )
-         _ ->
-          SupportFileUploader.url({assignment_file.file.file_name, assignment_file},
-            signed: true
-          )
+          %AssignmentSubmissionFile{} = assignment_file ->
+            AssignmentSubmissionFileUploader.url(
+              {assignment_file.file.file_name, assignment_file},
+              signed: true
+            )
+
+          _ ->
+            SupportFileUploader.url({assignment_file.file.file_name, assignment_file},
+              signed: true
+            )
         end
 
       {:ok, %Finch.Response{status: 200, body: body}} =
