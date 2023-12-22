@@ -80,11 +80,15 @@ defmodule HandinWeb.AssignmentLive.Detail do
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
     with true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
          true <- Modules.assignment_exists?(id, assignment_id) do
+      module = Modules.get_module!(id)
+      assignment = Assignments.get_assignment!(assignment_id)
+
       {:ok,
        socket
        |> assign(current_page: :modules)
-       |> assign(:module, Modules.get_module!(id))
-       |> assign(:assignment, Assignments.get_assignment!(assignment_id))}
+       |> assign(:module, module)
+       |> assign(:page_title, "#{module.name} - #{assignment.name}")
+       |> assign(:assignment, assignment)}
     else
       false ->
         {:ok,
