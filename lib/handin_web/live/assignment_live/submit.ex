@@ -201,6 +201,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
     with true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
          true <- Modules.assignment_exists?(id, assignment_id) do
       assignment = Assignments.get_assignment!(assignment_id)
+      module = Modules.get_module!(id)
 
       assignment_submission =
         Assignments.get_submission(assignment_id, socket.assigns.current_user.id) ||
@@ -210,8 +211,9 @@ defmodule HandinWeb.AssignmentLive.Submit do
         :ok,
         socket
         |> assign(current_page: :modules)
-        |> assign(:module, Modules.get_module!(id))
+        |> assign(:module, module)
         |> assign(:assignment, assignment)
+        |> assign(:page_title, "#{module.name} - #{assignment.name}")
         |> assign(
           :assignment_tests,
           assignment.assignment_tests
