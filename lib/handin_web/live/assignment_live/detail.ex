@@ -36,6 +36,10 @@ defmodule HandinWeb.AssignmentLive.Detail do
           text="Submissions"
           href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
         />
+        <:item
+          text="Settings"
+          href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"}
+        />
       </.tabs>
     <% end %>
     <%= if @current_user.role == "student" do %>

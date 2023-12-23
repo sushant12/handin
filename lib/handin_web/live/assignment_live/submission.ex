@@ -34,6 +34,7 @@ defmodule HandinWeb.AssignmentLive.Submission do
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
         current={true}
       />
+      <:item text="Settings" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"} />
     </.tabs>
 
     <.header class="mt-5">
