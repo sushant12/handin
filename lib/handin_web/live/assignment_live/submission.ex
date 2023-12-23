@@ -71,7 +71,8 @@ defmodule HandinWeb.AssignmentLive.Submission do
        |> assign(current_page: :modules)
        |> assign(:module, module)
        |> assign(:assignment, assignment)
-       |> assign(:assignment_submissions, assignment_submissions)}
+       |> assign(:assignment_submissions, assignment_submissions)
+       |> assign(:page_title, "#{module.name} - #{assignment.name}")}
     else
       {:ok,
        push_navigate(socket, to: ~p"/modules/#{id}/assignments")

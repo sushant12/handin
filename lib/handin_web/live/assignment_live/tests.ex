@@ -323,11 +323,13 @@ defmodule HandinWeb.AssignmentLive.Tests do
     if Modules.assignment_exists?(id, assignment_id) do
       assignment = Assignments.get_assignment!(assignment_id)
       assignment_test = Enum.at(assignment.assignment_tests, 0)
+      module = Modules.get_module!(id)
 
       {:ok,
        socket
        |> assign(current_page: :modules)
-       |> assign(:module, Modules.get_module!(id))
+       |> assign(:module, module)
+       |> assign(:page_title, "#{module.name} - #{assignment.name}")
        |> assign(:assignment, assignment)
        |> assign(:assignment_test, assignment_test)
        |> assign(
