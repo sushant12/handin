@@ -350,4 +350,11 @@ defmodule Handin.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  def enrolled_module?(user, module_id) do
+    user
+    |> Repo.preload(:modules)
+    |> Map.get(:modules)
+    |> Enum.any?(&(&1.id == module_id))
+  end
 end
