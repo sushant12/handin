@@ -58,5 +58,47 @@ defmodule Handin.Assignments.Assignment do
     |> validate_number(:max_attempts, greater_than_or_equal_to: 0)
     |> validate_number(:penalty_per_day, greater_than_or_equal_to: 0)
     |> validate_number(:total_marks, greater_than_or_equal_to: 0)
+    |> maybe_validate_due_date()
+    |> maybe_validate_cutoff_date()
+  end
+
+  defp maybe_validate_due_date(changeset) do
+    case get_field(changeset, :due_date) do
+      nil ->
+        changeset
+
+      due_date ->
+        validate_date(
+          changeset,
+          :due_date,
+          get_field(changeset, :start_date),
+          due_date,
+          "must come after start date"
+        )
+    end
+  end
+
+  defp maybe_validate_cutoff_date(changeset) do
+    case get_field(changeset, :cutoff_date) do
+      nil ->
+        changeset
+
+      cutoff_date ->
+        validate_date(
+          changeset,
+          :cutoff_date,
+          get_field(changeset, :start_date),
+          cutoff_date,
+          "must come after start date"
+        )
+    end
+  end
+
+  defp validate_date(changeset, field, date, reference_date, error) do
+    if Timex.compare(date, reference_date) > 0 do
+      add_error(changeset, field, error)
+    else
+      changeset
+    end
   end
 end
