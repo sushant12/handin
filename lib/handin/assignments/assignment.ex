@@ -55,23 +55,45 @@ defmodule Handin.Assignments.Assignment do
     |> validate_number(:max_attempts, greater_than_or_equal_to: 0)
     |> validate_number(:penalty_per_day, greater_than_or_equal_to: 0)
     |> validate_number(:total_marks, greater_than_or_equal_to: 0)
-    |> validate_date(:start_date, :due_date, :cutoff_date)
+    |> validate_dates(:start_date, :due_date, :cutoff_date)
   end
 
-  defp validate_date(changeset, start_date_field, due_date_field, cutoff_date_field) do
+  defp validate_dates(changeset, start_date_field, due_date_field, cutoff_date_field) do
     start_date = get_field(changeset, start_date_field)
     due_date = get_field(changeset, due_date_field)
     cutoff_date = get_field(changeset, cutoff_date_field)
 
-    if DateTime.compare(start_date, due_date) == :gt do
-      add_error(changeset, due_date_field, "Date error.")
-    else
-      if DateTime.compare(due_date, cutoff_date) == :gt do
-      add_error(changeset, cutoff_date_field, "Date error")
+    if start_date && due_date && cutoff_date do
+      changeset
+      |> validate_date(:due_date, due_date, start_date, "Due date must be after the start date")
+      |> validate_date(
+        :due_date,
+        cutoff_date,
+        due_date,
+        "Due date must be before the cutoff date"
+      )
+      |> validate_date(
+        :cutoff_date,
+        cutoff_date,
+        start_date,
+        "Cut off date must be after the start date"
+      )
+      |> validate_date(
+        :cutoff_date,
+        cutoff_date,
+        due_date,
+        "Cut off date must be after the due date"
+      )
     else
       changeset
     end
   end
 
-end
+  defp validate_date(changeset, field, date, reference_date, error) do
+    if date < reference_date do
+      add_error(changeset, field, error)
+    else
+      changeset
+    end
+  end
 end
