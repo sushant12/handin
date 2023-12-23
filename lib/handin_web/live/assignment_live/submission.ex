@@ -64,6 +64,7 @@ defmodule HandinWeb.AssignmentLive.Submission do
      socket
      |> assign(current_page: :modules)
      |> assign(:module, module)
+     |> assign(:page_title, "#{module.name} - #{assignment.name}")
      |> assign(:assignment, assignment)}
   end
 end

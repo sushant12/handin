@@ -286,6 +286,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
     assignment = Assignments.get_assignment!(assignment_id)
+    module = Modules.get_module!(id)
     assignment_test = Enum.at(assignment.assignment_tests, 0)
 
     {:ok,
@@ -293,6 +294,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
      |> assign(current_page: :modules)
      |> assign(:module, Modules.get_module!(id))
      |> assign(:assignment, assignment)
+     |> assign(:page_title, "#{module.name} - #{assignment.name}")
      |> assign(:assignment_test, assignment_test)
      |> assign(:assignment_tests, assignment.assignment_tests)
      |> assign(:logs, Assignments.build_recent_test_results(assignment_id))

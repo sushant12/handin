@@ -130,6 +130,7 @@ defmodule HandinWeb.AssignmentLive.Environment do
      |> assign(current_page: :modules)
      |> assign(:module, module)
      |> assign(:assignment, assignment)
+     |> assign(:page_title, "#{module.name} - #{assignment.name}")
      |> assign(:form, Assignments.change_assignment(assignment) |> to_form())
      |> assign(
        :programming_languages,
