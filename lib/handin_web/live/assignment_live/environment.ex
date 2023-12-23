@@ -13,7 +13,11 @@ defmodule HandinWeb.AssignmentLive.Environment do
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
         text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}"}
+        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
+      />
+      <:item
+        text={@assignment.name}
+        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
       />
     </.breadcrumbs>
@@ -122,20 +126,26 @@ defmodule HandinWeb.AssignmentLive.Environment do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    assignment = Assignments.get_assignment!(assignment_id)
-    module = Modules.get_module!(id)
+    if Modules.assignment_exists?(id, assignment_id) do
+      assignment = Assignments.get_assignment!(assignment_id)
+      module = Modules.get_module!(id)
 
-    {:ok,
-     socket
-     |> assign(current_page: :modules)
-     |> assign(:module, module)
-     |> assign(:assignment, assignment)
-     |> assign(:form, Assignments.change_assignment(assignment) |> to_form())
-     |> assign(
-       :programming_languages,
-       ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
-     )
-     |> LiveMonacoEditor.set_value(assignment.name)}
+      {:ok,
+       socket
+       |> assign(current_page: :modules)
+       |> assign(:module, module)
+       |> assign(:assignment, assignment)
+       |> assign(:form, Assignments.change_assignment(assignment) |> to_form())
+       |> assign(
+         :programming_languages,
+         ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
+       )
+       |> LiveMonacoEditor.set_value(assignment.name)}
+    else
+      {:ok,
+       push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+       |> put_flash(:error, "You are not authorized to view this page")}
+    end
   end
 
   @impl true

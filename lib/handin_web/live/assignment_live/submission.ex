@@ -13,7 +13,11 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
         text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}"}
+        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
+      />
+      <:item
+        text={@assignment.name}
+        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
       />
     </.breadcrumbs>
@@ -35,7 +39,7 @@ defmodule HandinWeb.AssignmentLive.Submission do
     <.header class="mt-5">
       Student Submissions
     </.header>
-    <.table id="submitted_assignment_submissions" rows={@assignment.assignment_submissions}>
+    <.table id="submitted_assignment_submissions" rows={@assignment_submissions}>
       <:col :let={{_, i}} label="id">
         <%= i %>
       </:col>
@@ -45,7 +49,7 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:action :let={{submission, _}}>
         <.link
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
-          href={~p"/modules/#{@module_id}/assignments/#{@assignment.id}/submission/#{submission.id}"}
+          href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submission/#{submission.id}"}
           target="_blank"
         >
           Show
@@ -57,13 +61,21 @@ defmodule HandinWeb.AssignmentLive.Submission do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    assignment = Assignments.get_assignment!(assignment_id)
-    module = Modules.get_module!(id)
+    if Modules.assignment_exists?(id, assignment_id) do
+      assignment = Assignments.get_assignment!(assignment_id)
+      module = Modules.get_module!(id)
+      assignment_submissions = Assignments.get_submissions_for_assignment(assignment_id)
 
-    {:ok,
-     socket
-     |> assign(current_page: :modules)
-     |> assign(:module, module)
-     |> assign(:assignment, assignment)}
+      {:ok,
+       socket
+       |> assign(current_page: :modules)
+       |> assign(:module, module)
+       |> assign(:assignment, assignment)
+       |> assign(:assignment_submissions, assignment_submissions)}
+    else
+      {:ok,
+       push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+       |> put_flash(:error, "You are not authorized to view this page")}
+    end
   end
 end

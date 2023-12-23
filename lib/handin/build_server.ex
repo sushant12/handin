@@ -1,7 +1,8 @@
 defmodule Handin.BuildServer do
   use GenServer
   alias Handin.Assignments
-  alias Handin.SupportFileUploader
+  alias Handin.{SupportFileUploader, AssignmentSubmissionFileUploader}
+  alias Handin.AssignmentSubmission.AssignmentSubmissionFile
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
 
@@ -20,7 +21,8 @@ defmodule Handin.BuildServer do
     {:ok, build} =
       Assignments.new_build(%{
         assignment_id: assignment.id,
-        status: :running
+        status: :running,
+        user_id: state.user_id
       })
 
     state = state |> Map.put(:assignment, assignment) |> Map.put(:build, build)
@@ -37,8 +39,9 @@ defmodule Handin.BuildServer do
                  auto_destroy: true,
                  image: state.image,
                  files:
-                   build_files(state.assignment, state.type) ++
-                     build_main_script(state.assignment) ++ build_tests_scripts(state.assignment)
+                   build_files(state.assignment, state.type, state.user_id) ++
+                     build_main_script(state.assignment) ++
+                     build_tests_scripts(state.assignment)
                }
              })
            ),
@@ -153,6 +156,15 @@ defmodule Handin.BuildServer do
         )
     end
 
+    if state.type == "assignment_submission" do
+      submission = Assignments.get_submission(state.assignment_id, state.user_id)
+
+      Map.get(submission, :id)
+      |> Assignments.submit_assignment()
+
+      Assignments.evaluate_marks(submission.id, state.build.id)
+    end
+
     Assignments.get_logs(state.build.id)
     @machine_api.stop(state.machine_id)
     {:stop, "Server terminated gracefully", state}
@@ -180,20 +192,29 @@ defmodule Handin.BuildServer do
     )
   end
 
-  defp build_files(assignment, type) do
+  defp build_files(assignment, type, user_id) do
     assignment_files =
       if type == "assignment_tests" do
         assignment.support_files ++ assignment.solution_files
       else
-        assignment.support_files
+        assignment.support_files ++ Assignments.get_submission_files(assignment.id, user_id)
       end
 
     assignment_files
     |> Enum.map(fn assignment_file ->
       url =
-        SupportFileUploader.url({assignment_file.file.file_name, assignment_file},
-          signed: true
-        )
+        case assignment_file do
+          %AssignmentSubmissionFile{} = assignment_file ->
+            AssignmentSubmissionFileUploader.url(
+              {assignment_file.file.file_name, assignment_file},
+              signed: true
+            )
+
+          _ ->
+            SupportFileUploader.url({assignment_file.file.file_name, assignment_file},
+              signed: true
+            )
+        end
 
       {:ok, %Finch.Response{status: 200, body: body}} =
         Finch.build(:get, url)

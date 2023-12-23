@@ -2,7 +2,7 @@ defmodule Handin.Assignments do
   @moduledoc """
   The Assignments context.
   """
-
+  use Timex
   import Ecto.Query, warn: false
   alias Handin.Repo
 
@@ -16,6 +16,8 @@ defmodule Handin.Assignments do
     RunScriptResult,
     TestResult
   }
+
+  alias Handin.AssignmentSubmission.{AssignmentSubmission, AssignmentSubmissionFile}
 
   @doc """
   Returns the list of assignments.
@@ -48,11 +50,11 @@ defmodule Handin.Assignments do
     do:
       Repo.get!(Assignment, id)
       |> Repo.preload([
-        :assignment_submissions,
         :programming_language,
         :assignment_tests,
         :support_files,
         :solution_files,
+        assignment_submissions: [:user],
         builds: [:logs]
       ])
 
@@ -135,11 +137,6 @@ defmodule Handin.Assignments do
     |> Repo.insert()
   end
 
-  def support_file_change(attrs \\ %{}) do
-    %SupportFile{}
-    |> SupportFile.changeset(attrs)
-  end
-
   def valid_submission_date?(assignment) do
     now = DateTime.utc_now()
 
@@ -151,6 +148,18 @@ defmodule Handin.Assignments do
     %SupportFile{}
     |> SupportFile.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def create_or_update_submission(
+        %{user_id: user_id, assignment_id: assignment_id} = attrs \\ %{}
+      ) do
+    if submission = get_submission(assignment_id, user_id) do
+      submission
+    else
+      %AssignmentSubmission{}
+    end
+    |> AssignmentSubmission.changeset(attrs)
+    |> Repo.insert_or_update()
   end
 
   def get_support_file!(id), do: Repo.get!(SupportFile, id)
@@ -173,6 +182,10 @@ defmodule Handin.Assignments do
     Repo.delete(solution_file)
   end
 
+  def delete_assignment_submission_file(%AssignmentSubmissionFile{} = submission_file) do
+    Repo.delete(submission_file)
+  end
+
   def change_support_file(%SupportFile{} = support_file, attrs \\ %{}) do
     SupportFile.changeset(support_file, attrs)
   end
@@ -189,6 +202,13 @@ defmodule Handin.Assignments do
     |> Repo.insert()
   end
 
+  def save_assignment_submission_file!(attrs \\ %{}) do
+    %AssignmentSubmissionFile{}
+    |> AssignmentSubmissionFile.changeset(attrs)
+    |> Repo.insert!()
+    |> Repo.preload(assignment_submission: [:user, :assignment])
+  end
+
   def upload_support_file(support_file, attrs \\ %{}) do
     support_file
     |> SupportFile.file_changeset(attrs)
@@ -201,13 +221,23 @@ defmodule Handin.Assignments do
     |> Repo.update!()
   end
 
+  def upload_assignment_submission_file(submission_file, attrs \\ %{}) do
+    submission_file
+    |> AssignmentSubmissionFile.file_changeset(attrs)
+    |> Repo.update!()
+  end
+
   def log(log_map) do
     Log.changeset(log_map)
     |> Repo.insert()
   end
 
   @spec new_build(
-          attrs :: %{assignment_test_id: Ecto.UUID, assignment_id: Ecto.UUID, status: String.t()}
+          attrs :: %{
+            assignment_id: Ecto.UUID,
+            status: String.t(),
+            user_id: Ecto.UUID
+          }
         ) ::
           {:ok, Build.t()}
   def new_build(attrs) do
@@ -256,10 +286,11 @@ defmodule Handin.Assignments do
     |> Repo.insert()
   end
 
-  def build_recent_test_results(assignment_id) do
+  def build_recent_test_results(assignment_id, user_id) do
     build =
       Build
       |> where([b], b.assignment_id == ^assignment_id)
+      |> where([b], b.user_id == ^user_id)
       |> order_by([b], desc: b.inserted_at)
       |> limit(1)
       |> Repo.one()
@@ -285,7 +316,6 @@ defmodule Handin.Assignments do
 
     test_results =
       build.test_results
-      |> Enum.sort_by(& &1.inserted_at, :asc)
       |> Enum.map(fn test_result ->
         %{
           type: "test_result",
@@ -305,20 +335,137 @@ defmodule Handin.Assignments do
         }
       end)
 
-    run_script_results = [
-      %{
-        type: "run_script_result",
-        state: build.run_script_result.state,
-        name: "Compiling files",
-        command: "sh ./main.sh",
-        output:
-          build.logs
-          |> Enum.find(&is_nil(&1.assignment_test_id))
-          |> Map.get(:output),
-        expected_output: ""
-      }
-    ]
+    run_script_results =
+      if build.run_script_result do
+        [
+          %{
+            type: "run_script_result",
+            state: build.run_script_result.state,
+            name: "Compiling files",
+            command: "sh ./main.sh",
+            output:
+              build.logs
+              |> Enum.find(&is_nil(&1.assignment_test_id))
+              |> Map.get(:output),
+            expected_output: ""
+          }
+        ]
+      else
+        []
+      end
 
     Enum.with_index(run_script_results ++ test_results, &{&2, &1})
+  end
+
+  def get_running_build(assignment_id, user_id) do
+    Build
+    |> where([b], b.assignment_id == ^assignment_id)
+    |> where([b], b.status == :running)
+    |> where([b], b.user_id == ^user_id)
+    |> order_by([b], desc: b.inserted_at)
+    |> limit(1)
+    |> Repo.one()
+  end
+
+  def get_submission_by_id(submission_id) do
+    AssignmentSubmission
+    |> where([as], as.id == ^submission_id)
+    |> Repo.one()
+    |> case do
+      nil -> nil
+      submission -> Repo.preload(submission, [:assignment_submission_files, :user])
+    end
+  end
+
+  def get_submission(assignment_id, user_id) do
+    AssignmentSubmission
+    |> where([as], as.assignment_id == ^assignment_id)
+    |> where([as], as.user_id == ^user_id)
+    |> order_by([as], desc: as.inserted_at)
+    |> preload([:assignment_submission_files, :assignment])
+    |> limit(1)
+    |> Repo.one()
+  end
+
+  def get_submission_files(assignment_id, user_id) do
+    AssignmentSubmission
+    |> where([as], as.assignment_id == ^assignment_id)
+    |> where([as], as.user_id == ^user_id)
+    |> order_by([as], desc: as.inserted_at)
+    |> limit(1)
+    |> join(:inner, [as], asf in assoc(as, :assignment_submission_files))
+    |> select([as, asf], asf)
+    |> Repo.all()
+    |> Enum.map(&Repo.preload(&1, assignment_submission: [:user, :assignment]))
+  end
+
+  def get_submissions_for_assignment(assignment_id) do
+    AssignmentSubmission
+    |> where([as], as.assignment_id == ^assignment_id)
+    |> preload([as], :user)
+    |> Repo.all()
+    |> Enum.with_index(1)
+  end
+
+  def get_submissions_for_user(module_id, user_id) do
+    Assignment
+    |> where([a], a.module_id == ^module_id)
+    |> join(:inner, [a], as in assoc(a, :assignment_submissions))
+    |> where([a, as], as.user_id == ^user_id)
+    |> select([a, as], as)
+    |> Repo.all()
+    |> Enum.map(&Repo.preload(&1, [:assignment]))
+  end
+
+  def submit_assignment(assignment_submission_id) do
+    now = DateTime.utc_now()
+
+    AssignmentSubmission
+    |> where([as], as.id == ^assignment_submission_id)
+    |> update([as], inc: [retries: 1], set: [submitted_at: ^now])
+    |> Repo.update_all([])
+  end
+
+  def create_submission(assignment_id, user_id) do
+    %AssignmentSubmission{}
+    |> AssignmentSubmission.changeset(%{
+      assignment_id: assignment_id,
+      user_id: user_id
+    })
+    |> Repo.insert!()
+    |> Repo.preload([:assignment_submission_files, :assignment])
+  end
+
+  def evaluate_marks(submission_id, build_id) do
+    submission = Repo.get(AssignmentSubmission, submission_id) |> Repo.preload(:assignment)
+
+    build =
+      Repo.get(Build, build_id)
+      |> Repo.preload([:run_script_result, test_results: [:assignment_test]])
+
+    total_passed_tests_points =
+      build.test_results
+      |> Enum.filter(&(&1.state == :pass))
+      |> Enum.reduce(0, fn test_result, acc ->
+        acc + test_result.assignment_test.points_on_pass
+      end)
+
+    total_points_after_penalty =
+      if Timex.after?(submission.submitted_at, submission.assignment.due_date) do
+        days_after_due_date =
+          Interval.new(from: submission.assignment.due_date, until: submission.submitted_at)
+          |> Interval.duration(:days)
+
+        penalty_percentage = submission.assignment.penalty_per_day * days_after_due_date / 100
+        total_passed_tests_points * (1 - penalty_percentage)
+      else
+        total_passed_tests_points
+      end
+
+    submission
+    |> Handin.AssignmentSubmission.AssignmentSubmission.changeset(%{
+      total_points: total_points_after_penalty
+    })
+    |> Repo.update()
   end
 end

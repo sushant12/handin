@@ -1,8 +1,7 @@
 defmodule HandinWeb.AssignmentLive.Detail do
   use HandinWeb, :live_view
   use Timex
-  alias Handin.Modules
-  alias Handin.Assignments
+  alias Handin.{Modules, Accounts, Assignments}
 
   @impl true
   def render(assigns) do
@@ -13,27 +12,42 @@ defmodule HandinWeb.AssignmentLive.Detail do
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
         text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}"}
-        current={true}
+        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
       />
-    </.breadcrumbs>
-
-    <.tabs>
       <:item
-        text="Details"
+        text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
       />
-      <:item
-        text="Environment"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/environment"}
-      />
-      <:item text="Tests" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/tests"} />
-      <:item
-        text="Submissions"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
-      />
-    </.tabs>
+    </.breadcrumbs>
+    <%= if @current_user.role != "student" do %>
+      <.tabs>
+        <:item
+          text="Details"
+          href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
+          current={true}
+        />
+        <:item
+          text="Environment"
+          href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/environment"}
+        />
+        <:item text="Tests" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/tests"} />
+        <:item
+          text="Submissions"
+          href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
+        />
+      </.tabs>
+    <% end %>
+    <%= if @current_user.role == "student" do %>
+      <.tabs>
+        <:item
+          text="Details"
+          href={~p"/modules/#{@module}/assignments/#{@assignment}/details"}
+          current={true}
+        />
+        <:item text="Submit" href={~p"/modules/#{@module}/assignments/#{@assignment}/submit"} />
+      </.tabs>
+    <% end %>
 
     <.header>
       <%= @assignment.name %>
@@ -64,10 +78,22 @@ defmodule HandinWeb.AssignmentLive.Detail do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    {:ok,
-     socket
-     |> assign(current_page: :modules)
-     |> assign(:module, Modules.get_module!(id))
-     |> assign(:assignment, Assignments.get_assignment!(assignment_id))}
+    with true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
+         true <- Modules.assignment_exists?(id, assignment_id) do
+      module = Modules.get_module!(id)
+      assignment = Assignments.get_assignment!(assignment_id)
+
+      {:ok,
+       socket
+       |> assign(current_page: :modules)
+       |> assign(:module, module)
+       |> assign(:page_title, "#{module.name} - #{assignment.name}")
+       |> assign(:assignment, assignment)}
+    else
+      false ->
+        {:ok,
+         push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+         |> put_flash(:error, "You are not authorized to view this page")}
+    end
   end
 end
