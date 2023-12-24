@@ -96,6 +96,7 @@ defmodule HandinWeb.Router do
 
           live "/tests", AssignmentLive.Tests, :index
           live "/submissions", AssignmentLive.Submission, :index
+          live "/settings", AssignmentLive.Settings, :index
         end
 
         live "/assignments/:assignment_id/add_test",

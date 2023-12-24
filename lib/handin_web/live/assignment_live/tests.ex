@@ -39,6 +39,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
         text="Submissions"
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
       />
+      <:item text="Settings" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"} />
     </.tabs>
 
     <div class="flex h-screen">

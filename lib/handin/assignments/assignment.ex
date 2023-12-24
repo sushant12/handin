@@ -17,6 +17,12 @@ defmodule Handin.Assignments.Assignment do
     field :penalty_per_day, :float
     field :run_script, :string
     field :attempt_marks, :integer
+    field :enable_cutoff_date, :boolean, default: false
+    field :enable_attempt_marks, :boolean, default: false
+    field :enable_penalty_per_day, :boolean, default: false
+    field :enable_max_attemps, :boolean, default: false
+    field :enable_total_marks, :boolean, default: false
+    field :enable_test_output, :boolean, default: false
 
     belongs_to :module, Module
     belongs_to :programming_language, ProgrammingLanguage, on_replace: :nilify
@@ -36,6 +42,13 @@ defmodule Handin.Assignments.Assignment do
 
   @required_attrs [
     :name,
+    :start_date,
+    :due_date,
+    :module_id
+  ]
+
+  @attrs [
+    :name,
     :total_marks,
     :start_date,
     :due_date,
@@ -44,10 +57,15 @@ defmodule Handin.Assignments.Assignment do
     :penalty_per_day,
     :module_id,
     :programming_language_id,
-    :attempt_marks
+    :attempt_marks,
+    :run_script,
+    :enable_cutoff_date,
+    :enable_attempt_marks,
+    :enable_penalty_per_day,
+    :enable_max_attemps,
+    :enable_total_marks,
+    :enable_test_output
   ]
-
-  @attrs @required_attrs ++ [:run_script]
 
   @doc false
   def changeset(assignment, attrs) do
@@ -58,8 +76,66 @@ defmodule Handin.Assignments.Assignment do
     |> validate_number(:max_attempts, greater_than_or_equal_to: 0)
     |> validate_number(:penalty_per_day, greater_than_or_equal_to: 0)
     |> validate_number(:total_marks, greater_than_or_equal_to: 0)
-    |> maybe_validate_due_date()
+    |> validate_number(:attempt_marks, greater_than_or_equal_to: 0)
     |> maybe_validate_cutoff_date()
+    |> maybe_validate_attempt_marks()
+    |> maybe_validate_penalty_per_day()
+    |> maybe_validate_max_attempts()
+    |> maybe_validate_total_marks()
+    |> maybe_validate_due_date()
+  end
+
+  def new_changeset(assignment, attrs) do
+    assignment
+    |> cast(attrs, @attrs)
+    |> validate_required(@required_attrs)
+  end
+
+  defp maybe_validate_cutoff_date(changeset) do
+    if get_field(changeset, :enable_cutoff_date) do
+      changeset
+      |> validate_required(:cutoff_date)
+      |> validate_date(
+        :cutoff_date,
+        get_field(changeset, :start_date),
+        get_field(changeset, :cutoff_date),
+        "must come after start date"
+      )
+    else
+      changeset
+    end
+  end
+
+  defp maybe_validate_attempt_marks(changeset) do
+    if get_field(changeset, :enable_attempt_marks) do
+      validate_required(changeset, :attempt_marks)
+    else
+      changeset
+    end
+  end
+
+  defp maybe_validate_penalty_per_day(changeset) do
+    if get_field(changeset, :enable_penalty_per_day) do
+      validate_required(changeset, :penalty_per_day)
+    else
+      changeset
+    end
+  end
+
+  defp maybe_validate_max_attempts(changeset) do
+    if get_field(changeset, :enable_max_attemps) do
+      validate_required(changeset, :max_attempts)
+    else
+      changeset
+    end
+  end
+
+  defp maybe_validate_total_marks(changeset) do
+    if get_field(changeset, :enable_total_marks) do
+      validate_required(changeset, :total_marks)
+    else
+      changeset
+    end
   end
 
   defp maybe_validate_due_date(changeset) do
@@ -73,22 +149,6 @@ defmodule Handin.Assignments.Assignment do
           :due_date,
           get_field(changeset, :start_date),
           due_date,
-          "must come after start date"
-        )
-    end
-  end
-
-  defp maybe_validate_cutoff_date(changeset) do
-    case get_field(changeset, :cutoff_date) do
-      nil ->
-        changeset
-
-      cutoff_date ->
-        validate_date(
-          changeset,
-          :cutoff_date,
-          get_field(changeset, :start_date),
-          cutoff_date,
           "must come after start date"
         )
     end
