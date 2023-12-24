@@ -44,7 +44,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
     </.header>
 
     <div class="grid grid-cols-6 gap-4">
-      <.simple_form for={@form} id="assignment-optional-attrs" class="mb-4" phx-change="validate">
+      <.simple_form for={@form} id="assignment-optional-attrs" class="mb-4" phx-change="validate_and_save">
         <div class="row-start-1">
           <label class="relative inline-flex items-center cursor-pointer">
             <input
@@ -225,7 +225,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
     end
   end
 
-  def handle_event("validate", %{"assignment" => assignment_params}, socket) do
+  def handle_event("validate_and_save", %{"assignment" => assignment_params}, socket) do
     assignment =
       socket.assigns.assignment
       |> Assignments.change_assignment(assignment_params)
@@ -241,7 +241,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
     end
   end
 
-  def handle_event("validate", _, socket) do
+  def handle_event("validate_and_save", _, socket) do
     {:noreply, socket}
   end
 
