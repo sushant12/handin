@@ -19,21 +19,8 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" />
-        <.input
-          field={@form[:programming_language_id]}
-          label="Language"
-          type="select"
-          prompt="Select Programming Language"
-          options={@programming_languages}
-        />
-        <.input field={@form[:total_marks]} type="number" label="Total marks" />
         <.input field={@form[:start_date]} type="datetime-local" label="Start date" />
         <.input field={@form[:due_date]} type="datetime-local" label="Due date" />
-        <.input field={@form[:cutoff_date]} type="datetime-local" label="Cutoff date" />
-        <.input field={@form[:max_attempts]} type="number" label="Max attempts" />
-        <.input field={@form[:attempt_marks]} type="number" label="Attempt marks" />
-        <.input field={@form[:penalty_per_day]} type="number" label="Penalty per day" step="any" />
-
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"

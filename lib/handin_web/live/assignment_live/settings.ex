@@ -226,22 +226,15 @@ defmodule HandinWeb.AssignmentLive.Settings do
   end
 
   def handle_event("validate", %{"assignment" => assignment_params}, socket) do
-    changeset =
+    assignment =
       socket.assigns.assignment
       |> Assignments.change_assignment(assignment_params)
-      |> Map.put(:action, :validate)
+      |> Handin.Repo.update()
 
-    cond do
-      %Ecto.Changeset{valid?: true} ->
-        {:ok, assignment} =
-          changeset
-          |> Map.put(:action, :update)
-          |> Handin.Repo.update()
-
-        {:noreply,
-         socket
-         |> assign(:assignment, assignment)
-         |> assign_form(changeset)}
+    case assignment do
+      {:ok, assignment} ->
+        changeset = Assignments.change_assignment(assignment)
+        {:noreply, socket |> assign(:assignment, assignment) |> assign_form(changeset)}
 
       {:error, changeset} ->
         {:noreply, assign_form(socket, changeset)}
