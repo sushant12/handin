@@ -1,6 +1,5 @@
 defmodule HandinWeb.AssignmentLive.Detail do
   use HandinWeb, :live_view
-  use Timex
   alias Handin.{Modules, Accounts, Assignments}
 
   @impl true
@@ -61,16 +60,13 @@ defmodule HandinWeb.AssignmentLive.Detail do
       <:item title="Max attempts"><%= @assignment.max_attempts %></:item>
       <:item title="Penalty per day"><%= @assignment.penalty_per_day %>%</:item>
       <:item title="Start Date">
-        <%= Timex.Timezone.convert(@assignment.start_date, "Europe/Dublin")
-        |> Timex.format!("%b %e, %Y at %H:%M:%S %p", :strftime) %>
+        <%= Handin.DisplayHelper.format_date(@assignment.start_date, "Europe/Dublin") %>
       </:item>
       <:item title="Due Date">
-        <%= Timex.Timezone.convert(@assignment.due_date, "Europe/Dublin")
-        |> Timex.format!("%b %e, %Y at %H:%M:%S %p", :strftime) %>
+        <%= Handin.DisplayHelper.format_date(@assignment.due_date, "Europe/Dublin") %>
       </:item>
       <:item title="Cut off Date">
-        <%= Timex.Timezone.convert(@assignment.cutoff_date, "Europe/Dublin")
-        |> Timex.format!("%b %e, %Y at %H:%M:%S %p", :strftime) %>
+        <%= Handin.DisplayHelper.format_date(@assignment.cutoff_date, "Europe/Dublin") %>
       </:item>
     </.list>
     """
