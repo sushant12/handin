@@ -1,7 +1,7 @@
 defmodule HandinWeb.AssignmentLive.Settings do
   use HandinWeb, :live_view
 
-  alias Handin.{Modules, Assignments, Repo}
+  alias Handin.{Modules, Assignments}
 
   @impl true
   def render(assigns) do
@@ -44,80 +44,123 @@ defmodule HandinWeb.AssignmentLive.Settings do
     </.header>
 
     <div class="grid grid-cols-6 gap-4">
-      <div class="row-start-1">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" class="sr-only peer" phx-click="toggle_enable_cutoff_date" checked={@form[:enable_cutoff_date].value}/>
-          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-          </div>
-          <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">&nbsp;&nbsp;Cutoff Date</span>
-        </label>
+      <.simple_form for={@form} id="assignment-optional-attrs" class="mb-4" phx-change="validate">
+        <div class="row-start-1">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              phx-click="toggle_enable_cutoff_date"
+              checked={@form[:enable_cutoff_date].value}
+            />
+            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+            </div>
+            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+              &nbsp;&nbsp;Cutoff Date
+            </span>
+          </label>
 
-        <div :if={@form[:enable_cutoff_date].value}>
-          <.input field={@form[:cutoff_date]} type="datetime-local" />
+          <div :if={@form[:enable_cutoff_date].value}>
+            <.input field={@form[:cutoff_date]} type="datetime-local" phx-blur="update_cutoff_date" />
+          </div>
         </div>
-      </div>
 
-      <div class="row-start-2">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" class="sr-only peer" phx-click="toggle_enable_attempt_marks" checked={@form[:enable_attempt_marks].value}/>
-          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+        <div class="row-start-2">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              phx-click="toggle_enable_attempt_marks"
+              checked={@form[:enable_attempt_marks].value}
+            />
+            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+            </div>
+            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+              &nbsp;&nbsp;Attempt Marks
+            </span>
+          </label>
+
+          <div :if={@form[:enable_attempt_marks].value} class="col-span-2">
+            <.input field={@form[:attempt_marks]} type="number" phx-blur="update_attempt_marks" />
           </div>
-          <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">&nbsp;&nbsp;Attempt Marks</span>
-        </label>
-
-        <div :if={@form[:enable_attempt_marks].value} class="col-span-2">
-          <.input field={@form[:attempt_marks]} type="number" />
         </div>
-      </div>
 
-      <div class="row-start-3">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" class="sr-only peer" phx-click="toggle_enable_penalty_per_day" checked={@form[:enable_penalty_per_day].value}/>
-          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+        <div class="row-start-3">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              phx-click="toggle_enable_penalty_per_day"
+              checked={@form[:enable_penalty_per_day].value}
+            />
+            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+            </div>
+            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+              &nbsp;&nbsp;Penalty Per Day
+            </span>
+          </label>
+
+          <div :if={@form[:enable_penalty_per_day].value} class="col-span-2">
+            <.input field={@form[:penalty_per_day]} type="number" phx-blur="update_penalty_per_day" />
           </div>
-          <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">&nbsp;&nbsp;Penalty Per Day
-          </span>
-        </label>
-
-        <div :if={@form[:enable_pentaly_per_day].value} class="col-span-2">
-          <.input field={@form[:penalty_per_day]} type="number" />
         </div>
-      </div>
 
-      <div class="row-start-4">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" class="sr-only peer" phx-click="toggle_enable_max_attemps" checked={@form[:enable_max_attemps].value}/>
-          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+        <div class="row-start-4">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              phx-click="toggle_enable_max_attemps"
+              checked={@form[:enable_max_attemps].value}
+            />
+            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+            </div>
+            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+              &nbsp;&nbsp;Max Attempts
+            </span>
+          </label>
+
+          <div :if={@form[:enable_max_attemps].value} class="col-span-2">
+            <.input field={@form[:max_attempts]} type="number" phx-blur="update_max_attempts" />
           </div>
-          <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">&nbsp;&nbsp;Max Attempts</span>
-        </label>
-
-        <div :if={@form[:enable_max_attemps].value} class="col-span-2">
-          <.input field={@form[:max_attempts]} type="number" />
         </div>
-      </div>
 
-      <div class="row-start-5">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" class="sr-only peer" phx-click="toggle_enable_total_marks" checked={@form[:enable_total_marks].value}/>
-          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+        <div class="row-start-5">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              phx-click="toggle_enable_total_marks"
+              checked={@form[:enable_total_marks].value}
+            />
+            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+            </div>
+            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+              &nbsp;&nbsp;Total Marks
+            </span>
+          </label>
+
+          <div :if={@form[:enable_total_marks].value} class="col-span-2">
+            <.input field={@form[:total_marks]} type="number" phx-blur="update_total_marks" />
           </div>
-          <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">&nbsp;&nbsp;Total Marks</span>
-        </label>
-
-        <div :if={@form[:enable_total_marks].value} class="col-span-2">
-          <.input field={@form[:total_marks]} type="number" />
         </div>
-      </div>
 
-      <div class="row-start-6">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" class="sr-only peer" phx-click="toggle_enable_test_output" checked={@form[:enable_test_output].value}/>
-          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-          </div>
-          <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">&nbsp;&nbsp;Test Output</span>
-        </label>
-      </div>
+        <div class="row-start-6">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              phx-click="toggle_enable_test_output"
+              checked={@form[:enable_test_output].value}
+            />
+            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+            </div>
+            <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+              &nbsp;&nbsp;Test Output
+            </span>
+          </label>
+        </div>
+      </.simple_form>
     </div>
     """
   end
@@ -144,9 +187,8 @@ defmodule HandinWeb.AssignmentLive.Settings do
 
   @impl true
   def handle_event("toggle_" <> key, %{"value" => "on"}, socket) do
-    assignment =
-      Assignments.change_assignment(socket.assigns.assignment, %{"#{key}" => true})
-      |> Repo.update!()
+    {:ok, assignment} =
+      Assignments.update_assignment(socket.assigns.assignment, %{"#{key}" => true})
 
     changeset = Assignments.change_assignment(assignment)
 
@@ -157,9 +199,8 @@ defmodule HandinWeb.AssignmentLive.Settings do
   end
 
   def handle_event("toggle_" <> key, _, socket) do
-    assignment =
-      Assignments.change_assignment(socket.assigns.assignment, %{"#{key}" => false})
-      |> Repo.update!()
+    {:ok, assignment} =
+      Assignments.update_assignment(socket.assigns.assignment, %{"#{key}" => false})
 
     changeset = Assignments.change_assignment(assignment)
 
@@ -167,6 +208,34 @@ defmodule HandinWeb.AssignmentLive.Settings do
      socket
      |> assign(:assignment, assignment)
      |> assign_form(changeset)}
+  end
+
+  def handle_event("update_" <> key, %{"value" => value}, socket) do
+    case Assignments.update_assignment(socket.assigns.assignment, %{"#{key}" => value}) do
+      {:ok, assignment} ->
+        changeset = Assignments.change_assignment(assignment)
+
+        {:noreply,
+         socket
+         |> assign(:assignment, assignment)
+         |> assign_form(changeset)}
+
+      {:error, changeset} ->
+        {:noreply, assign_form(socket, changeset)}
+    end
+  end
+
+  def handle_event("validate", %{"assignment" => assignment_params}, socket) do
+    changeset =
+      socket.assigns.assignment
+      |> Assignments.change_assignment(assignment_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign_form(socket, changeset)}
+  end
+
+  def handle_event("validate", _, socket) do
+    {:noreply, socket}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
