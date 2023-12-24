@@ -98,6 +98,12 @@ defmodule Handin.Assignments do
     |> Repo.update()
   end
 
+  def update_new_assignment(%Assignment{} = assignment, attrs) do
+    assignment
+    |> Assignment.new_changeset(attrs)
+    |> Repo.update()
+  end
+
   @doc """
   Deletes a assignment.
 
@@ -125,6 +131,10 @@ defmodule Handin.Assignments do
   """
   def change_assignment(%Assignment{} = assignment, attrs \\ %{}) do
     Assignment.changeset(assignment, attrs)
+  end
+
+  def change_new_assignment(%Assignment{} = assignment, attrs \\ %{}) do
+    Assignment.new_changeset(assignment, attrs)
   end
 
   def change_assignment_test(%AssignmentTest{} = assignment_test, attrs \\ %{}) do

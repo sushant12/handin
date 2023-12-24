@@ -61,7 +61,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
           </label>
 
           <div :if={@form[:enable_cutoff_date].value}>
-            <.input field={@form[:cutoff_date]} type="datetime-local" phx-blur="update_cutoff_date" />
+            <.input field={@form[:cutoff_date]} type="datetime-local" />
           </div>
         </div>
 
@@ -81,7 +81,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
           </label>
 
           <div :if={@form[:enable_attempt_marks].value} class="col-span-2">
-            <.input field={@form[:attempt_marks]} type="number" phx-blur="update_attempt_marks" />
+            <.input field={@form[:attempt_marks]} type="number" />
           </div>
         </div>
 
@@ -101,7 +101,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
           </label>
 
           <div :if={@form[:enable_penalty_per_day].value} class="col-span-2">
-            <.input field={@form[:penalty_per_day]} type="number" phx-blur="update_penalty_per_day" />
+            <.input field={@form[:penalty_per_day]} type="number" />
           </div>
         </div>
 
@@ -121,7 +121,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
           </label>
 
           <div :if={@form[:enable_max_attemps].value} class="col-span-2">
-            <.input field={@form[:max_attempts]} type="number" phx-blur="update_max_attempts" />
+            <.input field={@form[:max_attempts]} type="number" />
           </div>
         </div>
 
@@ -141,7 +141,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
           </label>
 
           <div :if={@form[:enable_total_marks].value} class="col-span-2">
-            <.input field={@form[:total_marks]} type="number" phx-blur="update_total_marks" />
+            <.input field={@form[:total_marks]} type="number" />
           </div>
         </div>
 
@@ -188,9 +188,9 @@ defmodule HandinWeb.AssignmentLive.Settings do
   @impl true
   def handle_event("toggle_" <> key, %{"value" => "on"}, socket) do
     {:ok, assignment} =
-      Assignments.update_assignment(socket.assigns.assignment, %{"#{key}" => true})
+      Assignments.update_new_assignment(socket.assigns.assignment, %{"#{key}" => true})
 
-    changeset = Assignments.change_assignment(assignment)
+    changeset = Assignments.change_new_assignment(assignment)
 
     {:noreply,
      socket
@@ -200,9 +200,9 @@ defmodule HandinWeb.AssignmentLive.Settings do
 
   def handle_event("toggle_" <> key, _, socket) do
     {:ok, assignment} =
-      Assignments.update_assignment(socket.assigns.assignment, %{"#{key}" => false})
+      Assignments.update_new_assignment(socket.assigns.assignment, %{"#{key}" => false})
 
-    changeset = Assignments.change_assignment(assignment)
+    changeset = Assignments.change_new_assignment(assignment)
 
     {:noreply,
      socket
@@ -231,7 +231,21 @@ defmodule HandinWeb.AssignmentLive.Settings do
       |> Assignments.change_assignment(assignment_params)
       |> Map.put(:action, :validate)
 
-    {:noreply, assign_form(socket, changeset)}
+    cond do
+      %Ecto.Changeset{valid?: true} ->
+        {:ok, assignment} =
+          changeset
+          |> Map.put(:action, :update)
+          |> Handin.Repo.update()
+
+        {:noreply,
+         socket
+         |> assign(:assignment, assignment)
+         |> assign_form(changeset)}
+
+      {:error, changeset} ->
+        {:noreply, assign_form(socket, changeset)}
+    end
   end
 
   def handle_event("validate", _, socket) do

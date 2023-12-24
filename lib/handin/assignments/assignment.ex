@@ -42,15 +42,9 @@ defmodule Handin.Assignments.Assignment do
 
   @required_attrs [
     :name,
-    :total_marks,
     :start_date,
     :due_date,
-    :cutoff_date,
-    :max_attempts,
-    :penalty_per_day,
-    :module_id,
-    :programming_language_id,
-    :attempt_marks
+    :module_id
   ]
 
   @attrs [
@@ -89,6 +83,12 @@ defmodule Handin.Assignments.Assignment do
     |> maybe_validate_max_attempts()
     |> maybe_validate_total_marks()
     |> maybe_validate_due_date()
+  end
+
+  def new_changeset(assignment, attrs) do
+    assignment
+    |> cast(attrs, @attrs)
+    |> validate_required(@required_attrs)
   end
 
   defp maybe_validate_cutoff_date(changeset) do
