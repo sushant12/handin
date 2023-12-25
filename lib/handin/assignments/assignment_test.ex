@@ -1,8 +1,10 @@
 defmodule Handin.Assignments.AssignmentTest do
   use Handin.Schema
   import Ecto.Changeset
+  import Ecto.Query, warn: false
+
   alias Handin.Assignments
-  alias Handin.Assignments.{Assignment, Log, TestResult}
+  alias Handin.Assignments.{Assignment, Log, TestResult, AssignmentTest}
   alias Handin.SupportFileUploader
 
   schema "assignment_tests" do
@@ -46,8 +48,10 @@ defmodule Handin.Assignments.AssignmentTest do
     assignment_test
     |> cast(attrs, @attrs)
     |> validate_required(@required_attrs)
-    |> maybe_validate_expected_output_type()
     |> validate_number(:ttl, less_than_or_equal_to: 60, greater_than_or_equal_to: 0)
+    |> maybe_validate_expected_output_type()
+    |> maybe_validate_points_on_pass()
+    |> maybe_validate_points_on_fail()
   end
 
   def new_changeset(assignment_test, attrs) do
@@ -111,6 +115,50 @@ defmodule Handin.Assignments.AssignmentTest do
         |> case do
           nil -> add_error(changeset, :expected_output_file, "File does not exist")
           _ -> changeset
+        end
+    end
+  end
+
+  defp maybe_validate_points_on_pass(changeset) do
+    case get_field(changeset, :points_on_pass) do
+      nil ->
+        changeset
+
+      points_on_pass ->
+        assignment = get_field(changeset, :assignment)
+
+        total_marks =
+          AssignmentTest
+          |> where([at], at.assignment_id == ^assignment.id and at.id != ^get_field(changeset, :id))
+          |> Handin.Repo.all()
+          |> Enum.reduce(0, fn assignment_test, acc -> assignment_test.points_on_pass + acc end)
+
+        if total_marks + points_on_pass > assignment.total_marks do
+          add_error(changeset, :points_on_pass, "Points exceed total marks. Please ensure points on pass assigned do not surpass the total marks.")
+        else
+          changeset
+        end
+    end
+  end
+
+  defp maybe_validate_points_on_fail(changeset) do
+    case get_field(changeset, :points_on_fail) do
+      nil ->
+        changeset
+
+      points_on_fail ->
+        assignment = get_field(changeset, :assignment)
+
+        total_marks =
+          AssignmentTest
+          |> where([at], at.assignment_id == ^assignment.id and at.id != ^get_field(changeset, :id))
+          |> Handin.Repo.all()
+          |> Enum.reduce(0, fn assignment_test, acc -> assignment_test.points_on_fail + acc end)
+
+        if total_marks + points_on_fail > assignment.total_marks do
+          add_error(changeset, :points_on_fail, "Points exceed total marks. Please ensure points on fail assigned do not surpass the total marks.")
+        else
+          changeset
         end
     end
   end
