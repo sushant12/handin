@@ -152,6 +152,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               <span class="col-span-9">
                 <.input field={@form[:name]} type="text" phx-blur="update_name" />
               </span>
+              <%= if @assignment.enable_total_marks do %>
               <label class="col-span-3 p-4">Points on pass</label>
               <span class="col-span-9">
                 <.input field={@form[:points_on_pass]} type="number" phx-blur="update_points_on_pass" />
@@ -160,6 +161,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               <span class="col-span-9">
                 <.input field={@form[:points_on_fail]} type="number" phx-blur="update_points_on_fail" />
               </span>
+              <% end %>
               <label class="col-span-3 p-4">Run command</label>
               <span class="col-span-9">
                 <.input field={@form[:command]} type="text" phx-blur="update_command" />
