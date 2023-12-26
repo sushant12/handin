@@ -163,6 +163,12 @@ defmodule Handin.BuildServer do
       |> Assignments.submit_assignment()
 
       Assignments.evaluate_marks(submission.id, state.build.id)
+
+      HandinWeb.Endpoint.broadcast!(
+        "build:#{state.type}:#{state.assignment_id}",
+        "submission_updated",
+        submission.id
+      )
     end
 
     Assignments.get_logs(state.build.id)

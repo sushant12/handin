@@ -20,7 +20,7 @@ defmodule Handin.Assignments.Assignment do
     field :enable_cutoff_date, :boolean, default: false
     field :enable_attempt_marks, :boolean, default: false
     field :enable_penalty_per_day, :boolean, default: false
-    field :enable_max_attemps, :boolean, default: false
+    field :enable_max_attempts, :boolean, default: false
     field :enable_total_marks, :boolean, default: false
     field :enable_test_output, :boolean, default: false
 
@@ -62,7 +62,7 @@ defmodule Handin.Assignments.Assignment do
     :enable_cutoff_date,
     :enable_attempt_marks,
     :enable_penalty_per_day,
-    :enable_max_attemps,
+    :enable_max_attempts,
     :enable_total_marks,
     :enable_test_output
   ]
@@ -123,7 +123,7 @@ defmodule Handin.Assignments.Assignment do
   end
 
   defp maybe_validate_max_attempts(changeset) do
-    if get_field(changeset, :enable_max_attemps) do
+    if get_field(changeset, :enable_max_attempts) do
       validate_required(changeset, :max_attempts)
     else
       changeset

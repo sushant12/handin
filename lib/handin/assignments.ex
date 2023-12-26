@@ -383,7 +383,7 @@ defmodule Handin.Assignments do
     |> Repo.one()
     |> case do
       nil -> nil
-      submission -> Repo.preload(submission, [:assignment_submission_files, :user])
+      submission -> Repo.preload(submission, [:assignment_submission_files, :user, :assignment])
     end
   end
 
@@ -477,5 +477,42 @@ defmodule Handin.Assignments do
       total_points: total_points_after_penalty
     })
     |> Repo.update()
+  end
+
+  def is_submission_allowed?(assignment_submission) do
+    attempts_valid?(assignment_submission) &&
+      submission_date_valid?(assignment_submission.assignment)
+  end
+
+  def get_submission_errors(assignment_submission) do
+    errors = []
+
+    errors =
+      if attempts_valid?(assignment_submission),
+        do: errors,
+        else: ["Number of attempts exceeded" | errors]
+
+    errors =
+      if submission_date_valid?(assignment_submission.assignment),
+        do: errors,
+        else: ["Cutoff date exceeded" | errors]
+
+    errors
+  end
+
+  defp submission_date_valid?(assignment) do
+    if assignment.enable_cutoff_date && assignment.cutoff_date do
+      Timex.compare(DateTime.utc_now(), assignment.cutoff_date) < 0
+    else
+      true
+    end
+  end
+
+  defp attempts_valid?(assignment_submission) do
+    if assignment_submission.assignment.enable_max_attempts do
+      assignment_submission.retries < assignment_submission.assignment.max_attempts
+    else
+      true
+    end
   end
 end

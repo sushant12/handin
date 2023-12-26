@@ -89,12 +89,19 @@ defmodule HandinWeb.AssignmentLive.Submit do
 
         <button
           type="button"
-          class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+          class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 disabled:bg-gray-400"
           phx-click="submit_assignment"
           phx-value-assignment_id={@assignment.id}
+          disabled={!Assignments.is_submission_allowed?(@assignment_submission)}
         >
           <%= if @build, do: "Submitting...", else: "Submit Assignment" %>
         </button>
+        <%= for error <- @submission_errors do %>
+          <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden">
+            <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
+            <%= error %>
+          </p>
+        <% end %>
       </div>
       <div id="accordion-open" data-accordion="open">
         <%= for {index, log} <- @logs do %>
@@ -231,6 +238,10 @@ defmodule HandinWeb.AssignmentLive.Submit do
           :assignment_submission_files,
           Map.get(assignment_submission, :assignment_submission_files, [])
         )
+        |> assign(
+          :submission_errors,
+          Assignments.get_submission_errors(assignment_submission)
+        )
       }
     else
       false ->
@@ -255,35 +266,38 @@ defmodule HandinWeb.AssignmentLive.Submit do
   end
 
   @impl true
-
   def handle_event("submit_assignment", %{"assignment_id" => assignment_id}, socket) do
-    HandinWeb.Endpoint.subscribe("build:assignment_submission:#{assignment_id}")
+    if Assignments.is_submission_allowed?(socket.assigns.assignment_submission) do
+      HandinWeb.Endpoint.subscribe("build:assignment_submission:#{assignment_id}")
 
-    DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
-      id: Handin.BuildServer,
-      start:
-        {Handin.BuildServer, :start_link,
-         [
-           %{
-             assignment_id: assignment_id,
-             type: "assignment_submission",
-             image: socket.assigns.assignment.programming_language.docker_file_url,
-             user_id: socket.assigns.current_user.id
-           }
-         ]},
-      restart: :temporary
-    })
+      DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
+        id: Handin.BuildServer,
+        start:
+          {Handin.BuildServer, :start_link,
+           [
+             %{
+               assignment_id: assignment_id,
+               type: "assignment_submission",
+               image: socket.assigns.assignment.programming_language.docker_file_url,
+               user_id: socket.assigns.current_user.id
+             }
+           ]},
+        restart: :temporary
+      })
 
-    {:noreply,
-     assign(
-       socket,
-       :logs,
-       Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
-     )
-     |> assign(
-       :build,
-       Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
-     )}
+      {:noreply,
+       assign(
+         socket,
+         :logs,
+         Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
+       )
+       |> assign(
+         :build,
+         Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
+       )}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("delete-submission-file", %{"id" => id}, socket) do
@@ -311,6 +325,18 @@ defmodule HandinWeb.AssignmentLive.Submit do
        :build,
        Assignments.get_running_build(socket.assigns.assignment.id, socket.assigns.current_user.id)
      )}
+  end
+
+  def handle_info(
+        %Phoenix.Socket.Broadcast{event: "submission_updated", payload: submission_id},
+        socket
+      ) do
+    assignment_submission = Assignments.get_submission_by_id(submission_id)
+
+    {:noreply,
+     socket
+     |> assign(:assignment_submission, assignment_submission)
+     |> assign(:submission_errors, Assignments.get_submission_errors(assignment_submission))}
   end
 
   def handle_info({HandinWeb.AssignmentLive.FileUploadComponent, {:saved, assignment}}, socket) do
