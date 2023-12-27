@@ -70,7 +70,8 @@ defmodule HandinWeb.AssignmentLive.Detail do
         <%= Handin.DisplayHelper.format_date(@assignment.due_date, "Europe/Dublin") %>
       </:item>
       <:item title="Cut off Date">
-        <%= if @assignment.enable_cutoff_date && @assignment.cutoff_date, do: Handin.DisplayHelper.format_date(@assignment.cutoff_date, "Europe/Dublin") %>
+        <%= if @assignment.enable_cutoff_date && @assignment.cutoff_date,
+          do: Handin.DisplayHelper.format_date(@assignment.cutoff_date, "Europe/Dublin") %>
       </:item>
     </.list>
     """

@@ -120,7 +120,7 @@ defmodule Handin.Assignments.AssignmentTest do
   end
 
   defp maybe_validate_points_on_pass(changeset) do
-    case get_field(changeset, :points_on_pass) do
+    case get_change(changeset, :points_on_pass) do
       nil ->
         changeset
 
@@ -129,12 +129,19 @@ defmodule Handin.Assignments.AssignmentTest do
 
         total_marks =
           AssignmentTest
-          |> where([at], at.assignment_id == ^assignment.id and at.id != ^get_field(changeset, :id))
+          |> where(
+            [at],
+            at.assignment_id == ^assignment.id and at.id != ^get_field(changeset, :id)
+          )
           |> Handin.Repo.all()
           |> Enum.reduce(0, fn assignment_test, acc -> assignment_test.points_on_pass + acc end)
 
         if total_marks + points_on_pass > assignment.total_marks do
-          add_error(changeset, :points_on_pass, "Points exceed total marks. Please ensure points on pass assigned do not surpass the total marks.")
+          add_error(
+            changeset,
+            :points_on_pass,
+            "Points exceed total marks. Please ensure points on pass assigned do not surpass the total marks."
+          )
         else
           changeset
         end
@@ -142,7 +149,7 @@ defmodule Handin.Assignments.AssignmentTest do
   end
 
   defp maybe_validate_points_on_fail(changeset) do
-    case get_field(changeset, :points_on_fail) do
+    case get_change(changeset, :points_on_fail) do
       nil ->
         changeset
 
@@ -151,12 +158,19 @@ defmodule Handin.Assignments.AssignmentTest do
 
         total_marks =
           AssignmentTest
-          |> where([at], at.assignment_id == ^assignment.id and at.id != ^get_field(changeset, :id))
+          |> where(
+            [at],
+            at.assignment_id == ^assignment.id and at.id != ^get_field(changeset, :id)
+          )
           |> Handin.Repo.all()
           |> Enum.reduce(0, fn assignment_test, acc -> assignment_test.points_on_fail + acc end)
 
         if total_marks + points_on_fail > assignment.total_marks do
-          add_error(changeset, :points_on_fail, "Points exceed total marks. Please ensure points on fail assigned do not surpass the total marks.")
+          add_error(
+            changeset,
+            :points_on_fail,
+            "Points exceed total marks. Please ensure points on fail assigned do not surpass the total marks."
+          )
         else
           changeset
         end
