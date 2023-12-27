@@ -96,7 +96,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
           <%= if @build, do: "Submitting...", else: "Submit Assignment" %>
         </button>
       </div>
-      <div id="accordion-open" data-accordion="open">
+      <div :if={@assignment.enable_test_output} id="accordion-open" data-accordion="open">
         <%= for {index, log} <- @logs do %>
           <h2 id={"accordion-open-heading-#{index}"}>
             <button
@@ -174,6 +174,42 @@ defmodule HandinWeb.AssignmentLive.Submit do
             </div>
           </div>
         <% end %>
+      </div>
+
+      <div :if={!@assignment.enable_test_output}>
+        <ul class="max-w-md space-y-2 text-gray-500 list-inside dark:text-gray-400">
+          <%= for {_index, log} <- @logs do %>
+            <li class="flex items-center">
+              <svg
+                :if={log.state == :pass}
+                class="w-5 h-5 me-2 text-green-500 dark:text-green-400 flex-shrink-0"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+              </svg>
+              <svg
+                :if={log.state == :fail}
+                class="w-5 h-5 me-2 text-red-500 dark:text-red-400 flex-shrink-0"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              <%= log.name %>
+            </li>
+          <% end %>
+        </ul>
       </div>
     </div>
     <.modal
