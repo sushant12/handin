@@ -11,9 +11,9 @@ defmodule Handin.Assignments.Assignment do
     field :name, :string
     field :max_attempts, :integer
     field :total_marks, :integer
-    field :start_date, :utc_datetime
-    field :due_date, :utc_datetime
-    field :cutoff_date, :utc_datetime
+    field :start_date, :naive_datetime
+    field :due_date, :naive_datetime
+    field :cutoff_date, :naive_datetime
     field :penalty_per_day, :float
     field :run_script, :string
     field :attempt_marks, :integer
