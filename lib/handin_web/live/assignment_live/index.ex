@@ -1,13 +1,14 @@
 defmodule HandinWeb.AssignmentLive.Index do
   use HandinWeb, :live_view
 
-  alias Handin.{Assignments, ProgrammingLanguages, Accounts}
+  alias Handin.{Assignments, Modules, ProgrammingLanguages, Accounts}
   alias Handin.Assignments.Assignment
 
   @impl true
   def mount(%{"id" => id} = _params, _session, socket) do
     with true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
-         assignments <- Assignments.get_started_assignments(id) do
+         assignments <-
+           Modules.list_assignments_for(id, socket.assigns.current_user.role) do
       programming_languages =
         ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
 

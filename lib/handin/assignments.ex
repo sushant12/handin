@@ -478,12 +478,4 @@ defmodule Handin.Assignments do
     })
     |> Repo.update()
   end
-
-  def get_started_assignments(module_id) do
-    Assignment
-    |> where([a], a.module_id == ^module_id)
-    |> where([a], a.start_date <= ^DateTime.utc_now())
-    |> preload([a], [:programming_language])
-    |> Repo.all()
-  end
 end
