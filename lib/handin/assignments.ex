@@ -383,7 +383,7 @@ defmodule Handin.Assignments do
     |> Repo.one()
     |> case do
       nil -> nil
-      submission -> Repo.preload(submission, [:assignment_submission_files, :user])
+      submission -> Repo.preload(submission, [:assignment_submission_files, :user, :assignment])
     end
   end
 
@@ -486,11 +486,14 @@ defmodule Handin.Assignments do
 
   defp calculate_penalty_marks(assignment, submission, marks) do
     if assignment.enable_penalty_per_day &&
-         Timex.after?(submission.submitted_at, assignment.due_date) do
+         Timex.after?(
+           DateTime.shift_zone!(submission.submitted_at, "Europe/Dublin"),
+           assignment.due_date
+         ) do
       days_after_due_date =
         Interval.new(
           from: assignment.due_date,
-          until: submission.submitted_at |> DateTime.shift_zone!("Europe/Dublin")
+          until: DateTime.shift_zone!(submission.submitted_at, "Europe/Dublin")
         )
         |> Interval.duration(:days)
 
@@ -498,6 +501,46 @@ defmodule Handin.Assignments do
       marks * (1 - penalty_percentage)
     else
       marks
+    end
+  end
+
+  def is_submission_allowed?(assignment_submission) do
+    attempts_valid?(assignment_submission) &&
+      submission_date_valid?(assignment_submission.assignment)
+  end
+
+  def get_submission_errors(assignment_submission) do
+    errors = []
+
+    errors =
+      if attempts_valid?(assignment_submission),
+        do: errors,
+        else: ["Number of attempts exceeded" | errors]
+
+    errors =
+      if submission_date_valid?(assignment_submission.assignment),
+        do: errors,
+        else: ["Cutoff date exceeded" | errors]
+
+    errors
+  end
+
+  defp submission_date_valid?(assignment) do
+    if assignment.enable_cutoff_date && assignment.cutoff_date do
+      Timex.compare(
+        DateTime.shift_zone!(DateTime.utc_now(), "Europe/Dublin"),
+        assignment.cutoff_date
+      ) < 0
+    else
+      true
+    end
+  end
+
+  defp attempts_valid?(assignment_submission) do
+    if assignment_submission.assignment.enable_max_attempts do
+      assignment_submission.retries < assignment_submission.assignment.max_attempts
+    else
+      true
     end
   end
 end
