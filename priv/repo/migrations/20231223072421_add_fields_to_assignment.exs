@@ -6,7 +6,7 @@ defmodule Handin.Repo.Migrations.AddFieldsToAssignment do
       add :enable_cutoff_date, :boolean
       add :enable_attempt_marks, :boolean
       add :enable_penalty_per_day, :boolean
-      add :enable_max_attemps, :boolean
+      add :enable_max_attempts, :boolean
       add :enable_total_marks, :boolean
       add :enable_test_output, :boolean
     end
