@@ -453,29 +453,51 @@ defmodule Handin.Assignments do
       Repo.get(Build, build_id)
       |> Repo.preload([:run_script_result, test_results: [:assignment_test]])
 
-    total_passed_tests_points =
-      build.test_results
-      |> Enum.filter(&(&1.state == :pass))
-      |> Enum.reduce(0, fn test_result, acc ->
-        acc + test_result.assignment_test.points_on_pass
-      end)
+    total_passed_tests_points = grade_test(build)
+
+    total_points_after_attempt_marks =
+      calculate_attempt_marks(submission.assignment, build, total_passed_tests_points)
 
     total_points_after_penalty =
-      if Timex.after?(submission.submitted_at, submission.assignment.due_date) do
-        days_after_due_date =
-          Interval.new(from: submission.assignment.due_date, until: submission.submitted_at)
-          |> Interval.duration(:days)
-
-        penalty_percentage = submission.assignment.penalty_per_day * days_after_due_date / 100
-        total_passed_tests_points * (1 - penalty_percentage)
-      else
-        total_passed_tests_points
-      end
+      calculate_penalty_marks(submission.assignment, submission, total_points_after_attempt_marks)
 
     submission
     |> Handin.AssignmentSubmission.AssignmentSubmission.changeset(%{
       total_points: total_points_after_penalty
     })
     |> Repo.update()
+  end
+
+  defp grade_test(build) do
+    build.test_results
+    |> Enum.filter(&(&1.state == :pass))
+    |> Enum.reduce(0, fn test_result, acc ->
+      acc + test_result.assignment_test.points_on_pass
+    end)
+  end
+
+  defp calculate_attempt_marks(assignment, build, marks) do
+    if assignment.enable_attempt_marks && build.run_script_result.state == :pass do
+      marks + assignment.attempt_marks
+    else
+      marks
+    end
+  end
+
+  defp calculate_penalty_marks(assignment, submission, marks) do
+    if assignment.enable_penalty_per_day &&
+         Timex.after?(submission.submitted_at, assignment.due_date) do
+      days_after_due_date =
+        Interval.new(
+          from: assignment.due_date,
+          until: submission.submitted_at |> DateTime.shift_zone!("Europe/Dublin")
+        )
+        |> Interval.duration(:days)
+
+      penalty_percentage = days_after_due_date * assignment.penalty_per_day / 100
+      marks * (1 - penalty_percentage)
+    else
+      marks
+    end
   end
 end
