@@ -157,17 +157,10 @@ defmodule Handin.BuildServer do
     end
 
     if state.type == "assignment_submission" do
-      submission = Assignments.get_submission(state.assignment_id, state.user_id)
-
-      Map.get(submission, :id)
-      |> Assignments.submit_assignment()
-
-      Assignments.evaluate_marks(submission.id, state.build.id)
-
       HandinWeb.Endpoint.broadcast!(
         "build:#{state.type}:#{state.assignment_id}",
-        "submission_updated",
-        submission.id
+        "assignment_submitted",
+        state.build.id
       )
     end
 

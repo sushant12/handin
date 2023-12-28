@@ -364,15 +364,19 @@ defmodule HandinWeb.AssignmentLive.Submit do
   end
 
   def handle_info(
-        %Phoenix.Socket.Broadcast{event: "submission_updated", payload: submission_id},
+        %Phoenix.Socket.Broadcast{event: "assignment_submitted", payload: build_id},
         socket
       ) do
-    assignment_submission = Assignments.get_submission_by_id(submission_id)
+    submission =
+      Assignments.get_submission(socket.assigns.assignment.id, socket.assigns.current_user.id)
+
+    Assignments.submit_assignment(submission.id)
+    Assignments.evaluate_marks(submission.id, build_id)
 
     {:noreply,
      socket
-     |> assign(:assignment_submission, assignment_submission)
-     |> assign(:submission_errors, Assignments.get_submission_errors(assignment_submission))}
+     |> assign(:assignment_submission, submission)
+     |> assign(:submission_errors, Assignments.get_submission_errors(submission))}
   end
 
   def handle_info({HandinWeb.AssignmentLive.FileUploadComponent, {:saved, assignment}}, socket) do
