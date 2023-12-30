@@ -137,12 +137,12 @@ defmodule HandinWeb.AssignmentLive.Environment do
        |> assign(:module, module)
        |> assign(:assignment, assignment)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
-       |> assign(:form, Assignments.change_assignment(assignment) |> to_form())
        |> assign(
          :programming_languages,
          ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
        )
-       |> LiveMonacoEditor.set_value(assignment.name)}
+       |> LiveMonacoEditor.set_value(assignment.name)
+       |> assign_form(Assignments.change_assignment(assignment))}
     else
       {:ok,
        push_navigate(socket, to: ~p"/modules/#{id}/assignments")
@@ -172,16 +172,19 @@ defmodule HandinWeb.AssignmentLive.Environment do
   @impl true
   def handle_event("save_language", %{"value" => programming_language_id}, socket) do
     {:ok, assignment} =
-      Assignments.get_assignment!(socket.assigns.assignment.id)
-      |> Assignments.update_assignment(%{"programming_language_id" => programming_language_id})
+      Assignments.update_assignment(socket.assigns.assignment, %{
+        "programming_language_id" => programming_language_id
+      })
 
-    {:noreply, socket |> assign(:assignment, assignment)}
+    {:noreply,
+     socket
+     |> assign(:assignment, assignment)
+     |> assign_form(Assignments.change_assignment(assignment))}
   end
 
   def handle_event("code-editor-lost-focus", %{"value" => value}, socket) do
     {:ok, assignment} =
-      Assignments.get_assignment!(socket.assigns.assignment.id)
-      |> Assignments.update_assignment(%{"run_script" => value})
+      Assignments.update_assignment(socket.assigns.assignment, %{"run_script" => value})
 
     {:noreply, socket |> assign(:assignment, assignment)}
   end
@@ -207,5 +210,9 @@ defmodule HandinWeb.AssignmentLive.Environment do
   @impl true
   def handle_info({HandinWeb.AssignmentLive.FileUploadComponent, {:saved, assignment}}, socket) do
     {:noreply, assign(socket, :assignment, Assignments.get_assignment!(assignment.id))}
+  end
+
+  defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+    assign(socket, :form, to_form(changeset))
   end
 end
