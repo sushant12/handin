@@ -29,9 +29,9 @@ Hooks.CodeEditorHook = CodeEditorHook
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
-    hooks: Hooks, 
-    params: { _csrf_token: csrfToken }, 
-    
+    hooks: Hooks,
+    params: { _csrf_token: csrfToken },
+
 })
 
 // Show progress bar on live navigation and form submits
@@ -49,7 +49,36 @@ window.addEventListener("lme:editor_mounted", (ev) => {
 })
 document.addEventListener("phx:update", () => {
     initAccordions();
-  });
+});
+
+Hooks.ChangeSubmissionEmail = {
+    mounted() {
+        document.addEventListener('keydown', (e) => {
+            e.preventDefault();
+            switch (e.key) {
+                case 'ArrowRight':
+                    this.pushEvent('next-student');
+                    break;
+
+                case 'ArrowLeft':
+                    this.pushEvent('previous-student');
+                    break;
+
+                case 'ArrowUp':
+                    this.pushEvent('increase-grade');
+                    break;
+
+                case 'ArrowDown':
+                    this.pushEvent('decrease-grade');
+                    break;
+
+                default:
+                    break;
+            }
+        })
+    }
+}
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 

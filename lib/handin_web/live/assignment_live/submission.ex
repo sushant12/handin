@@ -47,7 +47,7 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:col :let={{submission, _}} label="email">
         <%= submission.user.email %>
       </:col>
-      <:col :if={@assignment.enable_total_marks} :let={{submission, _}} label="Total marks">
+      <:col :let={{submission, _}} :if={@assignment.enable_total_marks} label="Total marks">
         <%= submission.total_points %> / <%= @assignment.total_marks %>
       </:col>
       <:action :let={{submission, _}}>
@@ -68,7 +68,9 @@ defmodule HandinWeb.AssignmentLive.Submission do
     if Modules.assignment_exists?(id, assignment_id) do
       assignment = Assignments.get_assignment!(assignment_id)
       module = Modules.get_module!(id)
-      assignment_submissions = Assignments.get_submissions_for_assignment(assignment_id)
+
+      assignment_submissions =
+        Assignments.get_submissions_for_assignment(assignment_id) |> Enum.with_index(1)
 
       {:ok,
        socket

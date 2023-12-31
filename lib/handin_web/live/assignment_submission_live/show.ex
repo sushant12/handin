@@ -34,6 +34,36 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
       />
     </.tabs>
 
+    <div id="student_email_selector" class="grid grid-cols-12" phx-hook="ChangeSubmissionEmail">
+      <pre class="col-span-3 row-span-2">
+      Right Arrow &rarr; = Next Student
+      Left Arrow &larr; = Previous Student
+      Up Arrow &uarr; = Increment Marks
+      Down Arrow &darr; = Decrement Marks
+      </pre>
+      <div class="col-span-2 col-start-5">
+        <.input
+          name="submissions_emails"
+          type="select"
+          value={@submission.user.id}
+          options={Enum.map(@students, &{&1.email, &1.id})}
+          phx-click="change_submission_email"
+        />
+      </div>
+      <div class="row-start-2 col-start-5">
+        Grade:
+        <div class="w-[47px]">
+          <.input
+            name="student_grade"
+            type="text"
+            value={@submission.total_points}
+            phx-blur="change_submission_grade"
+          />
+        </div>
+        / <%= @assignment.total_marks %>
+      </div>
+    </div>
+
     <div class="flex h-screen">
       <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-full p-4">
         <div class="assignment-test-files">
@@ -178,6 +208,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
     if Modules.assignment_exists?(id, assignment_id) do
       assignment = Assignments.get_assignment!(assignment_id)
       submission = Assignments.get_submission_by_id(submission_id)
+      students = Assignments.get_submissions_for_assignment(assignment_id) |> Enum.map(& &1.user)
 
       {:ok,
        socket
@@ -185,6 +216,9 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
        |> assign(:module, Modules.get_module!(id))
        |> assign(:assignment, assignment)
        |> assign(:submission, submission)
+       |> assign(:students, students)
+       |> assign(:current_student_index, 0)
+       |> assign_top_submission_file(Enum.at(students, 0).id)
        |> assign(
          :logs,
          Assignments.build_recent_test_results(assignment_id, submission.user_id)
@@ -254,6 +288,111 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
      )}
   end
 
+  def handle_event("change_submission_email", %{"value" => id}, socket) do
+    submission = Assignments.get_submission(socket.assigns.assignment.id, id)
+    {:noreply, socket |> assign(:submission, submission)}
+  end
+
+  def handle_event("next-student", _, socket) do
+    total_students = length(socket.assigns.students)
+
+    current_student_index =
+      if socket.assigns.current_student_index < total_students - 1,
+        do: socket.assigns.current_student_index + 1,
+        else: total_students - 1
+
+    next_student = Enum.at(socket.assigns.students, current_student_index)
+    submission = Assignments.get_submission(socket.assigns.assignment.id, next_student.id)
+
+    {:noreply,
+     socket
+     |> assign(:submission, submission)
+     |> assign(:current_student_index, current_student_index)
+     |> assign_top_submission_file(Enum.at(socket.assigns.students, current_student_index).id)
+     |> assign(
+       :logs,
+       Assignments.build_recent_test_results(socket.assigns.assignment.id, submission.user_id)
+     )
+     |> assign(
+       :build,
+       Assignments.get_running_build(socket.assigns.assignment.id, submission.user_id)
+     )}
+  end
+
+  def handle_event("previous-student", _, socket) do
+    current_student_index =
+      if socket.assigns.current_student_index == 0,
+        do: 0,
+        else: socket.assigns.current_student_index - 1
+
+    previous_student = Enum.at(socket.assigns.students, current_student_index)
+    submission = Assignments.get_submission(socket.assigns.assignment.id, previous_student.id)
+
+    {:noreply,
+     socket
+     |> assign(:submission, submission)
+     |> assign(:current_student_index, current_student_index)
+     |> assign_top_submission_file(Enum.at(socket.assigns.students, current_student_index).id)
+     |> assign(
+       :logs,
+       Assignments.build_recent_test_results(socket.assigns.assignment.id, submission.user_id)
+     )
+     |> assign(
+       :build,
+       Assignments.get_running_build(socket.assigns.assignment.id, submission.user_id)
+     )}
+  end
+
+  def handle_event("increase-grade", _, socket) do
+    total_points = socket.assigns.submission.total_points + 1
+
+    case Assignments.create_or_update_submission(%{
+        user_id: socket.assigns.submission.user_id,
+        assignment_id: socket.assigns.assignment.id,
+        total_points: total_points
+      }) do
+
+        {:ok, submission} ->
+          {:noreply, socket |> assign(:submission, submission)}
+
+
+        {:error, %Ecto.Changeset{} = changeset} ->
+          {error, _} = changeset.errors[:total_points]
+          {:noreply, put_flash(socket, :error, error)}
+        end
+
+  end
+
+  def handle_event("decrease-grade", _, socket) do
+    total_points = socket.assigns.submission.total_points - 1
+
+    case Assignments.create_or_update_submission(%{
+      user_id: socket.assigns.submission.user_id,
+      assignment_id: socket.assigns.assignment.id,
+      total_points: total_points
+    }) do
+
+      {:ok, submission} ->
+        {:noreply, socket |> assign(:submission, submission)}
+
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {error, _} = changeset.errors[:total_points]
+        {:noreply, put_flash(socket, :error, error)}
+      end
+  end
+
+  def handle_event("change_submission_grade", %{"value" => total_points}, socket) do
+    {:ok, submission} =
+      Assignments.create_or_update_submission(%{
+        user_id: socket.assigns.submission.user_id,
+        assignment_id: socket.assigns.assignment.id,
+        total_points: total_points
+      })
+
+    {:noreply, socket |> assign(:submission, submission)}
+  end
+
   @impl true
   def handle_info(
         %Phoenix.Socket.Broadcast{event: "test_result", payload: build_id},
@@ -268,5 +407,32 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
          socket.assigns.submission.user.id
        )
      )}
+  end
+
+  defp assign_top_submission_file(socket, student_id) do
+    if submission_file =
+      Enum.at(
+        Assignments.get_submission_files(
+          socket.assigns.assignment.id,
+          student_id
+        ),
+        0
+      ) do
+      url =
+        AssignmentSubmissionFileUploader.url(
+          {submission_file.file.file_name, submission_file},
+          signed: true
+        )
+
+      {:ok, %Finch.Response{status: 200, body: body}} =
+        Finch.build(:get, url)
+        |> Finch.request(Handin.Finch)
+
+      socket
+      |> assign(:selected_assignment_submission_file, submission_file.id)
+      |> LiveMonacoEditor.set_value(body)
+    else
+      socket
+    end
   end
 end
