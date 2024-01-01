@@ -54,22 +54,15 @@ document.addEventListener("phx:update", () => {
 Hooks.ChangeSubmissionEmail = {
     mounted() {
         document.addEventListener('keydown', (e) => {
-            e.preventDefault();
             switch (e.key) {
                 case 'ArrowRight':
+                    e.preventDefault();
                     this.pushEvent('next-student');
                     break;
 
                 case 'ArrowLeft':
+                    e.preventDefault();
                     this.pushEvent('previous-student');
-                    break;
-
-                case 'ArrowUp':
-                    this.pushEvent('increase-grade');
-                    break;
-
-                case 'ArrowDown':
-                    this.pushEvent('decrease-grade');
                     break;
 
                 default:

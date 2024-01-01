@@ -34,38 +34,40 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
       />
     </.tabs>
 
-    <div id="student_email_selector" class="grid grid-cols-12" phx-hook="ChangeSubmissionEmail">
-      <pre class="col-span-3 row-span-2">
-      Right Arrow &rarr; = Next Student
-      Left Arrow &larr; = Previous Student
-      Up Arrow &uarr; = Increment Marks
-      Down Arrow &darr; = Decrement Marks
-      </pre>
-      <div class="col-span-2 col-start-5">
-        <.input
-          name="submissions_emails"
-          type="select"
-          value={@submission.user.id}
-          options={Enum.map(@students, &{&1.email, &1.id})}
-          phx-click="change_submission_email"
-        />
+    <div id="student_email_selector" class="grid grid-cols-12 p-4" phx-hook="ChangeSubmissionEmail">
+      <div class="keyboard-shortcut-instructions col-span-4">
+        <pre>
+          Right Arrow &rarr; = Next Student
+          Left Arrow &larr; = Previous Student
+        </pre>
       </div>
-      <div class="row-start-2 col-start-5">
-        Grade:
-        <div class="w-[47px]">
+      <div class="col-span-8">
+        <div class="flex justify-between items-center">
           <.input
-            name="student_grade"
-            type="text"
-            value={@submission.total_points}
-            phx-blur="change_submission_grade"
+            name="submissions_emails"
+            type="select"
+            value={@submission.user.id}
+            options={Enum.map(@students, &{&1.email, &1.id})}
+            phx-click="change_submission_email"
           />
         </div>
-        / <%= @assignment.total_marks %>
+        <div class="flex  items-center">
+          <%= if @assignment.enable_total_marks do %>
+            Grade:
+            <.input
+              name="student_grade"
+              type="text"
+              class="w-15"
+              value={@submission.total_points}
+              phx-blur="change_submission_grade"
+            /> / <%= @assignment.total_marks %>
+          <% end %>
+        </div>
       </div>
     </div>
 
     <div class="flex h-screen">
-      <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-full p-4">
+      <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-full ">
         <div class="assignment-test-files">
           <ul>
             <li
@@ -347,39 +349,34 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
     total_points = socket.assigns.submission.total_points + 1
 
     case Assignments.create_or_update_submission(%{
-        user_id: socket.assigns.submission.user_id,
-        assignment_id: socket.assigns.assignment.id,
-        total_points: total_points
-      }) do
+           user_id: socket.assigns.submission.user_id,
+           assignment_id: socket.assigns.assignment.id,
+           total_points: total_points
+         }) do
+      {:ok, submission} ->
+        {:noreply, socket |> assign(:submission, submission)}
 
-        {:ok, submission} ->
-          {:noreply, socket |> assign(:submission, submission)}
-
-
-        {:error, %Ecto.Changeset{} = changeset} ->
-          {error, _} = changeset.errors[:total_points]
-          {:noreply, put_flash(socket, :error, error)}
-        end
-
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {error, _} = changeset.errors[:total_points]
+        {:noreply, put_flash(socket, :error, error)}
+    end
   end
 
   def handle_event("decrease-grade", _, socket) do
     total_points = socket.assigns.submission.total_points - 1
 
     case Assignments.create_or_update_submission(%{
-      user_id: socket.assigns.submission.user_id,
-      assignment_id: socket.assigns.assignment.id,
-      total_points: total_points
-    }) do
-
+           user_id: socket.assigns.submission.user_id,
+           assignment_id: socket.assigns.assignment.id,
+           total_points: total_points
+         }) do
       {:ok, submission} ->
         {:noreply, socket |> assign(:submission, submission)}
-
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {error, _} = changeset.errors[:total_points]
         {:noreply, put_flash(socket, :error, error)}
-      end
+    end
   end
 
   def handle_event("change_submission_grade", %{"value" => total_points}, socket) do
@@ -411,13 +408,13 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
 
   defp assign_top_submission_file(socket, student_id) do
     if submission_file =
-      Enum.at(
-        Assignments.get_submission_files(
-          socket.assigns.assignment.id,
-          student_id
-        ),
-        0
-      ) do
+         Enum.at(
+           Assignments.get_submission_files(
+             socket.assigns.assignment.id,
+             student_id
+           ),
+           0
+         ) do
       url =
         AssignmentSubmissionFileUploader.url(
           {submission_file.file.file_name, submission_file},
