@@ -72,7 +72,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
           <ul>
             <li
               :for={submission_file <- @submission.assignment_submission_files}
-              class="py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded"
+              class={["py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded cursor-pointer", submission_file.id == @selected_assignment_submission_file && "bg-gray-300" ]}
               phx-click="select_file"
               phx-value-submission_file_id={submission_file.id}
             >
