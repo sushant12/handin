@@ -101,6 +101,12 @@ defmodule Handin.Assignments.Assignment do
         get_field(changeset, :cutoff_date),
         "must come after start date"
       )
+      |> validate_date(
+        :cutoff_date,
+        get_field(changeset, :due_date),
+        get_field(changeset, :cutoff_date),
+        "must come after due date"
+      )
     else
       changeset
     end
