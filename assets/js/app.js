@@ -57,12 +57,12 @@ Hooks.ChangeSubmissionEmail = {
             switch (e.key) {
                 case 'ArrowRight':
                     e.preventDefault();
-                    this.pushEvent('next-student');
+                    this.pushEvent('next_submission');
                     break;
 
                 case 'ArrowLeft':
                     e.preventDefault();
-                    this.pushEvent('previous-student');
+                    this.pushEvent('previous_submission');
                     break;
 
                 default:

@@ -413,7 +413,7 @@ defmodule Handin.Assignments do
     AssignmentSubmission
     |> where([as], as.assignment_id == ^assignment_id)
     |> where([as], not is_nil(as.submitted_at))
-    |> preload([as], :user)
+    |> preload([as], [:user, :assignment_submission_files, :assignment])
     |> Repo.all()
   end
 
