@@ -34,13 +34,49 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
       />
     </.tabs>
 
+    <div id="student_email_selector" class="grid grid-cols-12 p-4" phx-hook="ChangeSubmissionEmail">
+      <div class="keyboard-shortcut-instructions col-span-4">
+        <pre>
+          Right Arrow &rarr; = Next Student
+          Left Arrow &larr; = Previous Student
+        </pre>
+      </div>
+      <div class="col-span-8">
+        <div class="flex justify-between items-center">
+          <form phx-change="change_student_email">
+            <.input
+              name="student_id"
+              type="select"
+              value={@submission.user.id}
+              options={Enum.map(@students, &{&1.email, &1.id})}
+            />
+          </form>
+        </div>
+        <div class="flex  items-center">
+          <%= if @assignment.enable_total_marks do %>
+            Grade:
+            <.input
+              name="student_grade"
+              type="text"
+              class="w-15"
+              value={@submission.total_points}
+              phx-blur="change_submission_grade"
+            /> / <%= @assignment.total_marks %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
     <div class="flex h-screen">
-      <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-full p-4">
+      <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-full ">
         <div class="assignment-test-files">
           <ul>
             <li
               :for={submission_file <- @submission.assignment_submission_files}
-              class="py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded"
+              class={[
+                "py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded cursor-pointer",
+                submission_file.id == @selected_assignment_submission_file && "bg-gray-300"
+              ]}
               phx-click="select_file"
               phx-value-submission_file_id={submission_file.id}
             >
@@ -177,7 +213,9 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
       ) do
     if Modules.assignment_exists?(id, assignment_id) do
       assignment = Assignments.get_assignment!(assignment_id)
-      submission = Assignments.get_submission_by_id(submission_id)
+      submissions = Assignments.get_submissions_for_assignment(assignment_id)
+      submission = submissions |> Enum.find(&(&1.id == submission_id))
+      students = submissions |> Enum.map(& &1.user)
 
       {:ok,
        socket
@@ -185,6 +223,9 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
        |> assign(:module, Modules.get_module!(id))
        |> assign(:assignment, assignment)
        |> assign(:submission, submission)
+       |> assign(:submissions, submissions)
+       |> assign(:students, students)
+       |> assign(:selected_assignment_submission_file, nil)
        |> assign(
          :logs,
          Assignments.build_recent_test_results(assignment_id, submission.user_id)
@@ -252,6 +293,103 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
        :build,
        Assignments.get_running_build(assignment_id, socket.assigns.submission.user.id)
      )}
+  end
+
+  def handle_event("change_student_email", %{"student_id" => student_id}, socket) do
+    submission = socket.assigns.submissions |> Enum.find(&(&1.user_id == student_id))
+
+    {:noreply,
+     push_navigate(socket,
+       to:
+         ~p"/modules/#{socket.assigns.module.id}/assignments/#{socket.assigns.assignment.id}/submission/#{submission.id}"
+     )}
+  end
+
+  def handle_event("next_submission", _, socket) do
+    current_submission_index =
+      socket.assigns.submissions
+      |> Enum.find_index(&(&1.user_id == socket.assigns.submission.user_id))
+
+    next_submission = socket.assigns.submissions |> Enum.at(current_submission_index + 1)
+
+    next_submission =
+      if(next_submission) do
+        next_submission
+      else
+        Enum.at(socket.assigns.submissions, 0)
+      end
+
+    {:noreply,
+     push_navigate(socket,
+       to:
+         ~p"/modules/#{socket.assigns.module.id}/assignments/#{socket.assigns.assignment.id}/submission/#{next_submission.id}"
+     )}
+  end
+
+  def handle_event("previous_submission", _, socket) do
+    current_submission_index =
+      socket.assigns.submissions
+      |> Enum.find_index(&(&1.user_id == socket.assigns.submission.user_id))
+
+    prev_submission = socket.assigns.submissions |> Enum.at(current_submission_index - 1)
+
+    prev_submission =
+      if(prev_submission) do
+        prev_submission
+      else
+        Enum.at(socket.assigns.submissions, 0)
+      end
+
+    {:noreply,
+     push_navigate(socket,
+       to:
+         ~p"/modules/#{socket.assigns.module.id}/assignments/#{socket.assigns.assignment.id}/submission/#{prev_submission.id}"
+     )}
+  end
+
+  def handle_event("increase-grade", _, socket) do
+    total_points = socket.assigns.submission.total_points + 1
+
+    case Assignments.create_or_update_submission(%{
+           user_id: socket.assigns.submission.user_id,
+           assignment_id: socket.assigns.assignment.id,
+           total_points: total_points
+         }) do
+      {:ok, submission} ->
+        {:noreply, socket |> assign(:submission, submission)}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {error, _} = changeset.errors[:total_points]
+        {:noreply, put_flash(socket, :error, error)}
+    end
+  end
+
+  def handle_event("decrease-grade", _, socket) do
+    total_points = socket.assigns.submission.total_points - 1
+
+    case Assignments.create_or_update_submission(%{
+           user_id: socket.assigns.submission.user_id,
+           assignment_id: socket.assigns.assignment.id,
+           total_points: total_points
+         }) do
+      {:ok, submission} ->
+        {:noreply, socket |> assign(:submission, submission)}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {error, _} = changeset.errors[:total_points]
+        {:noreply, put_flash(socket, :error, error)}
+    end
+  end
+
+  def handle_event("change_submission_grade", %{"value" => total_points}, socket) do
+    {:ok, submission} =
+      Assignments.create_or_update_submission(%{
+        user_id: socket.assigns.submission.user_id,
+        assignment_id: socket.assigns.assignment.id,
+        total_points: total_points
+      })
+
+    {:noreply, socket |> assign(:submission, submission)}
   end
 
   @impl true

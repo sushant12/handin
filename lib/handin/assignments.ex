@@ -392,7 +392,7 @@ defmodule Handin.Assignments do
     |> where([as], as.assignment_id == ^assignment_id)
     |> where([as], as.user_id == ^user_id)
     |> order_by([as], desc: as.inserted_at)
-    |> preload([:assignment_submission_files, :assignment])
+    |> preload([:assignment_submission_files, :assignment, :user])
     |> limit(1)
     |> Repo.one()
   end
@@ -412,9 +412,9 @@ defmodule Handin.Assignments do
   def get_submissions_for_assignment(assignment_id) do
     AssignmentSubmission
     |> where([as], as.assignment_id == ^assignment_id)
-    |> preload([as], :user)
+    |> where([as], not is_nil(as.submitted_at))
+    |> preload([as], [:user, :assignment_submission_files, :assignment])
     |> Repo.all()
-    |> Enum.with_index(1)
   end
 
   def get_submissions_for_user(module_id, user_id) do
@@ -422,6 +422,7 @@ defmodule Handin.Assignments do
     |> where([a], a.module_id == ^module_id)
     |> join(:inner, [a], as in assoc(a, :assignment_submissions))
     |> where([a, as], as.user_id == ^user_id)
+    |> where([a, as], not is_nil(as.submitted_at))
     |> select([a, as], as)
     |> Repo.all()
     |> Enum.map(&Repo.preload(&1, [:assignment]))

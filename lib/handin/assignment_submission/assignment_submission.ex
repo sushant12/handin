@@ -27,5 +27,21 @@ defmodule Handin.AssignmentSubmission.AssignmentSubmission do
     |> cast_assoc(:assignment_submission_files)
     |> validate_required(@required_attrs)
     |> unique_constraint([:assignment_id, :user_id])
+    |> maybe_validate_total_points()
+  end
+
+  defp maybe_validate_total_points(changeset) do
+    case get_change(changeset, :total_points) do
+      nil ->
+        changeset
+
+      total_points ->
+        assignment = get_field(changeset, :assignment)
+        if assignment.enable_total_marks && (total_points > assignment.total_marks || total_points < -assignment.total_marks) do
+          add_error(changeset, :total_points, "Total points exceeds total marks")
+        else
+          changeset
+        end
+    end
   end
 end
