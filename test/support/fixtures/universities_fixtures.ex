@@ -11,8 +11,8 @@ defmodule Handin.UniversitiesFixtures do
     {:ok, university} =
       attrs
       |> Enum.into(%{
-        name: "some name",
-        config: %{}
+        name: "University of Limerick",
+        student_email_regex: "^\\d+@studentmail.ul.ie$"
       })
       |> Handin.Universities.create_university()
 

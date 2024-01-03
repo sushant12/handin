@@ -53,22 +53,24 @@ defmodule Handin.Accounts.User do
     |> password_changeset(attrs, opts)
   end
 
-  defp validate_email(changeset, opts) do
-    if get_field(changeset, :university) do
-      university = get_field(changeset, :university) |> Universities.get_university()
-      regex = university.student_email_regex |> Regex.compile!()
+  defp validate_email(%Ecto.Changeset{valid?: false} = changeset, _) do
+    changeset
+    |> validate_required([:email])
+  end
 
-      changeset
-      |> validate_required([:email])
-      |> validate_format(:email, regex,
-        message: "please use your university student email address"
-      )
-      |> validate_length(:email, max: 160)
-      |> maybe_validate_unique_email(opts)
-    else
-      changeset
-      |> add_error(:email, "select a university")
-    end
+  defp validate_email(changeset, opts) do
+    university =
+      get_field(changeset, :university)
+      |> Universities.get_university()
+
+    university.student_email_regex |> IO.inspect()
+    regex = Regex.compile!(university.student_email_regex)
+
+    changeset
+    |> validate_required([:email])
+    |> validate_format(:email, regex, message: "please use your university email address")
+    |> validate_length(:email, max: 160)
+    |> maybe_validate_unique_email(opts)
   end
 
   defp validate_password(changeset, opts) do

@@ -1,12 +1,8 @@
 defmodule HandinWeb.AdminSessionControllerTest do
   use HandinWeb.ConnCase, async: true
 
-  import HandinWeb.Factory
-
   describe "POST /admin/log_in" do
     test "log the admin in", %{conn: conn} do
-      admin = insert(:admin)
-
       conn =
         conn
         |> post(~p"/admin/log_in", %{

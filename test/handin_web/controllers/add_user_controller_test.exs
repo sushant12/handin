@@ -1,7 +1,6 @@
 defmodule HandinWeb.AddUserControllerTest do
   use HandinWeb.ConnCase, async: true
 
-  import HandinWeb.Factory
   import Handin.AccountsFixtures
 
   setup do

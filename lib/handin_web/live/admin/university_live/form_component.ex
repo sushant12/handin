@@ -81,6 +81,8 @@ defmodule HandinWeb.Admin.UniversityLive.FormComponent do
   end
 
   defp save_university(socket, :edit, university_params) do
+    IO.inspect(university_params)
+
     case Universities.update_university(socket.assigns.university, university_params) do
       {:ok, university} ->
         notify_parent({:saved, university})

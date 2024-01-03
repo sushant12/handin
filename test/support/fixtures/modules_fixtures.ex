@@ -8,13 +8,14 @@ defmodule Handin.ModulesFixtures do
   Generate a module.
   """
   def module_fixture(attrs \\ %{}) do
-    {:ok, module} =
-      attrs
-      |> Enum.into(%{
-        name: "some name"
-      })
-      |> Handin.Modules.create_module()
+    attrs
+    # {:ok, module} =
+    #   attrs
+    #   |> Enum.into(%{
+    #     name: "some name"
+    #   })
+    #   |> Handin.Modules.create_module()
 
-    module
+    # module
   end
 end

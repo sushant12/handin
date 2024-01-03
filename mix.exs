@@ -62,12 +62,12 @@ defmodule Handin.MixProject do
       {:live_monaco_editor, "~> 0.1"},
       {:timex, "~> 3.0"},
       {:floki, ">= 0.30.0", only: :test},
-      {:ex_machina, "~> 2.7.0", only: :test},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
-      {:phoenix_live_reload, "~> 1.2", only: :dev}
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:ex_doc, "~> 0.31.0", only: :dev, runtime: false}
     ]
   end
 
