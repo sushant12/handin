@@ -60,9 +60,15 @@ defmodule HandinWeb.AssignmentLive.Detail do
     </.header>
 
     <.list>
-      <:item title="Total marks"><%= @assignment.total_marks %></:item>
-      <:item title="Max attempts"><%= @assignment.max_attempts %></:item>
-      <:item title="Penalty per day"><%= @assignment.penalty_per_day %>%</:item>
+      <:item title="Total marks">
+        <%= if @assignment.enable_total_marks, do: @assignment.total_marks %>
+      </:item>
+      <:item title="Max attempts">
+        <%= if @assignment.enable_max_attempts, do: @assignment.max_attempts %>
+      </:item>
+      <:item title="Penalty per day">
+        <%= if @assignment.enable_penalty_per_day, do: @assignment.penalty_per_day %>%
+      </:item>
       <:item title="Start Date">
         <%= Handin.DisplayHelper.format_date(@assignment.start_date, "Europe/Dublin") %>
       </:item>
