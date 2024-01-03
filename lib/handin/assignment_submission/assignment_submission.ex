@@ -37,7 +37,9 @@ defmodule Handin.AssignmentSubmission.AssignmentSubmission do
 
       total_points ->
         assignment = get_field(changeset, :assignment)
-        if assignment.enable_total_marks && (total_points > assignment.total_marks || total_points < -assignment.total_marks) do
+
+        if assignment.enable_total_marks &&
+             (total_points > assignment.total_marks || total_points < -assignment.total_marks) do
           add_error(changeset, :total_points, "Total points exceeds total marks")
         else
           changeset
