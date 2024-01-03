@@ -90,7 +90,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
           </div>
         </div>
 
-        <div class="row-start-3">
+        <div :if={@form[:enable_cutoff_date].value} class="row-start-3">
           <label class="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
