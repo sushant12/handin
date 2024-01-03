@@ -1,0 +1,7 @@
+ - package-ecosystem: "hex"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    allow:
+      - dependency-type: "direct"
+        update-type: "version"
