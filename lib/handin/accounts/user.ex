@@ -63,7 +63,7 @@ defmodule Handin.Accounts.User do
       get_field(changeset, :university)
       |> Universities.get_university()
 
-    university.student_email_regex |> IO.inspect()
+    university.student_email_regex
     regex = Regex.compile!(university.student_email_regex)
 
     changeset
