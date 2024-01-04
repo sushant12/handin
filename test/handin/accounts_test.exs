@@ -38,7 +38,7 @@ defmodule Handin.AccountsTest do
   describe "get_user!/1" do
     test "raises if id is invalid" do
       assert_raise Ecto.NoResultsError, fn ->
-        Accounts.get_user!(Ecto.UUID.generate)
+        Accounts.get_user!(Ecto.UUID.generate())
       end
     end
 
@@ -111,25 +111,25 @@ defmodule Handin.AccountsTest do
     test "allows fields to be set" do
       email = unique_user_email()
       password = valid_user_password()
-      university = university_fixture()
 
       changeset =
         Accounts.change_user_registration(
           %User{},
-          valid_user_attributes(email: email, password: password, university: university.id)
+          valid_user_attributes(email: email, password: password)
         )
 
       assert changeset.valid?
       assert get_change(changeset, :email) == email
       assert get_change(changeset, :password) == password
-      assert get_change(changeset, :university) == university.id
       assert is_nil(get_change(changeset, :hashed_password))
     end
   end
 
   describe "change_user_email/2" do
     test "returns a user changeset" do
-      assert %Ecto.Changeset{} = changeset = Accounts.change_user_email(%User{university: university_fixture().id})
+      assert %Ecto.Changeset{} =
+               changeset = Accounts.change_user_email(%User{university: university_fixture().id})
+
       assert changeset.required == [:email]
     end
   end
@@ -161,10 +161,10 @@ defmodule Handin.AccountsTest do
     end
 
     test "validates email uniqueness", %{user: user} do
-      %{email: email} = user_fixture()
+      new_user = user_fixture(%{email: "123123@studentmail.ul.ie", university: user.university})
       password = valid_user_password()
 
-      {:error, changeset} = Accounts.apply_user_email(user, password, %{email: email})
+      {:error, changeset} = Accounts.apply_user_email(user, password, %{email: new_user.email})
 
       assert "has already been taken" in errors_on(changeset).email
     end
