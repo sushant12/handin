@@ -42,18 +42,22 @@ defmodule Handin.Modules do
   end
 
   def get_module!(id),
-    do: Repo.get(Module, id) |> Repo.preload(assignments: [:programming_language])
+    do: Repo.get!(Module, id) |> Repo.preload(assignments: [:programming_language])
 
   @spec create_module(attrs :: %{name: String.t(), code: String.t()}, user_id :: Ecto.UUID) ::
           {:ok, Module.t()} | {:error, %Ecto.Changeset{}}
   def create_module(attrs, user_id) do
     Repo.transaction(fn ->
-      module = Module.changeset(%Module{}, attrs) |> Repo.insert!()
+      case Module.changeset(%Module{}, attrs) |> Repo.insert() do
+        {:ok, module} ->
+          ModulesUsers.changeset(%ModulesUsers{}, %{module_id: module.id, user_id: user_id})
+          |> Repo.insert!()
 
-      ModulesUsers.changeset(%ModulesUsers{}, %{module_id: module.id, user_id: user_id})
-      |> Repo.insert!()
+          module
 
-      module
+        {:error, changeset} ->
+          Handin.Repo.rollback(changeset)
+      end
     end)
   end
 
@@ -85,12 +89,6 @@ defmodule Handin.Modules do
           {:ok, ModulesInvitations.t()}
   def add_modules_invitations(params) do
     change_modules_invitations(%ModulesInvitations{}, params) |> Repo.insert()
-  end
-
-  def register_user_into_module(attrs) do
-    %ModulesUsers{}
-    |> ModulesUsers.changeset(attrs)
-    |> Repo.insert()
   end
 
   def remove_user_from_module(user_id, module_id) do
