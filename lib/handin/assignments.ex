@@ -98,6 +98,12 @@ defmodule Handin.Assignments do
     |> Repo.update()
   end
 
+  def update_assignment_test(%AssignmentTest{} = assignment_test, attrs) do
+    assignment_test
+    |> AssignmentTest.changeset(attrs)
+    |> Repo.update()
+  end
+
   def update_new_assignment(%Assignment{} = assignment, attrs) do
     assignment
     |> Assignment.new_changeset(attrs)

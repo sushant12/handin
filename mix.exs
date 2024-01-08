@@ -42,7 +42,7 @@ defmodule Handin.MixProject do
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3"},
-      {:phoenix_live_view, "~> 0.20.1"},
+      {:phoenix_live_view, "~> 0.20.3"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:swoosh, "~> 1.3"},
       {:finch, "~> 0.13"},
@@ -65,7 +65,7 @@ defmodule Handin.MixProject do
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.8.1", runtime: Mix.env() == :dev},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.31.0", only: :dev, runtime: false}
     ]

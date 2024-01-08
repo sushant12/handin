@@ -12,10 +12,6 @@ defmodule HandinWeb.AssignmentLive.Environment do
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
-        text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
-      />
-      <:item
         text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
@@ -37,75 +33,77 @@ defmodule HandinWeb.AssignmentLive.Environment do
       <:item text="Settings" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"} />
     </.tabs>
 
-    <div>
-      <.simple_form for={@form} id="environment-setup-form" class="mb-4">
-        <div class="max-w-md mb-4">
-          <.input
-            field={@form[:programming_language_id]}
-            label="Language"
-            type="select"
-            prompt="Select Programming Language"
-            options={@programming_languages}
-            phx-blur="save_language"
-          />
-        </div>
-        <div>
-          <.label for="Run Script">Run Script</.label>
-          <LiveMonacoEditor.code_editor
-            style="min-height: 450px; width: 100%;"
-            value={@assignment.run_script}
-            opts={
-              Map.merge(
-                LiveMonacoEditor.default_opts(),
-                %{"language" => "shell"}
-              )
-            }
-          />
-        </div>
-      </.simple_form>
-
-      <div id="helper-files-container" class="max-w-md mb-4">
-        <.header class="mb-4">Helper Files</.header>
-        <.link
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
-          patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/add_helper_files"}
-        >
-          Add Helper Files
-        </.link>
-        <.table id="helper-files" rows={@assignment.support_files}>
-          <:col :let={file} label="name"><%= file.file.file_name %></:col>
-          <:action :let={file}>
-            <.link
-              class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-              phx-click={JS.push("delete-file", value: %{support_file_id: file.id})}
-              data-confirm="Are you sure?"
-            >
-              Delete
-            </.link>
-          </:action>
-        </.table>
+    <.simple_form for={@form} class="" phx-submit="save">
+      <div class="w-1/2">
+        <.input
+          field={@form[:programming_language_id]}
+          label="Language"
+          type="select"
+          prompt="Select Programming Language"
+          options={@programming_languages}
+        />
       </div>
-      <div id="solution-files-container " class="max-w-md mb-4">
-        <.header class="mb-4">Solution Files</.header>
-        <.link
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3"
-          patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/add_solution_files"}
-        >
-          Add Solution Files
-        </.link>
-        <.table id="solution-files" rows={@assignment.solution_files}>
-          <:col :let={file} label="name"><%= file.file.file_name %></:col>
-          <:action :let={file}>
-            <.link
-              class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-              phx-click={JS.push("delete-file", value: %{solution_file_id: file.id})}
-              data-confirm="Are you sure?"
-            >
-              Delete
-            </.link>
-          </:action>
-        </.table>
+      <div class="w-1/2">
+        <.label for="Run Script">Run Script</.label>
+        <LiveMonacoEditor.code_editor
+          style="min-height: 450px; width: 100%;"
+          value={@assignment.run_script}
+          opts={
+            Map.merge(
+              LiveMonacoEditor.default_opts(),
+              %{"language" => "shell"}
+            )
+          }
+        />
       </div>
+      <.button
+        class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+        phx-disable-with="Saving..."
+      >
+        Save
+      </.button>
+    </.simple_form>
+    <.header class="mb-4 mt-10">Helper Files</.header>
+    <div class="w-1/2">
+      <.link
+        class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 mb-4"
+        patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/add_helper_files"}
+      >
+        Add Helper Files
+      </.link>
+      <.table id="helper-files" rows={@assignment.support_files}>
+        <:col :let={file} label="name"><%= file.file.file_name %></:col>
+        <:action :let={file}>
+          <.link
+            class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+            phx-click={JS.push("delete-file", value: %{support_file_id: file.id})}
+            data-confirm="Are you sure?"
+          >
+            Delete
+          </.link>
+        </:action>
+      </.table>
+    </div>
+    <.header class="mb-4 mt-10">Solution Files</.header>
+    <div class="w-1/2">
+      <.link
+        class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 mb-4"
+        patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/add_solution_files"}
+      >
+        Add Solution Files
+      </.link>
+      <.table id="solution-files" rows={@assignment.solution_files}>
+        <:col :let={file} label="name"><%= file.file.file_name %></:col>
+        <:action :let={file}>
+          <.link
+            class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+            phx-click={JS.push("delete-file", value: %{solution_file_id: file.id})}
+            data-confirm="Are you sure?"
+          >
+            Delete
+          </.link>
+        </:action>
+      </.table>
     </div>
     <.modal
       :if={@live_action in [:add_helper_files, :add_solution_files]}
@@ -170,23 +168,29 @@ defmodule HandinWeb.AssignmentLive.Environment do
   end
 
   @impl true
-  def handle_event("save_language", %{"value" => programming_language_id}, socket) do
+  def handle_event(
+        "save",
+        %{
+          "assignment" => %{"programming_language_id" => programming_language_id},
+          "live_monaco_editor" => %{"file" => run_script}
+        },
+        socket
+      ) do
     {:ok, assignment} =
       Assignments.update_assignment(socket.assigns.assignment, %{
-        "programming_language_id" => programming_language_id
+        "programming_language_id" => programming_language_id,
+        "run_script" => run_script
       })
 
     {:noreply,
      socket
      |> assign(:assignment, assignment)
+     |> put_flash(:info, "Environment updated successfully")
      |> assign_form(Assignments.change_assignment(assignment))}
   end
 
-  def handle_event("code-editor-lost-focus", %{"value" => value}, socket) do
-    {:ok, assignment} =
-      Assignments.update_assignment(socket.assigns.assignment, %{"run_script" => value})
-
-    {:noreply, socket |> assign(:assignment, assignment)}
+  def handle_event("code-editor-lost-focus", _, socket) do
+    {:noreply, socket}
   end
 
   def handle_event("delete-file", %{"support_file_id" => id}, socket) do

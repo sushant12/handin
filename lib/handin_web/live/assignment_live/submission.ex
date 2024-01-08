@@ -12,10 +12,6 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
-        text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
-      />
-      <:item
         text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
@@ -37,9 +33,6 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:item text="Settings" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"} />
     </.tabs>
 
-    <.header class="mt-5">
-      Student Submissions
-    </.header>
     <.table id="submitted_assignment_submissions" rows={@assignment_submissions}>
       <:col :let={{_, i}} label="id">
         <%= i %>
