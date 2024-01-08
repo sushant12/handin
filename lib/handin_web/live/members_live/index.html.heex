@@ -1,17 +1,22 @@
+<.breadcrumbs>
+  <:item text="Home" href={~p"/"} />
+  <:item text="Modules" href={~p"/modules"} />
+  <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
+</.breadcrumbs>
 <.tabs>
-  <:item text="Assignments" href={~p"/modules/#{@module_id}/assignments"} />
-  <:item text="Members" href={~p"/modules/#{@module_id}/members"} current={true} />
+  <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"} />
+  <:item text="Members" href={~p"/modules/#{@module.id}/members"} current={true} />
   <:item
     :if={@current_user.role == "student"}
     text="Grades"
-    href={~p"/modules/#{@module_id}/grades"}
+    href={~p"/modules/#{@module.id}/grades"}
   />
 </.tabs>
 
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
   <.header>
     <:actions>
-      <.link :if={@current_user.role != "student"} patch={~p"/modules/#{@module_id}/members/new"}>
+      <.link :if={@current_user.role != "student"} patch={~p"/modules/#{@module.id}/members/new"}>
         <.button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 mt-3">
           Add Member
         </.button>
@@ -37,15 +42,15 @@
   :if={@live_action == :new}
   id="member-modal"
   show
-  on_cancel={JS.patch(~p"/modules/#{@module_id}/members/")}
+  on_cancel={JS.patch(~p"/modules/#{@module.id}/members/")}
 >
   <.live_component
     module={HandinWeb.MembersLive.FormComponent}
     id={:new}
     title={@page_title}
     action={@live_action}
-    module_id={@module_id}
+    module_id={@module.id}
     modules_invitations={%Handin.Modules.ModulesInvitations{}}
-    patch={~p"/modules/#{@module_id}/members"}
+    patch={~p"/modules/#{@module.id}/members"}
   />
 </.modal>

@@ -6,7 +6,8 @@ defmodule HandinWeb.AssignmentLive.Index do
 
   @impl true
   def mount(%{"id" => id} = _params, _session, socket) do
-    with true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
+    with module <- Modules.get_module!(id),
+         true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
          assignments <-
            Modules.list_assignments_for(id, socket.assigns.current_user.role) do
       programming_languages =
@@ -16,7 +17,7 @@ defmodule HandinWeb.AssignmentLive.Index do
        socket
        |> stream(:assignments, assignments)
        |> assign(:programming_languages, programming_languages)
-       |> assign(:module_id, id)
+       |> assign(:module, module)
        |> assign(:current_page, :modules)}
     else
       false ->

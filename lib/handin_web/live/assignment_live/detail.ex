@@ -10,10 +10,6 @@ defmodule HandinWeb.AssignmentLive.Detail do
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
-        text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
-      />
-      <:item
         text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}

@@ -245,7 +245,19 @@ defmodule Handin.BuildServer do
     |> Enum.map(fn assignment_test ->
       template = """
         #!bin/bash
-        #{assignment_test.command}
+        output=$(#{assignment_test.command})
+        expected_output=$(<#{assignment_test.expcted_output_file})
+
+        if [ "$output" = "$expected_output" ]; then
+          # Output matches expected result
+          json_output="{ \"state\": \"pass\", \"output\": \"$output\" }"
+        else
+          # Output does not match expected result
+          json_output="{ \"state\": \"fail\", \"output\": \"$output\" }"
+        fi
+
+        # Print JSON output
+        echo "$json_output"
       """
 
       %{
