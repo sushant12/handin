@@ -21,7 +21,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
       />
     </.breadcrumbs>
 
-    <%= if @current_user.role != "student" do %>
+    <%= if @current_user.role != :student do %>
       <.tabs>
         <:item
           text="Details"
@@ -39,7 +39,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
         />
       </.tabs>
     <% end %>
-    <%= if @current_user.role == "student" do %>
+    <%= if @current_user.role == :student do %>
       <.tabs>
         <:item text="Details" href={~p"/modules/#{@module}/assignments/#{@assignment}/details"} />
         <:item

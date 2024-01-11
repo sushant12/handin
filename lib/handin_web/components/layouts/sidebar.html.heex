@@ -39,7 +39,7 @@
       </span>
     </.link>
     <ul class="space-y-2 font-medium">
-      <li>
+      <li :if={@current_user.role != :student}>
         <.link
           navigate={~p"/"}
           class={[
@@ -93,7 +93,7 @@
         </.link>
       </li>
 
-      <li :if={@current_user.role == "admin"}>
+      <li :if={@current_user.role == :admin}>
         <.link
           navigate={~p"/admin/universities"}
           class={[
@@ -119,7 +119,7 @@
           <span class="ml-3">Universities</span>
         </.link>
       </li>
-      <li :if={@current_user.role == "admin"}>
+      <li :if={@current_user.role == :admin}>
         <.link
           navigate={~p"/admin/programming_languages"}
           class={[
@@ -146,7 +146,7 @@
         </.link>
       </li>
 
-      <li :if={@current_user.role == "admin"}>
+      <li :if={@current_user.role == :admin}>
         <.link
           navigate={~p"/users/settings"}
           class={[

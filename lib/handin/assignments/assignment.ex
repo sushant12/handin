@@ -77,7 +77,7 @@ defmodule Handin.Assignments.Assignment do
     |> validate_number(:penalty_per_day, greater_than_or_equal_to: 0)
     |> validate_number(:total_marks, greater_than_or_equal_to: 0)
     |> validate_number(:attempt_marks, greater_than_or_equal_to: 0)
-    |> maybe_validate_start_date()
+    |> maybe_validate_start_date(attrs)
     |> maybe_validate_due_date()
     |> maybe_validate_cutoff_date()
     |> maybe_validate_attempt_marks()
@@ -92,13 +92,13 @@ defmodule Handin.Assignments.Assignment do
     |> validate_required(@required_attrs)
   end
 
-  defp maybe_validate_start_date(changeset) do
+  defp maybe_validate_start_date(changeset, attrs) do
     case get_change(changeset, :start_date) do
       nil ->
         changeset
 
       start_date ->
-        now = DateTime.utc_now() |> DateTime.shift_zone!("Europe/Dublin") |> DateTime.to_naive()
+        now = DateTime.utc_now() |> DateTime.shift_zone!(attrs["timezone"]) |> DateTime.to_naive()
 
         if NaiveDateTime.compare(start_date, now) == :lt do
           add_error(changeset, :start_date, "must be in the future")

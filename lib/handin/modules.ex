@@ -14,7 +14,7 @@ defmodule Handin.Modules do
   def get_students(module_id) do
     Module
     |> where([m], m.id == ^module_id)
-    |> join(:inner, [m], u in assoc(m, :users), on: u.role == "student")
+    |> join(:inner, [m], u in assoc(m, :users), on: u.role == :student)
     |> select([m, u], u)
     |> Repo.all()
   end
@@ -23,16 +23,16 @@ defmodule Handin.Modules do
   def get_students_count(module_id) do
     Module
     |> where([m], m.id == ^module_id)
-    |> join(:inner, [m], u in assoc(m, :users), on: u.role == "student")
+    |> join(:inner, [m], u in assoc(m, :users), on: u.role == :student)
     |> select([m, u], count(u.id))
     |> Repo.one()
   end
 
-  def get_assignments_count(module_id, role) do
+  def get_assignments_count(module_id, user) do
     Module
     |> where([m], m.id == ^module_id)
     |> join(:inner, [m], a in assoc(m, :assignments), on: a.module_id == ^module_id)
-    |> maybe_filter_by_released_assignment(role)
+    |> maybe_filter_by_released_assignment(user)
     |> select([m, a], count(a.id))
     |> Repo.one()
   end
@@ -124,20 +124,20 @@ defmodule Handin.Modules do
     |> Enum.any?(&(&1.id == assignment_id))
   end
 
-  def list_assignments_for(id, role) do
+  def list_assignments_for(id, user) do
     Module
     |> where([m], m.id == ^id)
     |> join(:inner, [m], a in assoc(m, :assignments), on: a.module_id == ^id)
     |> select([m, a], a)
-    |> maybe_filter_by_released_assignment(role)
+    |> maybe_filter_by_released_assignment(user)
     |> Repo.all()
     |> Repo.preload([:programming_language])
   end
 
-  defp maybe_filter_by_released_assignment(query, role) do
-    case role do
-      "student" ->
-        now = DateTime.utc_now() |> DateTime.shift_zone!("Europe/Dublin")
+  defp maybe_filter_by_released_assignment(query, user) do
+    case user.role do
+      :student ->
+        now = DateTime.utc_now() |> DateTime.shift_zone!(user.university.timezone)
 
         query
         |> where([m, a], a.start_date <= ^now)

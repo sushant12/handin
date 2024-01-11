@@ -2,6 +2,7 @@ defmodule Handin.Accounts.User do
   use Handin.Schema
   import Ecto.Changeset
   alias Handin.Universities
+  alias Handin.Universities.University
   alias Handin.Modules.ModulesUsers
   alias Handin.Modules.Module
   alias Handin.Assignments.{TestResult, RunScriptResult, Build}
@@ -12,9 +13,9 @@ defmodule Handin.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
-    field :university, :string, virtual: true
-    field :role, :string, default: "student"
+    field :role, Ecto.Enum, default: :student, values: [:student, :admin, :lecturer]
 
+    belongs_to :university, University
     has_many :test_results, TestResult
     has_many :run_script_results, RunScriptResult
     many_to_many :modules, Module, join_through: ModulesUsers
@@ -47,8 +48,8 @@ defmodule Handin.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :university])
-    |> validate_required([:university])
+    |> cast(attrs, [:email, :password, :university_id])
+    |> validate_required([:university_id])
     |> validate_email(opts)
     |> password_changeset(attrs, opts)
   end
@@ -62,7 +63,7 @@ defmodule Handin.Accounts.User do
   end
 
   defp maybe_validate_email_format(changeset) do
-    case get_field(changeset, :university) do
+    case get_field(changeset, :university_id) do
       nil ->
         changeset
 

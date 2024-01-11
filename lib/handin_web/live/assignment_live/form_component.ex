@@ -54,7 +54,9 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
   def handle_event("validate", %{"assignment" => assignment_params}, socket) do
     changeset =
       socket.assigns.assignment
-      |> Assignments.change_assignment(assignment_params)
+      |> Assignments.change_assignment(
+        Map.put(assignment_params, "timezone", socket.assigns.current_user.university.timezone)
+      )
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
@@ -65,6 +67,7 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
       socket,
       socket.assigns.action,
       Map.put(assignment_params, "module_id", socket.assigns.module_id)
+      |> Map.put("timezone", socket.assigns.current_user.university.timezone)
     )
   end
 

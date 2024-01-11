@@ -399,7 +399,7 @@ defmodule Handin.Assignments do
     |> where([as], as.assignment_id == ^assignment_id)
     |> where([as], as.user_id == ^user_id)
     |> order_by([as], desc: as.inserted_at)
-    |> preload([:assignment_submission_files, :assignment, :user])
+    |> preload([:assignment_submission_files, :assignment, user: [:university]])
     |> limit(1)
     |> Repo.one()
   end
@@ -451,11 +451,13 @@ defmodule Handin.Assignments do
       user_id: user_id
     })
     |> Repo.insert!()
-    |> Repo.preload([:assignment_submission_files, :assignment])
+    |> Repo.preload([:assignment_submission_files, :assignment, user: [:university]])
   end
 
   def evaluate_marks(submission_id, build_id) do
-    submission = Repo.get(AssignmentSubmission, submission_id) |> Repo.preload(:assignment)
+    submission =
+      Repo.get(AssignmentSubmission, submission_id)
+      |> Repo.preload(:assignment, user: [:university])
 
     build =
       Repo.get(Build, build_id)
@@ -495,13 +497,13 @@ defmodule Handin.Assignments do
   defp calculate_penalty_marks(assignment, submission, marks) do
     if assignment.enable_penalty_per_day &&
          Timex.after?(
-           DateTime.shift_zone!(submission.submitted_at, "Europe/Dublin"),
+           DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone),
            assignment.due_date
          ) do
       days_after_due_date =
         Interval.new(
           from: assignment.due_date,
-          until: DateTime.shift_zone!(submission.submitted_at, "Europe/Dublin")
+          until: DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone)
         )
         |> Interval.duration(:days)
 
@@ -514,7 +516,7 @@ defmodule Handin.Assignments do
 
   def is_submission_allowed?(assignment_submission) do
     attempts_valid?(assignment_submission) &&
-      submission_date_valid?(assignment_submission.assignment)
+      submission_date_valid?(assignment_submission)
   end
 
   def get_submission_errors(assignment_submission) do
@@ -526,18 +528,19 @@ defmodule Handin.Assignments do
         else: ["Number of attempts exceeded" | errors]
 
     errors =
-      if submission_date_valid?(assignment_submission.assignment),
+      if submission_date_valid?(assignment_submission),
         do: errors,
         else: ["Cutoff date exceeded" | errors]
 
     errors
   end
 
-  defp submission_date_valid?(assignment) do
-    if assignment.enable_cutoff_date && assignment.cutoff_date do
+  defp submission_date_valid?(assignment_submission) do
+    if assignment_submission.assignment.enable_cutoff_date &&
+         assignment_submission.assignment.cutoff_date do
       Timex.compare(
-        DateTime.shift_zone!(DateTime.utc_now(), "Europe/Dublin"),
-        assignment.cutoff_date
+        DateTime.shift_zone!(DateTime.utc_now(), assignment_submission.user.university.timezone),
+        assignment_submission.assignment.cutoff_date
       ) < 0
     else
       true

@@ -78,6 +78,7 @@ defmodule Handin.Accounts do
   """
   def register_user(attrs) do
     %User{}
+    |> Repo.preload(:university)
     |> User.registration_changeset(attrs)
     |> Repo.insert()
   end

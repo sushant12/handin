@@ -4,6 +4,6 @@ defmodule Handin.Repo.Migrations.AddTimezoneToUniversities do
   def change do
     alter table(:universities) do
       add :timezone, :string
+    end
   end
-end
 end

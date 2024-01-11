@@ -41,7 +41,7 @@
   <:item title="Penalty per day"><%= @assignment.penalty_per_day %></:item>
 </.list>
 
-<div :if={@current_user.role != "student"} class="grid grid-cols-12 gap-4">
+<div :if={@current_user.role != :student} class="grid grid-cols-12 gap-4">
   <.header class="mt-5 col-span-3">
     Tests
     <:actions>
@@ -232,7 +232,7 @@
     </div>
   </div>
 </div>
-<div :if={@current_user.role == "student"} class="grid grid-cols-12 gap-4">
+<div :if={@current_user.role == :student} class="grid grid-cols-12 gap-4">
   <.header class="mt-5 col-span-3">
     Submission
     <:actions>
@@ -343,7 +343,7 @@
     </div>
   </div>
 </div>
-<div :if={@current_user.role != "student"}>
+<div :if={@current_user.role != :student}>
   <.header class="mt-5">
     Student Submissions
   </.header>

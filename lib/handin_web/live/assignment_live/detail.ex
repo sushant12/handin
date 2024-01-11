@@ -15,7 +15,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
         current={true}
       />
     </.breadcrumbs>
-    <%= if @current_user.role != "student" do %>
+    <%= if @current_user.role != :student do %>
       <.tabs>
         <:item
           text="Details"
@@ -37,7 +37,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
         />
       </.tabs>
     <% end %>
-    <%= if @current_user.role == "student" do %>
+    <%= if @current_user.role == :student do %>
       <.tabs>
         <:item
           text="Details"
@@ -57,13 +57,19 @@ defmodule HandinWeb.AssignmentLive.Detail do
 
     <.list>
       <:item title="Start Date">
-        <%= Handin.DisplayHelper.format_date(@assignment.start_date, "Europe/Dublin") %>
+        <%= Handin.DisplayHelper.format_date(
+          @assignment.start_date,
+          @current_user.university.timezone
+        ) %>
       </:item>
       <:item title="Due Date">
-        <%= Handin.DisplayHelper.format_date(@assignment.due_date, "Europe/Dublin") %>
+        <%= Handin.DisplayHelper.format_date(@assignment.due_date, @current_user.university.timezone) %>
       </:item>
       <:item :if={@assignment.enable_cutoff_date} title="Cut off Date">
-        <%= Handin.DisplayHelper.format_date(@assignment.cutoff_date, "Europe/Dublin") %>
+        <%= Handin.DisplayHelper.format_date(
+          @assignment.cutoff_date,
+          @current_user.university.timezone
+        ) %>
       </:item>
       <:item :if={@assignment.enable_total_marks} title="Total marks">
         <%= @assignment.total_marks %>
