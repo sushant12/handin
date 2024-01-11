@@ -138,7 +138,7 @@ defmodule Handin.Assignments.Assignment do
           changeset
 
         cutoff_date ->
-          if start_date && due_date && Timex.between?(cutoff_date, start_date, due_date) do
+          if start_date && due_date && NaiveDateTime.compare(cutoff_date, due_date) == :lt do
             changeset
             |> add_error(:cutoff_date, "must come after start date and due date")
           else

@@ -469,9 +469,14 @@ defmodule HandinWeb.AssignmentLive.Tests do
            assignment_test_params
          ) do
       {:ok, assignment_test} ->
+        assignment =
+          socket.assigns.assignment |> Handin.Repo.preload(:assignment_tests, force: true)
+
         {:noreply,
          socket
          |> assign_form(Assignments.change_assignment_test(assignment_test))
+         |> assign(:assignment_test, assignment_test)
+         |> assign(:assignment_tests, assignment.assignment_tests)
          |> put_flash(:info, "Test saved successfully")}
 
       {:error, %Ecto.Changeset{} = changeset} ->

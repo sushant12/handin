@@ -67,7 +67,10 @@ defmodule HandinWeb.AssignmentLive.Settings do
       />
       <div class="w-64">
         <.input
-          :if={Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_penalty_per_day].value)}
+          :if={
+            Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_cutoff_date].value) &&
+              Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_penalty_per_day].value)
+          }
           field={@form[:penalty_per_day]}
           type="number"
         />

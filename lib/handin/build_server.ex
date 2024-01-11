@@ -246,7 +246,7 @@ defmodule Handin.BuildServer do
       template = """
         #!bin/bash
         output=$(#{assignment_test.command})
-        expected_output=$(<#{assignment_test.expcted_output_file})
+        expected_output=$(<#{assignment_test.expected_output_file})
 
         if [ "$output" = "$expected_output" ]; then
           # Output matches expected result
