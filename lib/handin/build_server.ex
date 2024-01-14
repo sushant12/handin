@@ -36,6 +36,9 @@ defmodule Handin.BuildServer do
            @machine_api.create(
              Jason.encode!(%{
                config: %{
+                 init: %{
+                   exec: ["/bin/sleep", "inf"]
+                 },
                  auto_destroy: true,
                  image: state.image,
                  files:
@@ -75,29 +78,55 @@ defmodule Handin.BuildServer do
       )
 
       state.assignment.assignment_tests
-      |> Enum.map(&{"#{&1.name}_#{&1.id}.sh", &1})
+      |> Enum.map(&{"#{&1.id}.sh", &1})
       |> Enum.each(fn {file_name, assignment_test} ->
-        case @machine_api.exec(state.machine_id, "sh ./'#{file_name}'") do
+        case @machine_api.exec(state.machine_id, "sh ./'#{file_name}'") |> IO.inspect() do
           {:ok, %{"exit_code" => 0} = response} ->
-            test_state =
-              if match_output?(assignment_test, response["stdout"]), do: :pass, else: :fail
+            case response["stdout"]
+                 |> String.replace("\n", "\\n")
+                 |> String.replace("\t", "\\t")
+                 |> String.replace("\r", "\\r")
+                 |> String.replace("\b", "\\b")
+                 |> Jason.decode() do
+              {:ok, response} ->
+                test_state = if response["state"] == "pass", do: :pass, else: :fail
 
-            Assignments.save_test_results(%{
-              assignment_test_id: assignment_test.id,
-              state: test_state,
-              build_id: state.build.id,
-              user_id: state.user_id
-            })
+                Assignments.save_test_results(%{
+                  assignment_test_id: assignment_test.id,
+                  state: test_state,
+                  build_id: state.build.id,
+                  user_id: state.user_id
+                })
 
-            log_and_broadcast(
-              state.build,
-              %{
-                command: assignment_test.command,
-                assignment_test_id: assignment_test.id,
-                output: response["stdout"]
-              },
-              state
-            )
+                log_and_broadcast(
+                  state.build,
+                  %{
+                    command: assignment_test.command,
+                    assignment_test_id: assignment_test.id,
+                    output: response["output"]
+                  },
+                  state
+                )
+
+              {:error, response} ->
+                Assignments.save_test_results(%{
+                  assignment_test_id: assignment_test.id,
+                  state: :fail,
+                  build_id: state.build.id,
+                  user_id: state.user_id
+                })
+
+                log_and_broadcast(
+                  state.build,
+                  %{
+                    command: assignment_test.command,
+                    assignment_test_id: assignment_test.id,
+                    output:
+                      "Error parsing json at position #{response.position}, data: #{response.data}"
+                  },
+                  state
+                )
+            end
 
           {:ok, response} ->
             Assignments.save_test_results(%{
@@ -156,16 +185,15 @@ defmodule Handin.BuildServer do
         )
     end
 
-    if state.type == "assignment_submission" do
-      HandinWeb.Endpoint.broadcast!(
-        "build:#{state.type}:#{state.assignment_id}",
-        "assignment_submitted",
-        state.build.id
-      )
-    end
-
     Assignments.get_logs(state.build.id)
     @machine_api.stop(state.machine_id)
+
+    HandinWeb.Endpoint.broadcast!(
+      "build:#{state.type}:#{state.assignment_id}",
+      "build_completed",
+      state.build.id
+    )
+
     {:stop, "Server terminated gracefully", state}
   end
 
@@ -243,35 +271,29 @@ defmodule Handin.BuildServer do
   defp build_tests_scripts(assignment) do
     assignment.assignment_tests
     |> Enum.map(fn assignment_test ->
-      template = """
+      template =
+        """
         #!bin/bash
         output=$(#{assignment_test.command})
-        expected_output=$(<#{assignment_test.expected_output_file})
+        #{if assignment_test.expected_output_type == :string do
+          "expected_output=#{assignment_test.expected_output_text}"
+        else
+          "expected_output=$(cat #{assignment_test.expected_output_file})"
+        end}
 
         if [ "$output" = "$expected_output" ]; then
-          # Output matches expected result
-          json_output="{ \"state\": \"pass\", \"output\": \"$output\" }"
+          state="pass"
         else
-          # Output does not match expected result
-          json_output="{ \"state\": \"fail\", \"output\": \"$output\" }"
+          state="fail"
         fi
-
-        # Print JSON output
-        echo "$json_output"
-      """
+        JSON_FMT='{"state": "%s", "output":"%s"}'
+        printf "$JSON_FMT" "$state" "$output"
+        """
 
       %{
-        "guest_path" => "/#{assignment_test.name}_#{assignment_test.id}.sh",
+        "guest_path" => "/#{assignment_test.id}.sh",
         "raw_value" => Base.encode64(template)
       }
     end)
-  end
-
-  defp match_output?(assignment_test, output) do
-    if assignment_test.expected_output_type == "text" do
-      output == assignment_test.expected_output_text
-    else
-      String.trim(output) == assignment_test.expected_output_file_content
-    end
   end
 end

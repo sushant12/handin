@@ -50,6 +50,7 @@ defmodule Handin.Assignments.AssignmentTest do
     |> validate_required(@required_attrs)
     |> maybe_validate_expected_output_type()
     |> maybe_validate_file_name(attrs)
+    |> maybe_parse_and_save_expected_output_file_content
     |> maybe_validate_points_on_pass()
     |> maybe_validate_points_on_fail()
   end

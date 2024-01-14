@@ -136,7 +136,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
           </div>
         </div>
       </div>
-      <div class="ml-8">
+      <div class="ml-8 w-1/2">
         <div class="rounded shadow-md px-4 mb-4">
           <.simple_form :if={@assignment_test} for={@form} phx-change="validate" phx-submit="save">
             <.input field={@form[:name]} type="text" label="Name" />
@@ -172,9 +172,19 @@ defmodule HandinWeb.AssignmentLive.Tests do
             >
               Save
             </.button>
-            <pre>
-              pseudocode: if <span class="text-blue-500"><%=  @assignment_test.command %></span> == <span class="text-blue-500"><%= if @assignment_test.expected_output_type == "file", do: "cat(#{@assignment_test.expected_output_file})", else: @assignment_test.expected_output_text %> </span> then <span class="text-green-500"> true </span> else <span class="text-red-600">false</span></pre>
           </.simple_form>
+          <div class="my-5 pb-5">
+            <span class="text-black-500">pseudocode: </span>
+            if <span class="text-blue-500"><%= @assignment_test.command %></span>
+            ==
+            <span class="text-blue-500">
+              <%= if @assignment_test.expected_output_type == :file,
+                do: "cat(#{@assignment_test.expected_output_file})",
+                else: @assignment_test.expected_output_text %>
+            </span>
+            then <span class="text-green-500"> true </span>
+            else <span class="text-red-600">false</span>
+          </div>
         </div>
         <div class="flex">
           <button
@@ -182,9 +192,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
             class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             phx-click="run_tests"
             phx-value-assignment_id={@assignment.id}
-            disabled={@build && @build.status == "running"}
           >
-            <%= if @build, do: "Running", else: "Run All Tests" %>
+            <%= if @build, do: "Running...", else: "Run All Tests" %>
           </button>
         </div>
 
@@ -296,7 +305,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
        )
        |> assign(
          :build,
-         Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
+         GenServer.whereis({:global, "build:assignment_tests:#{assignment.id}"})
        )
        |> assign_form(
          AssignmentTests.change_assignment_test(
@@ -373,49 +382,6 @@ defmodule HandinWeb.AssignmentLive.Tests do
     save_assignment_test(socket, :edit, assignment_test_params)
   end
 
-  # def handle_event("update_name", %{"value" => value}, socket) do
-  #   {:ok, assignment_test} =
-  #     Handin.Assignments.AssignmentTest.new_changeset(socket.assigns.assignment_test, %{
-  #       name: value
-  #     })
-  #     |> Repo.update()
-
-  #   assignment = socket.assigns.assignment |> Repo.preload(:assignment_tests, force: true)
-
-  #   {:noreply,
-  #    assign(socket, :assignment_test, assignment_test)
-  #    |> assign(
-  #      :assignment_tests,
-  #      assignment.assignment_tests
-  #    )}
-  # end
-
-  # def handle_event("update_expected_output_file", %{"value" => value}, socket) do
-  #   socket.assigns.assignment_test
-  #   |> Repo.preload(assignment: [:support_files])
-  #   |> Handin.Assignments.AssignmentTest.output_file_changeset(%{
-  #     expected_output_file: value
-  #   })
-  #   |> Repo.update()
-  #   |> case do
-  #     {:ok, assignment_test} ->
-  #       {:noreply, assign(socket, :assignment_test, assignment_test)}
-
-  #     {:error, changeset} ->
-  #       {:noreply, assign_form(socket, changeset)}
-  #   end
-  # end
-
-  # def handle_event("update_" <> key, %{"value" => value}, socket) do
-  #   {:ok, assignment_test} =
-  #     Handin.Assignments.AssignmentTest.new_changeset(socket.assigns.assignment_test, %{
-  #       "#{key}": value
-  #     })
-  #     |> Repo.update()
-
-  #   {:noreply, assign(socket, :assignment_test, assignment_test)}
-  # end
-
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
     HandinWeb.Endpoint.subscribe("build:assignment_tests:#{assignment_id}")
 
@@ -440,23 +406,31 @@ defmodule HandinWeb.AssignmentLive.Tests do
        :logs,
        Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
      )
-     |> assign(
-       :build,
-       Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
-     )}
+     |> assign(:build, GenServer.whereis({:global, "build:assignment_tests:#{assignment_id}"}))}
   end
 
   @impl true
   def handle_info(
-        %Phoenix.Socket.Broadcast{event: "test_result", payload: build_id},
+        %Phoenix.Socket.Broadcast{event: event, payload: build_id},
         socket
       ) do
-    {:noreply,
-     assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
-     |> assign(
-       :build,
-       Assignments.get_running_build(socket.assigns.assignment.id, socket.assigns.current_user.id)
-     )}
+    case event do
+      "test_result" ->
+        {:noreply,
+         assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
+         |> assign(
+           :build,
+           GenServer.whereis({:global, "build:assignment_tests:#{socket.assigns.assignment.id}"})
+         )}
+
+      "build_completed" ->
+        {:noreply,
+         assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
+         |> assign(
+           :build,
+           nil
+         )}
+    end
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do

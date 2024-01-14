@@ -1,15 +1,20 @@
 defmodule HandinWeb.AssignmentLive.Grade do
   use HandinWeb, :live_view
 
-  alias Handin.{Assignments, Accounts}
+  alias Handin.{Assignments, Accounts, Modules}
 
   @impl true
   def render(assigns) do
     ~H"""
+    <.breadcrumbs>
+      <:item text="Home" href={~p"/"} />
+      <:item text="Modules" href={~p"/modules"} />
+      <:item text={@module.name} href={~p"/modules/#{@module.id}/grades"} current={true} />
+    </.breadcrumbs>
     <.tabs>
-      <:item text="Assignments" href={~p"/modules/#{@module_id}/assignments"} />
-      <:item text="Members" href={~p"/modules/#{@module_id}/members"} />
-      <:item text="Grades" href={~p"/modules/#{@module_id}/grades"} current={true} />
+      <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"} />
+      <:item text="Members" href={~p"/modules/#{@module.id}/members"} />
+      <:item text="Grades" href={~p"/modules/#{@module.id}/grades"} current={true} />
     </.tabs>
 
     <.table id="assignment_submissions" rows={@streams.assignment_submissions}>
@@ -26,13 +31,15 @@ defmodule HandinWeb.AssignmentLive.Grade do
   @impl true
   def mount(%{"id" => id} = _params, _session, socket) do
     if Accounts.enrolled_module?(socket.assigns.current_user, id) do
+      module = Modules.get_module!(id)
+
       assignment_submissions =
         Assignments.get_submissions_for_user(id, socket.assigns.current_user.id)
 
       {:ok,
        socket
        |> stream(:assignment_submissions, assignment_submissions)
-       |> assign(:module_id, id)
+       |> assign(:module, module)
        |> assign(:current_page, :grades)}
     else
       {:ok,

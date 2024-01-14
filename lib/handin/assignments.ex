@@ -252,7 +252,7 @@ defmodule Handin.Assignments do
   @spec new_build(
           attrs :: %{
             assignment_id: Ecto.UUID,
-            status: String.t(),
+            status: :running | :failed | :completed,
             user_id: Ecto.UUID
           }
         ) ::
@@ -264,7 +264,7 @@ defmodule Handin.Assignments do
 
   @spec update_build(
           build :: Build.t(),
-          attrs :: %{status: String.t()} | %{machine_id: String.t()}
+          attrs :: %{status: :running | :failed | :completed} | %{machine_id: String.t()}
         ) :: {:ok, Build.t()}
   def update_build(build, attrs) do
     Build.update_changeset(build, attrs)
@@ -358,7 +358,7 @@ defmodule Handin.Assignments do
             |> Enum.find(%{}, &(&1.assignment_test_id == test_result.assignment_test_id))
             |> Map.get(:output),
           expected_output:
-            if test_result.assignment_test.expected_output_type == "text" do
+            if test_result.assignment_test.expected_output_type == :string do
               test_result.assignment_test.expected_output_text
             else
               test_result.assignment_test.expected_output_file_content
@@ -449,14 +449,18 @@ defmodule Handin.Assignments do
     |> Enum.map(&Repo.preload(&1, [:assignment]))
   end
 
-  def submit_assignment(assignment_submission_id) do
+  def submit_assignment(assignment_submission_id, max_attempts_enabled) do
     now = DateTime.utc_now()
 
     AssignmentSubmission
     |> where([as], as.id == ^assignment_submission_id)
-    |> update([as], inc: [retries: 1], set: [submitted_at: ^now])
+    |> maybe_update_retries_count(max_attempts_enabled)
+    |> update([as], set: [submitted_at: ^now])
     |> Repo.update_all([])
   end
+
+  defp maybe_update_retries_count(query, false), do: query
+  defp maybe_update_retries_count(query, true), do: query |> update([as], inc: [retries: 1])
 
   def create_submission(assignment_id, user_id) do
     %AssignmentSubmission{}
