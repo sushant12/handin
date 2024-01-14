@@ -271,6 +271,20 @@ defmodule Handin.Assignments do
     |> Repo.update()
   end
 
+  def list_builds(params) do
+    case Flop.validate_and_run(Build, params, for: Build) do
+      {:ok, {builds, meta}} ->
+        %{builds: builds, meta: meta}
+
+      {:error, meta} ->
+        %{builds: [], meta: meta}
+    end
+  end
+
+  def get_build!(id), do: Repo.get!(Build, id) |> Repo.preload([:assignment, :user])
+
+  def delete_build(build), do: Repo.delete!(build)
+
   def get_logs(build_id) do
     Build
     |> Repo.get!(build_id)
@@ -503,7 +517,8 @@ defmodule Handin.Assignments do
       days_after_due_date =
         Interval.new(
           from: assignment.due_date,
-          until: DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone)
+          until:
+            DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone)
         )
         |> Interval.duration(:days)
 

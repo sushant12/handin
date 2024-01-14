@@ -8,6 +8,11 @@ defmodule Handin.Accounts.User do
   alias Handin.Assignments.{TestResult, RunScriptResult, Build}
   @type t :: %__MODULE__{}
 
+  @derive {
+    Flop.Schema,
+    filterable: [:email], sortable: [:email], default_limit: 15
+  }
+
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
@@ -52,6 +57,12 @@ defmodule Handin.Accounts.User do
     |> validate_required([:university_id])
     |> validate_email(opts)
     |> password_changeset(attrs, opts)
+  end
+
+  def edit_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :role, :university_id])
+    |> validate_email(opts)
   end
 
   defp validate_email(changeset, opts) do

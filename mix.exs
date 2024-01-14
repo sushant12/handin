@@ -67,7 +67,8 @@ defmodule Handin.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:esbuild, "~> 0.8.1", runtime: Mix.env() == :dev},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:ex_doc, "~> 0.31.0", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.31.0", only: :dev, runtime: false},
+      {:flop_phoenix, "~> 0.22.4"}
     ]
   end
 

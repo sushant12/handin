@@ -57,6 +57,12 @@ defmodule HandinWeb.Router do
 
       live "/programming_languages/:id", ProgrammingLanguageLive.Show, :show
       live "/programming_languages/:id/show/edit", ProgrammingLanguageLive.Show, :edit
+
+      live "/users", UserListLive.Index, :index
+      live "/users/:user_id/edit", UserListLive.Index, :edit
+
+      live "/builds", BuildLive.Index, :index
+      live "/builds/:build_id/edit", BuildLive.Index, :edit
     end
   end
 
