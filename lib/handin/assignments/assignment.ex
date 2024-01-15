@@ -9,19 +9,20 @@ defmodule Handin.Assignments.Assignment do
 
   schema "assignments" do
     field :name, :string
-    field :max_attempts, :integer
-    field :total_marks, :integer
     field :start_date, :naive_datetime
     field :due_date, :naive_datetime
-    field :cutoff_date, :naive_datetime
-    field :penalty_per_day, :float
     field :run_script, :string
-    field :attempt_marks, :integer
-    field :enable_cutoff_date, :boolean, default: false
-    field :enable_attempt_marks, :boolean, default: false
-    field :enable_penalty_per_day, :boolean, default: false
+
     field :enable_max_attempts, :boolean, default: false
+    field :max_attempts, :integer
     field :enable_total_marks, :boolean, default: false
+    field :total_marks, :integer
+    field :enable_cutoff_date, :boolean, default: false
+    field :cutoff_date, :naive_datetime
+    field :enable_penalty_per_day, :boolean, default: false
+    field :penalty_per_day, :float
+    field :enable_attempt_marks, :boolean, default: false
+    field :attempt_marks, :integer
     field :enable_test_output, :boolean, default: false
 
     belongs_to :module, Module

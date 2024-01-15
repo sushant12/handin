@@ -368,7 +368,7 @@ defmodule Handin.Accounts do
   def list_users(params) do
     case Flop.validate_and_run(User, params, for: User) do
       {:ok, {users, meta}} ->
-        %{users: users |> Enum.map(&Repo.preload(&1, :university)), meta: meta}
+        %{users: users |> Repo.preload(:university), meta: meta}
 
       {:error, meta} ->
         %{users: [], meta: meta}

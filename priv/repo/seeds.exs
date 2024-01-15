@@ -16,14 +16,15 @@ university =
 }
 |> Repo.insert!()
 
-%Handin.Accounts.User{
-  email: "admin@admin.com",
-  hashed_password: Bcrypt.hash_pwd_salt("admin"),
-  confirmed_at: now,
-  role: :admin,
-  university_id: university.id
-}
-|> Repo.insert!()
+admin =
+  %Handin.Accounts.User{
+    email: "admin@admin.com",
+    hashed_password: Bcrypt.hash_pwd_salt("admin"),
+    confirmed_at: now,
+    role: :admin,
+    university_id: university.id
+  }
+  |> Repo.insert!()
 
 %Handin.Accounts.User{
   email: "student3@studentmail.ul.ie",
@@ -43,8 +44,33 @@ university =
 }
 |> Repo.insert!()
 
-%Handin.ProgrammingLanguages.ProgrammingLanguage{
-  name: "cpp",
-  docker_file_url: "sushantbajracharya/cpp:latest"
+programming_language =
+  %Handin.ProgrammingLanguages.ProgrammingLanguage{
+    name: "cpp",
+    docker_file_url: "sushantbajracharya/cpp:latest"
+  }
+  |> Repo.insert!()
+
+module =
+  %Handin.Modules.Module{
+    name: "Data Structure and Algorithms",
+    code: "CS100"
+  }
+  |> Repo.insert!()
+
+assignment =
+  %Handin.Assignments.Assignment{
+    name: "Week 0",
+    start_date: now,
+    due_date: NaiveDateTime.add(now, 2, :day),
+    programming_language_id: programming_language.id,
+    module_id: module.id,
+    run_script: "g++ main.cpp -o main"
+  }
+  |> Repo.insert!()
+
+%Handin.Modules.ModuleUser{
+  module_id: module.id,
+  user_id: admin.id
 }
 |> Repo.insert!()
