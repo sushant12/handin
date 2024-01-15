@@ -173,7 +173,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               Save
             </.button>
           </.simple_form>
-          <div class="my-5 pb-5">
+          <div :if={@assignment_test} class="my-5 pb-5">
             <span class="text-black-500">pseudocode: </span>
             if <span class="text-blue-500"><%= @assignment_test.command %></span>
             ==

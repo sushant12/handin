@@ -168,7 +168,7 @@ defmodule Handin.BuildServer do
 
       Assignments.update_build(state.build, %{status: :completed})
     else
-      {:ok, %{"exit_code" => 1} = reason} ->
+      {:ok, %{"exit_code" => _} = reason} ->
         Assignments.update_build(state.build, %{status: :failed})
 
         Assignments.save_run_script_results(%{
