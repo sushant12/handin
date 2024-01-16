@@ -17,6 +17,8 @@ defmodule Handin.Assignments.AssignmentTest do
     field :expected_output_file, :string
     field :expected_output_file_content, :string
     field :ttl, :integer, default: 60
+    field :enable_custom_test, :boolean, default: false
+    field :custom_test, :string
 
     belongs_to :assignment, Assignment
 
@@ -40,7 +42,9 @@ defmodule Handin.Assignments.AssignmentTest do
              :expected_output_text,
              :expected_output_file,
              :expected_output_file_content,
-             :ttl
+             :ttl,
+             :enable_custom_test,
+             :custom_test
            ]
 
   @doc false
@@ -53,6 +57,7 @@ defmodule Handin.Assignments.AssignmentTest do
     |> maybe_parse_and_save_expected_output_file_content
     |> maybe_validate_points_on_pass()
     |> maybe_validate_points_on_fail()
+    |> maybe_validate_custom_test()
   end
 
   def new_changeset(assignment_test, attrs) do
@@ -175,6 +180,14 @@ defmodule Handin.Assignments.AssignmentTest do
         else
           changeset
         end
+    end
+  end
+
+  defp maybe_validate_custom_test(changeset) do
+    if get_field(changeset, :enable_custom_test) do
+      validate_required(changeset, :custom_test)
+    else
+      changeset
     end
   end
 end

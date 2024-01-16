@@ -140,31 +140,47 @@ defmodule HandinWeb.AssignmentLive.Tests do
         <div class="rounded shadow-md px-4 mb-4">
           <.simple_form :if={@assignment_test} for={@form} phx-change="validate" phx-submit="save">
             <.input field={@form[:name]} type="text" label="Name" />
-            <%= if @assignment.enable_total_marks do %>
-              <.input field={@form[:points_on_pass]} type="number" label="Points on Pass" />
-              <.input field={@form[:points_on_fail]} type="number" label="Points on Fail" />
-            <% end %>
-            <.input field={@form[:command]} type="text" label="Command" />
-            <.input field={@form[:ttl]} type="number" label="Timeout(second)" />
-            <.input
-              field={@form[:expected_output_type]}
-              type="select"
-              label="Match Type"
-              options={[:file, :string]}
-            />
+            <.input field={@form[:enable_custom_test]} type="checkbox" label="Enable Custom Test" />
+            <%= if Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_custom_test].value) do %>
+              <.label for="Custom Test">Custom Test</.label>
+              <LiveMonacoEditor.code_editor
+                style="min-height: 450px;"
+                class="mt-3 w-full"
+                value={@assignment_test.custom_test}
+                opts={
+                  Map.merge(
+                    LiveMonacoEditor.default_opts(),
+                    %{"language" => "shell"}
+                  )
+                }
+              />
+            <% else %>
+              <%= if @assignment.enable_total_marks do %>
+                <.input field={@form[:points_on_pass]} type="number" label="Points on Pass" />
+                <.input field={@form[:points_on_fail]} type="number" label="Points on Fail" />
+              <% end %>
+              <.input field={@form[:command]} type="text" label="Command" />
+              <.input field={@form[:ttl]} type="number" label="Timeout(second)" />
+              <.input
+                field={@form[:expected_output_type]}
+                type="select"
+                label="Match Type"
+                options={[:file, :string]}
+              />
 
-            <.input
-              :if={@form[:expected_output_type].value in ["file", :file]}
-              field={@form[:expected_output_file]}
-              type="text"
-              label="File Name"
-            />
-            <.input
-              :if={@form[:expected_output_type].value in [:string, "string"]}
-              field={@form[:expected_output_text]}
-              type="text"
-              label="Expected Text"
-            />
+              <.input
+                :if={@form[:expected_output_type].value in ["file", :file]}
+                field={@form[:expected_output_file]}
+                type="text"
+                label="File Name"
+              />
+              <.input
+                :if={@form[:expected_output_type].value in [:string, "string"]}
+                field={@form[:expected_output_text]}
+                type="text"
+                label="Expected Text"
+              />
+            <% end %>
 
             <.button
               class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
@@ -378,6 +394,21 @@ defmodule HandinWeb.AssignmentLive.Tests do
     {:noreply, assign_form(socket, changeset)}
   end
 
+  def handle_event(
+        "save",
+        %{
+          "assignment_test" => assignment_test_params,
+          "live_monaco_editor" => %{"file" => custom_test}
+        },
+        socket
+      ) do
+    save_assignment_test(
+      socket,
+      :edit,
+      assignment_test_params |> Map.put("custom_test", custom_test)
+    )
+  end
+
   def handle_event("save", %{"assignment_test" => assignment_test_params}, socket) do
     save_assignment_test(socket, :edit, assignment_test_params)
   end
@@ -407,6 +438,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
        Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
      )
      |> assign(:build, GenServer.whereis({:global, "build:assignment_tests:#{assignment_id}"}))}
+  end
+
+  def handle_event("code-editor-lost-focus", _, socket) do
+    {:noreply, socket}
   end
 
   @impl true
