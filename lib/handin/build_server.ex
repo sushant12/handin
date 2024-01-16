@@ -80,13 +80,9 @@ defmodule Handin.BuildServer do
       state.assignment.assignment_tests
       |> Enum.map(&{"#{&1.id}.sh", &1})
       |> Enum.each(fn {file_name, assignment_test} ->
-        case @machine_api.exec(state.machine_id, "sh ./'#{file_name}'") |> IO.inspect() do
+        case @machine_api.exec(state.machine_id, "sh ./'#{file_name}'") do
           {:ok, %{"exit_code" => 0} = response} ->
             case response["stdout"]
-                 |> String.replace("\n", "\\n")
-                 |> String.replace("\t", "\\t")
-                 |> String.replace("\r", "\\r")
-                 |> String.replace("\b", "\\b")
                  |> Jason.decode() do
               {:ok, response} ->
                 test_state = if response["state"] == "pass", do: :pass, else: :fail
@@ -103,7 +99,8 @@ defmodule Handin.BuildServer do
                   %{
                     command: assignment_test.command,
                     assignment_test_id: assignment_test.id,
-                    output: response["output"]
+                    output: response["output"] |> Base.decode64!(),
+                    expected_output: response["expected_output"] |> Base.decode64!()
                   },
                   state
                 )
@@ -272,23 +269,29 @@ defmodule Handin.BuildServer do
     assignment.assignment_tests
     |> Enum.map(fn assignment_test ->
       template =
-        """
-        #!bin/bash
-        output=$(#{assignment_test.command})
-        #{if assignment_test.expected_output_type == :string do
-          "expected_output=#{assignment_test.expected_output_text}"
+        if assignment_test.enable_custom_test do
+          assignment_test.custom_test
         else
-          "expected_output=$(cat #{assignment_test.expected_output_file})"
-        end}
+          """
+          #!bin/bash
+          output=$(#{assignment_test.command})
+          #{if assignment_test.expected_output_type == :string do
+            "expected_output=#{assignment_test.expected_output_text}"
+          else
+            "expected_output=$(cat #{assignment_test.expected_output_file})"
+          end}
 
-        if [ "$output" = "$expected_output" ]; then
-          state="pass"
-        else
-          state="fail"
-        fi
-        JSON_FMT='{"state": "%s", "output":"%s"}'
-        printf "$JSON_FMT" "$state" "$output"
-        """
+          if [ "$output" = "$expected_output" ]; then
+            state="pass"
+          else
+            state="fail"
+          fi
+          output=$(echo "$output" | base64 --wrap=0)
+          expected_output=$(echo "$expected_output" | base64 --wrap=0)
+          JSON_FMT='{"state": "%s", "output":"%s", "expected_output": "%s"}'
+          printf "$JSON_FMT" "$state" "$output" "$expected_output"
+          """
+        end
 
       %{
         "guest_path" => "/#{assignment_test.id}.sh",

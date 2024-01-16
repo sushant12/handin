@@ -348,21 +348,16 @@ defmodule Handin.Assignments do
     test_results =
       build.test_results
       |> Enum.map(fn test_result ->
+        log =
+          Enum.find(build.logs, %{}, &(&1.assignment_test_id == test_result.assignment_test_id))
+
         %{
           type: "test_result",
           state: test_result.state,
           name: test_result.assignment_test.name,
           command: test_result.assignment_test.command,
-          output:
-            build.logs
-            |> Enum.find(%{}, &(&1.assignment_test_id == test_result.assignment_test_id))
-            |> Map.get(:output),
-          expected_output:
-            if test_result.assignment_test.expected_output_type == :string do
-              test_result.assignment_test.expected_output_text
-            else
-              test_result.assignment_test.expected_output_file_content
-            end
+          output: Map.get(log, :output),
+          expected_output: Map.get(log, :expected_output)
         }
       end)
 

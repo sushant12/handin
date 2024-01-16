@@ -128,6 +128,7 @@ defmodule Handin.Modules do
     Module
     |> where([m], m.id == ^id)
     |> join(:inner, [m], a in assoc(m, :assignments), on: a.module_id == ^id)
+    |> order_by([m, a], asc: a.start_date)
     |> select([m, a], a)
     |> maybe_filter_by_released_assignment(user)
     |> Repo.all()

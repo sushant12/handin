@@ -135,6 +135,7 @@ defmodule HandinWeb.AssignmentLive.Environment do
        |> assign(:module, module)
        |> assign(:assignment, assignment)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
+       |> assign(:run_script, assignment.run_script)
        |> assign(
          :programming_languages,
          ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
@@ -171,15 +172,14 @@ defmodule HandinWeb.AssignmentLive.Environment do
   def handle_event(
         "save",
         %{
-          "assignment" => %{"programming_language_id" => programming_language_id},
-          "live_monaco_editor" => %{"file" => run_script}
+          "assignment" => %{"programming_language_id" => programming_language_id}
         },
         socket
       ) do
     {:ok, assignment} =
       Assignments.update_assignment(socket.assigns.assignment, %{
         "programming_language_id" => programming_language_id,
-        "run_script" => run_script
+        "run_script" => socket.assigns.run_script
       })
 
     {:noreply,
@@ -189,8 +189,13 @@ defmodule HandinWeb.AssignmentLive.Environment do
      |> assign_form(Assignments.change_assignment(assignment))}
   end
 
-  def handle_event("code-editor-lost-focus", _, socket) do
-    {:noreply, socket}
+  def handle_event("code-editor-lost-focus", %{"value" => value}, socket) do
+    {:noreply,
+     socket
+     |> assign(:run_script, value)
+     |> assign_form(
+       Assignments.change_assignment(socket.assigns.assignment, %{"run_script" => value})
+     )}
   end
 
   def handle_event("delete-file", %{"support_file_id" => id}, socket) do
