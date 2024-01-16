@@ -2,19 +2,25 @@ defmodule Handin.Accounts.User do
   use Handin.Schema
   import Ecto.Changeset
   alias Handin.Universities
+  alias Handin.Universities.University
   alias Handin.Modules.ModulesUsers
   alias Handin.Modules.Module
   alias Handin.Assignments.{TestResult, RunScriptResult, Build}
   @type t :: %__MODULE__{}
+
+  @derive {
+    Flop.Schema,
+    filterable: [:email], sortable: [:email], default_limit: 15
+  }
 
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
-    field :university, :string, virtual: true
-    field :role, :string, default: "student"
+    field :role, Ecto.Enum, default: :student, values: [:student, :admin, :lecturer]
 
+    belongs_to :university, University
     has_many :test_results, TestResult
     has_many :run_script_results, RunScriptResult
     many_to_many :modules, Module, join_through: ModulesUsers
@@ -47,30 +53,39 @@ defmodule Handin.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :university])
-    |> validate_required([:university])
+    |> cast(attrs, [:email, :password, :university_id])
+    |> validate_required([:university_id])
     |> validate_email(opts)
     |> password_changeset(attrs, opts)
   end
 
-  defp validate_email(%Ecto.Changeset{valid?: false} = changeset, _) do
-    changeset
-    |> validate_required([:email])
+  def edit_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :role, :university_id])
+    |> validate_email(opts)
   end
 
   defp validate_email(changeset, opts) do
-    university =
-      get_field(changeset, :university)
-      |> Universities.get_university()
-
-    university.student_email_regex |> IO.inspect()
-    regex = Regex.compile!(university.student_email_regex)
-
     changeset
     |> validate_required([:email])
-    |> validate_format(:email, regex, message: "please use your university email address")
     |> validate_length(:email, max: 160)
+    |> maybe_validate_email_format()
     |> maybe_validate_unique_email(opts)
+  end
+
+  defp maybe_validate_email_format(changeset) do
+    case get_field(changeset, :university_id) do
+      nil ->
+        changeset
+
+      university_id ->
+        university = Universities.get_university!(university_id)
+
+        changeset
+        |> validate_format(:email, ~r/#{university.student_email_regex}/,
+          message: "please use your university email address"
+        )
+    end
   end
 
   defp validate_password(changeset, opts) do

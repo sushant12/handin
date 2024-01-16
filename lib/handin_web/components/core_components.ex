@@ -270,9 +270,11 @@ defmodule HandinWeb.CoreComponents do
     |> input()
   end
 
-  def input(%{type: "checkbox", value: value} = assigns) do
+  def input(%{type: "checkbox"} = assigns) do
     assigns =
-      assign_new(assigns, :checked, fn -> Phoenix.HTML.Form.normalize_value("checkbox", value) end)
+      assign_new(assigns, :checked, fn ->
+        Phoenix.HTML.Form.normalize_value("checkbox", assigns[:value])
+      end)
 
     ~H"""
     <div phx-feedback-for={@name}>
@@ -328,6 +330,36 @@ defmodule HandinWeb.CoreComponents do
     """
   end
 
+  def input(%{type: "radio"} = assigns) do
+    assigns =
+      assign_new(assigns, :checked, fn ->
+        Phoenix.HTML.Form.normalize_value("radio", assigns[:value])
+      end)
+
+    ~H"""
+    <div phx-feedback-for={@name}>
+      <div>
+        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+          <%= @label %>
+        </label>
+        <input
+          type={@type}
+          name={@name}
+          id={@id}
+          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          checked={@checked}
+          class={[
+            "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600",
+            @class
+          ]}
+          {@rest}
+        />
+        <.error :for={msg <- @errors}><%= msg %></.error>
+      </div>
+    </div>
+    """
+  end
+
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
@@ -342,7 +374,7 @@ defmodule HandinWeb.CoreComponents do
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
           class={[
-            "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+            "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 w-full",
             @class
           ]}
           {@rest}
@@ -481,7 +513,7 @@ defmodule HandinWeb.CoreComponents do
           <td
             :if={@action != []}
             scope="row"
-            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-3"
+            class="font-medium text-gray-900 whitespace-nowrap dark:text-white w-3"
           >
             <div class=" whitespace-nowrap py-4 text-right text-sm font-medium">
               <span
@@ -595,7 +627,7 @@ defmodule HandinWeb.CoreComponents do
 
   def tabs(assigns) do
     ~H"""
-    <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 mb-5">
+    <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 mb-5 mt-5">
       <ul class="flex flex-wrap -mb-px">
         <.tab_item
           :for={item <- @item}

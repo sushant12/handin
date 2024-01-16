@@ -7,6 +7,8 @@ defmodule Handin.Universities.University do
     field :student_email_regex, :string
     field :timezone, :string
 
+    has_many :users, Handin.Accounts.User
+
     timestamps()
   end
 

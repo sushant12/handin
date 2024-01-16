@@ -24,6 +24,12 @@ defmodule HandinWeb.Admin.UniversityLive.FormComponent do
         <div class="grid gap-4 mb-4 sm:grid-cols-1">
           <.input field={@form[:name]} label="Name" type="text" />
           <.input field={@form[:student_email_regex]} label="Student Email Regex" type="text" />
+          <.input
+            field={@form[:timezone]}
+            label="Timezone"
+            type="select"
+            options={Tzdata.zone_lists_grouped()}
+          />
         </div>
         <:actions>
           <.button
@@ -81,8 +87,6 @@ defmodule HandinWeb.Admin.UniversityLive.FormComponent do
   end
 
   defp save_university(socket, :edit, university_params) do
-    IO.inspect(university_params)
-
     case Universities.update_university(socket.assigns.university, university_params) do
       {:ok, university} ->
         notify_parent({:saved, university})

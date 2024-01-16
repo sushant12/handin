@@ -78,6 +78,7 @@ defmodule Handin.Accounts do
   """
   def register_user(attrs) do
     %User{}
+    |> Repo.preload(:university)
     |> User.registration_changeset(attrs)
     |> Repo.insert()
   end
@@ -358,5 +359,41 @@ defmodule Handin.Accounts do
     |> Repo.preload(:modules)
     |> Map.get(:modules)
     |> Enum.any?(&(&1.id == module_id))
+  end
+
+  def list_users() do
+    Repo.all(User)
+  end
+
+  def list_users(params) do
+    case Flop.validate_and_run(User, params, for: User) do
+      {:ok, {users, meta}} ->
+        %{users: users |> Repo.preload(:university), meta: meta}
+
+      {:error, meta} ->
+        %{users: [], meta: meta}
+    end
+  end
+
+  def edit_changeset(user, attrs \\ %{}) do
+    user
+    |> Repo.preload(:university)
+    |> User.edit_changeset(attrs)
+  end
+
+  def update_user(user, attrs) do
+    case user
+         |> edit_changeset(attrs)
+         |> Repo.update() do
+      {:ok, user} ->
+        {:ok, Repo.preload(user, :university, force: true)}
+
+      error ->
+        error
+    end
+  end
+
+  def delete_user(user) do
+    Repo.delete(user)
   end
 end

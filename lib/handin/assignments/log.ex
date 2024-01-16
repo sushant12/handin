@@ -7,13 +7,14 @@ defmodule Handin.Assignments.Log do
   schema "logs" do
     field :output, :string
     field :command, :string
+    field :expected_output, :string
     belongs_to :build, Build
     belongs_to :assignment_test, AssignmentTest
 
     timestamps(type: :utc_datetime_usec)
   end
 
-  @attrs [:output, :build_id, :command, :assignment_test_id]
+  @attrs [:output, :build_id, :command, :assignment_test_id, :expected_output]
   def changeset(attrs) do
     %__MODULE__{}
     |> cast(attrs, @attrs)

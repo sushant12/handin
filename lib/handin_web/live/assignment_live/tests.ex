@@ -1,7 +1,6 @@
 defmodule HandinWeb.AssignmentLive.Tests do
   use HandinWeb, :live_view
 
-  alias Handin.Repo
   alias Handin.Modules
   alias Handin.{Assignments, AssignmentTests}
   alias Handin.Assignments.AssignmentTest
@@ -13,10 +12,6 @@ defmodule HandinWeb.AssignmentLive.Tests do
       <:item text="Home" href={~p"/"} />
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
-      <:item
-        text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
-      />
       <:item
         text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
@@ -42,8 +37,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
       <:item text="Settings" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"} />
     </.tabs>
 
-    <div class="flex h-screen">
-      <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-full p-4">
+    <div class="flex">
+      <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-auto overflow-y-auto p-4">
         <div class="assignment-test-files">
           <ul>
             <li :for={support_file <- @assignment.support_files} class="py-1 flex items-center">
@@ -65,7 +60,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 <%= support_file.file.file_name %>
               </span>
             </li>
-            <li :for={solution_file <- @assignment.solution_files} class="py-1 flex items-center">
+            <li
+              :for={solution_file <- @assignment.solution_files}
+              class="py-1 flex items-center text text-gray-300"
+            >
               <span>
                 <svg
                   class="w-4 h-4 mr-2"
@@ -101,7 +99,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               <li
                 :for={test <- @assignment_tests}
                 class={[
-                  "py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded",
+                  "py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded",
                   test.id == @assignment_test.id && "bg-gray-300"
                 ]}
               >
@@ -138,100 +136,71 @@ defmodule HandinWeb.AssignmentLive.Tests do
           </div>
         </div>
       </div>
-      <div class="flex-1 ml-4">
-        <div class="assignment-test-form bg-white rounded shadow-md px-4 mb-4  w-full">
-          <.simple_form
-            :if={@assignment_test}
-            for={@form}
-            id="test-creation-form"
-            class="mb-4"
-            phx-change="validate"
-          >
-            <div class="grid grid-cols-12 gap-4">
-              <label class="col-span-3 p-4">Name</label>
-              <span class="col-span-9">
-                <.input field={@form[:name]} type="text" phx-blur="update_name" />
-              </span>
+      <div class="ml-8 w-1/2">
+        <div class="rounded shadow-md px-4 mb-4">
+          <.simple_form :if={@assignment_test} for={@form} phx-change="validate" phx-submit="save">
+            <.input field={@form[:name]} type="text" label="Name" />
+            <.input field={@form[:enable_custom_test]} type="checkbox" label="Enable Custom Test" />
+            <%= if Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_custom_test].value) do %>
+              <.label for="Custom Test">Custom Test</.label>
+              <LiveMonacoEditor.code_editor
+                style="min-height: 450px;"
+                class="mt-3 w-full"
+                value={@assignment_test.custom_test}
+                opts={
+                  Map.merge(
+                    LiveMonacoEditor.default_opts(),
+                    %{"language" => "shell"}
+                  )
+                }
+              />
+            <% else %>
               <%= if @assignment.enable_total_marks do %>
-                <label class="col-span-3 p-4">Points on pass</label>
-                <span class="col-span-9">
-                  <.input
-                    field={@form[:points_on_pass]}
-                    type="number"
-                    phx-blur="update_points_on_pass"
-                  />
-                </span>
-                <label class="col-span-3 p-4">Points on fail</label>
-                <span class="col-span-9">
-                  <.input
-                    field={@form[:points_on_fail]}
-                    type="number"
-                    phx-blur="update_points_on_fail"
-                  />
-                </span>
+                <.input field={@form[:points_on_pass]} type="number" label="Points on Pass" />
+                <.input field={@form[:points_on_fail]} type="number" label="Points on Fail" />
               <% end %>
-              <label class="col-span-3 p-4">Run command</label>
-              <span class="col-span-9">
-                <.input field={@form[:command]} type="text" phx-blur="update_command" />
-              </span>
-              <label class="col-span-3 p-4">Timeout (in seconds)</label>
-              <span class="col-span-9">
-                <.input field={@form[:ttl]} type="number" phx-blur="update_ttl" />
-              </span>
-              <label class="col-span-3 p-4">Expected output</label>
-              <div class="col-span-3 items-center me-4">
-                <input
-                  id="text-match-radio"
-                  type="radio"
-                  value="text"
-                  name="assignment_test[expected_output_type]"
-                  class="w-4 h-4  bg-gray-100 border-gray-300  dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  checked={@form[:expected_output_type].value == "text"}
-                  phx-blur="update_expected_output_type"
-                />
-                <label
-                  for="text-match-radio"
-                  class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                >
-                  Text (Strict)
-                </label>
-              </div>
-              <div class="col-span-3 items-center me-4">
-                <input
-                  id="file-match-radio"
-                  type="radio"
-                  value="file"
-                  name="assignment_test[expected_output_type]"
-                  class="w-4 h-4 bg-gray-100 border-gray-300  dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  checked={@form[:expected_output_type].value == "file"}
-                  phx-blur="update_expected_output_type"
-                />
-                <label
-                  for="file-match-radio"
-                  class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                >
-                  File
-                </label>
-              </div>
-              <span :if={@form[:expected_output_type].value == "text"} class="col-span-9 col-start-4">
-                <.input
-                  field={@form[:expected_output_text]}
-                  type="text"
-                  phx-blur="update_expected_output_text"
-                />
-              </span>
-              <span :if={@form[:expected_output_type].value == "file"} class="col-span-9 col-start-4">
-                <.input
-                  field={@form[:expected_output_file]}
-                  type="text"
-                  placeholder="Filename"
-                  phx-blur="update_expected_output_file"
-                />
-              </span>
-            </div>
-            <pre>
-              pseudocode: if <span class="text-blue-500"><%=  @assignment_test.command %></span> == <span class="text-blue-500"><%= if @assignment_test.expected_output_type == "file", do: "cat(#{@assignment_test.expected_output_file})", else: @assignment_test.expected_output_text %> </span> then <span class="text-green-500"> true </span> else <span class="text-red-600">false</span></pre>
+              <.input field={@form[:command]} type="text" label="Command" />
+              <.input field={@form[:ttl]} type="number" label="Timeout(second)" />
+              <.input
+                field={@form[:expected_output_type]}
+                type="select"
+                label="Match Type"
+                options={[:file, :string]}
+              />
+
+              <.input
+                :if={@form[:expected_output_type].value in ["file", :file]}
+                field={@form[:expected_output_file]}
+                type="text"
+                label="File Name"
+              />
+              <.input
+                :if={@form[:expected_output_type].value in [:string, "string"]}
+                field={@form[:expected_output_text]}
+                type="text"
+                label="Expected Text"
+              />
+            <% end %>
+
+            <.button
+              class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              phx-disable-with="Saving..."
+            >
+              Save
+            </.button>
           </.simple_form>
+          <div :if={@assignment_test} class="my-5 pb-5">
+            <span class="text-black-500">pseudocode: </span>
+            if <span class="text-blue-500"><%= @assignment_test.command %></span>
+            ==
+            <span class="text-blue-500">
+              <%= if @assignment_test.expected_output_type == :file,
+                do: "cat(#{@assignment_test.expected_output_file})",
+                else: @assignment_test.expected_output_text %>
+            </span>
+            then <span class="text-green-500"> true </span>
+            else <span class="text-red-600">false</span>
+          </div>
         </div>
         <div class="flex">
           <button
@@ -239,9 +208,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
             class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             phx-click="run_tests"
             phx-value-assignment_id={@assignment.id}
-            disabled={@build && @build.status == "running"}
           >
-            <%= if @build, do: "Running", else: "Run All Tests" %>
+            <%= if @build, do: "Running...", else: "Run All Tests" %>
           </button>
         </div>
 
@@ -353,7 +321,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
        )
        |> assign(
          :build,
-         Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
+         GenServer.whereis({:global, "build:assignment_tests:#{assignment.id}"})
        )
        |> assign_form(
          AssignmentTests.change_assignment_test(
@@ -426,47 +394,23 @@ defmodule HandinWeb.AssignmentLive.Tests do
     {:noreply, assign_form(socket, changeset)}
   end
 
-  def handle_event("update_name", %{"value" => value}, socket) do
-    {:ok, assignment_test} =
-      Handin.Assignments.AssignmentTest.new_changeset(socket.assigns.assignment_test, %{
-        name: value
-      })
-      |> Repo.update()
-
-    assignment = socket.assigns.assignment |> Repo.preload(:assignment_tests, force: true)
-
-    {:noreply,
-     assign(socket, :assignment_test, assignment_test)
-     |> assign(
-       :assignment_tests,
-       assignment.assignment_tests
-     )}
+  def handle_event(
+        "save",
+        %{
+          "assignment_test" => assignment_test_params,
+          "live_monaco_editor" => %{"file" => custom_test}
+        },
+        socket
+      ) do
+    save_assignment_test(
+      socket,
+      :edit,
+      assignment_test_params |> Map.put("custom_test", custom_test)
+    )
   end
 
-  def handle_event("update_expected_output_file", %{"value" => value}, socket) do
-    socket.assigns.assignment_test
-    |> Repo.preload(assignment: [:support_files])
-    |> Handin.Assignments.AssignmentTest.output_file_changeset(%{
-      expected_output_file: value
-    })
-    |> Repo.update()
-    |> case do
-      {:ok, assignment_test} ->
-        {:noreply, assign(socket, :assignment_test, assignment_test)}
-
-      {:error, changeset} ->
-        {:noreply, assign_form(socket, changeset)}
-    end
-  end
-
-  def handle_event("update_" <> key, %{"value" => value}, socket) do
-    {:ok, assignment_test} =
-      Handin.Assignments.AssignmentTest.new_changeset(socket.assigns.assignment_test, %{
-        "#{key}": value
-      })
-      |> Repo.update()
-
-    {:noreply, assign(socket, :assignment_test, assignment_test)}
+  def handle_event("save", %{"assignment_test" => assignment_test_params}, socket) do
+    save_assignment_test(socket, :edit, assignment_test_params)
   end
 
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
@@ -493,26 +437,59 @@ defmodule HandinWeb.AssignmentLive.Tests do
        :logs,
        Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
      )
-     |> assign(
-       :build,
-       Assignments.get_running_build(assignment_id, socket.assigns.current_user.id)
-     )}
+     |> assign(:build, GenServer.whereis({:global, "build:assignment_tests:#{assignment_id}"}))}
+  end
+
+  def handle_event("code-editor-lost-focus", _, socket) do
+    {:noreply, socket}
   end
 
   @impl true
   def handle_info(
-        %Phoenix.Socket.Broadcast{event: "test_result", payload: build_id},
+        %Phoenix.Socket.Broadcast{event: event, payload: build_id},
         socket
       ) do
-    {:noreply,
-     assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
-     |> assign(
-       :build,
-       Assignments.get_running_build(socket.assigns.assignment.id, socket.assigns.current_user.id)
-     )}
+    case event do
+      "test_result" ->
+        {:noreply,
+         assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
+         |> assign(
+           :build,
+           GenServer.whereis({:global, "build:assignment_tests:#{socket.assigns.assignment.id}"})
+         )}
+
+      "build_completed" ->
+        {:noreply,
+         assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
+         |> assign(
+           :build,
+           nil
+         )}
+    end
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
+  end
+
+  defp save_assignment_test(socket, :edit, assignment_test_params) do
+    case Assignments.update_assignment_test(
+           socket.assigns.assignment_test,
+           assignment_test_params
+         ) do
+      {:ok, assignment_test} ->
+        assignment =
+          socket.assigns.assignment |> Handin.Repo.preload(:assignment_tests, force: true)
+
+        {:noreply,
+         socket
+         |> assign_form(Assignments.change_assignment_test(assignment_test))
+         |> assign(:assignment_test, assignment_test)
+         |> assign(:assignment_tests, assignment.assignment_tests)
+         |> put_flash(:info, "Test saved successfully")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign_form(socket, changeset)}
+    end
   end
 end

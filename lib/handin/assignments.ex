@@ -98,6 +98,13 @@ defmodule Handin.Assignments do
     |> Repo.update()
   end
 
+  def update_assignment_test(%AssignmentTest{} = assignment_test, attrs) do
+    assignment_test
+    |> Repo.preload(assignment: [:support_files])
+    |> AssignmentTest.changeset(attrs)
+    |> Repo.update()
+  end
+
   def update_new_assignment(%Assignment{} = assignment, attrs) do
     assignment
     |> Assignment.new_changeset(attrs)
@@ -245,7 +252,7 @@ defmodule Handin.Assignments do
   @spec new_build(
           attrs :: %{
             assignment_id: Ecto.UUID,
-            status: String.t(),
+            status: :running | :failed | :completed,
             user_id: Ecto.UUID
           }
         ) ::
@@ -257,12 +264,26 @@ defmodule Handin.Assignments do
 
   @spec update_build(
           build :: Build.t(),
-          attrs :: %{status: String.t()} | %{machine_id: String.t()}
+          attrs :: %{status: :running | :failed | :completed} | %{machine_id: String.t()}
         ) :: {:ok, Build.t()}
   def update_build(build, attrs) do
     Build.update_changeset(build, attrs)
     |> Repo.update()
   end
+
+  def list_builds(params) do
+    case Flop.validate_and_run(Build, params, for: Build) do
+      {:ok, {builds, meta}} ->
+        %{builds: builds, meta: meta}
+
+      {:error, meta} ->
+        %{builds: [], meta: meta}
+    end
+  end
+
+  def get_build!(id), do: Repo.get!(Build, id) |> Repo.preload([:assignment, :user])
+
+  def delete_build(build), do: Repo.delete!(build)
 
   def get_logs(build_id) do
     Build
@@ -327,21 +348,16 @@ defmodule Handin.Assignments do
     test_results =
       build.test_results
       |> Enum.map(fn test_result ->
+        log =
+          Enum.find(build.logs, %{}, &(&1.assignment_test_id == test_result.assignment_test_id))
+
         %{
           type: "test_result",
           state: test_result.state,
           name: test_result.assignment_test.name,
           command: test_result.assignment_test.command,
-          output:
-            build.logs
-            |> Enum.find(%{}, &(&1.assignment_test_id == test_result.assignment_test_id))
-            |> Map.get(:output),
-          expected_output:
-            if test_result.assignment_test.expected_output_type == "text" do
-              test_result.assignment_test.expected_output_text
-            else
-              test_result.assignment_test.expected_output_file_content
-            end
+          output: Map.get(log, :output),
+          expected_output: Map.get(log, :expected_output)
         }
       end)
 
@@ -392,7 +408,7 @@ defmodule Handin.Assignments do
     |> where([as], as.assignment_id == ^assignment_id)
     |> where([as], as.user_id == ^user_id)
     |> order_by([as], desc: as.inserted_at)
-    |> preload([:assignment_submission_files, :assignment, :user])
+    |> preload([:assignment_submission_files, :assignment, user: [:university]])
     |> limit(1)
     |> Repo.one()
   end
@@ -428,14 +444,18 @@ defmodule Handin.Assignments do
     |> Enum.map(&Repo.preload(&1, [:assignment]))
   end
 
-  def submit_assignment(assignment_submission_id) do
+  def submit_assignment(assignment_submission_id, max_attempts_enabled) do
     now = DateTime.utc_now()
 
     AssignmentSubmission
     |> where([as], as.id == ^assignment_submission_id)
-    |> update([as], inc: [retries: 1], set: [submitted_at: ^now])
+    |> maybe_update_retries_count(max_attempts_enabled)
+    |> update([as], set: [submitted_at: ^now])
     |> Repo.update_all([])
   end
+
+  defp maybe_update_retries_count(query, false), do: query
+  defp maybe_update_retries_count(query, true), do: query |> update([as], inc: [retries: 1])
 
   def create_submission(assignment_id, user_id) do
     %AssignmentSubmission{}
@@ -444,11 +464,13 @@ defmodule Handin.Assignments do
       user_id: user_id
     })
     |> Repo.insert!()
-    |> Repo.preload([:assignment_submission_files, :assignment])
+    |> Repo.preload([:assignment_submission_files, :assignment, user: [:university]])
   end
 
   def evaluate_marks(submission_id, build_id) do
-    submission = Repo.get(AssignmentSubmission, submission_id) |> Repo.preload(:assignment)
+    submission =
+      Repo.get(AssignmentSubmission, submission_id)
+      |> Repo.preload(:assignment, user: [:university])
 
     build =
       Repo.get(Build, build_id)
@@ -488,13 +510,14 @@ defmodule Handin.Assignments do
   defp calculate_penalty_marks(assignment, submission, marks) do
     if assignment.enable_penalty_per_day &&
          Timex.after?(
-           DateTime.shift_zone!(submission.submitted_at, "Europe/Dublin"),
+           DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone),
            assignment.due_date
          ) do
       days_after_due_date =
         Interval.new(
           from: assignment.due_date,
-          until: DateTime.shift_zone!(submission.submitted_at, "Europe/Dublin")
+          until:
+            DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone)
         )
         |> Interval.duration(:days)
 
@@ -507,7 +530,7 @@ defmodule Handin.Assignments do
 
   def is_submission_allowed?(assignment_submission) do
     attempts_valid?(assignment_submission) &&
-      submission_date_valid?(assignment_submission.assignment)
+      submission_date_valid?(assignment_submission)
   end
 
   def get_submission_errors(assignment_submission) do
@@ -519,18 +542,19 @@ defmodule Handin.Assignments do
         else: ["Number of attempts exceeded" | errors]
 
     errors =
-      if submission_date_valid?(assignment_submission.assignment),
+      if submission_date_valid?(assignment_submission),
         do: errors,
         else: ["Cutoff date exceeded" | errors]
 
     errors
   end
 
-  defp submission_date_valid?(assignment) do
-    if assignment.enable_cutoff_date && assignment.cutoff_date do
+  defp submission_date_valid?(assignment_submission) do
+    if assignment_submission.assignment.enable_cutoff_date &&
+         assignment_submission.assignment.cutoff_date do
       Timex.compare(
-        DateTime.shift_zone!(DateTime.utc_now(), "Europe/Dublin"),
-        assignment.cutoff_date
+        DateTime.shift_zone!(DateTime.utc_now(), assignment_submission.user.university.timezone),
+        assignment_submission.assignment.cutoff_date
       ) < 0
     else
       true

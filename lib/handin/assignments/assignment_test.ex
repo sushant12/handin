@@ -12,11 +12,13 @@ defmodule Handin.Assignments.AssignmentTest do
     field :points_on_pass, :float, default: 0.0
     field :points_on_fail, :float, default: 0.0
     field :command, :string
-    field :expected_output_type, :string, default: "text"
+    field :expected_output_type, Ecto.Enum, values: [:string, :file], default: :string
     field :expected_output_text, :string
     field :expected_output_file, :string
     field :expected_output_file_content, :string
     field :ttl, :integer, default: 60
+    field :enable_custom_test, :boolean, default: false
+    field :custom_test, :string
 
     belongs_to :assignment, Assignment
 
@@ -29,18 +31,20 @@ defmodule Handin.Assignments.AssignmentTest do
   @required_attrs [
     :name,
     :assignment_id,
-    :points_on_pass,
-    :points_on_fail,
     :command,
     :expected_output_type
   ]
 
   @attrs @required_attrs ++
            [
+             :points_on_pass,
+             :points_on_fail,
              :expected_output_text,
              :expected_output_file,
              :expected_output_file_content,
-             :ttl
+             :ttl,
+             :enable_custom_test,
+             :custom_test
            ]
 
   @doc false
@@ -48,10 +52,12 @@ defmodule Handin.Assignments.AssignmentTest do
     assignment_test
     |> cast(attrs, @attrs)
     |> validate_required(@required_attrs)
-    |> validate_number(:ttl, less_than_or_equal_to: 60, greater_than_or_equal_to: 0)
     |> maybe_validate_expected_output_type()
+    |> maybe_validate_file_name(attrs)
+    |> maybe_parse_and_save_expected_output_file_content
     |> maybe_validate_points_on_pass()
     |> maybe_validate_points_on_fail()
+    |> maybe_validate_custom_test()
   end
 
   def new_changeset(assignment_test, attrs) do
@@ -95,9 +101,9 @@ defmodule Handin.Assignments.AssignmentTest do
   end
 
   defp maybe_validate_expected_output_type(changeset) do
-    case get_change(changeset, :expected_output_type) do
-      "file" -> changeset |> validate_required([:expected_output_file])
-      "text" -> changeset |> validate_required([:expected_output_text])
+    case get_field(changeset, :expected_output_type) do
+      :file -> changeset |> validate_required([:expected_output_file])
+      :string -> changeset |> validate_required([:expected_output_text])
       _ -> changeset
     end
   end
@@ -174,6 +180,14 @@ defmodule Handin.Assignments.AssignmentTest do
         else
           changeset
         end
+    end
+  end
+
+  defp maybe_validate_custom_test(changeset) do
+    if get_field(changeset, :enable_custom_test) do
+      validate_required(changeset, :custom_test)
+    else
+      changeset
     end
   end
 end

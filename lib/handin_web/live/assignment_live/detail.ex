@@ -10,16 +10,12 @@ defmodule HandinWeb.AssignmentLive.Detail do
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
-        text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
-      />
-      <:item
         text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
       />
     </.breadcrumbs>
-    <%= if @current_user.role != "student" do %>
+    <%= if @current_user.role != :student do %>
       <.tabs>
         <:item
           text="Details"
@@ -41,7 +37,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
         />
       </.tabs>
     <% end %>
-    <%= if @current_user.role == "student" do %>
+    <%= if @current_user.role == :student do %>
       <.tabs>
         <:item
           text="Details"
@@ -60,24 +56,29 @@ defmodule HandinWeb.AssignmentLive.Detail do
     </.header>
 
     <.list>
-      <:item title="Total marks">
-        <%= if @assignment.enable_total_marks, do: @assignment.total_marks %>
-      </:item>
-      <:item title="Max attempts">
-        <%= if @assignment.enable_max_attempts, do: @assignment.max_attempts %>
-      </:item>
-      <:item title="Penalty per day">
-        <%= if @assignment.enable_penalty_per_day, do: @assignment.penalty_per_day %>%
-      </:item>
       <:item title="Start Date">
-        <%= Handin.DisplayHelper.format_date(@assignment.start_date, "Europe/Dublin") %>
+        <%= Handin.DisplayHelper.format_date(
+          @assignment.start_date,
+          @current_user.university.timezone
+        ) %>
       </:item>
       <:item title="Due Date">
-        <%= Handin.DisplayHelper.format_date(@assignment.due_date, "Europe/Dublin") %>
+        <%= Handin.DisplayHelper.format_date(@assignment.due_date, @current_user.university.timezone) %>
       </:item>
-      <:item title="Cut off Date">
-        <%= if @assignment.enable_cutoff_date && @assignment.cutoff_date,
-          do: Handin.DisplayHelper.format_date(@assignment.cutoff_date, "Europe/Dublin") %>
+      <:item :if={@assignment.enable_cutoff_date} title="Cut off Date">
+        <%= Handin.DisplayHelper.format_date(
+          @assignment.cutoff_date,
+          @current_user.university.timezone
+        ) %>
+      </:item>
+      <:item :if={@assignment.enable_total_marks} title="Total marks">
+        <%= @assignment.total_marks %>
+      </:item>
+      <:item :if={@assignment.enable_max_attempts} title="Max attempts">
+        <%= @assignment.max_attempts %>
+      </:item>
+      <:item :if={@assignment.enable_penalty_per_day} title="Penalty per day">
+        <%= @assignment.penalty_per_day %>%
       </:item>
     </.list>
     """

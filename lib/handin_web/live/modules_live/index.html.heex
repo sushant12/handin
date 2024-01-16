@@ -1,41 +1,32 @@
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-  <div class="flex items-center justify-between pb-4">
-    <div></div>
-    <div>
-      <.link
-        :if={@current_user.role != "student"}
-        patch={~p"/modules/new"}
-        class="inline-flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-      >
-        Add Module
-      </.link>
-    </div>
-  </div>
-  <.table id="modules" rows={@streams.modules}>
-    <:col :let={{_, module}} label="Module"><%= "#{module.name} (#{module.code})" %></:col>
-    <:col :let={{_, module}} label="Students"><%= Modules.get_students_count(module.id) %></:col>
-    <:col :let={{_, module}} label="Assignments">
-      <%= Modules.get_assignments_count(module.id, @current_user.role) %>
-    </:col>
-    <:action :let={{_, module}}>
-      <.link
-        navigate={~p"/modules/#{module.id}/assignments"}
-        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-      >
-        View
-      </.link>
-    </:action>
-    <:action :let={{_, module}}>
-      <.link
-        :if={@current_user.role != "student"}
-        patch={~p"/modules/#{module.id}/edit"}
-        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-      >
-        Edit
-      </.link>
-    </:action>
-  </.table>
-</div>
+<.link
+  :if={@current_user.role != :student}
+  patch={~p"/modules/new"}
+  class="float-right inline-flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+>
+  Add Module
+</.link>
+<.table id="modules" rows={@streams.modules}>
+  <:col :let={{_, module}} label="Module"><%= "#{module.name} (#{module.code})" %></:col>
+  <:col :let={{_, module}} label="Students"><%= Modules.get_students_count(module.id) %></:col>
+  <:col :let={{_, module}} label="Assignments">
+    <%= Modules.get_assignments_count(module.id, @current_user) %>
+  </:col>
+  <:action :let={{_, module}}>
+    <.link
+      navigate={~p"/modules/#{module.id}/assignments"}
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    >
+      View
+    </.link>
+    <.link
+      :if={@current_user.role != :student}
+      patch={~p"/modules/#{module.id}/edit"}
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    >
+      Edit
+    </.link>
+  </:action>
+</.table>
 <.modal
   :if={@live_action in [:new, :edit]}
   id="module-modal"

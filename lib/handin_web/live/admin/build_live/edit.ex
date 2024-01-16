@@ -1,26 +1,42 @@
-defmodule HandinWeb.AssignmentLive.FormComponent do
+defmodule HandinWeb.Admin.BuildLive.Edit do
   use HandinWeb, :live_component
-
-  alias Handin.Assignments
+  alias Handin.{Assignments, Accounts}
+  alias Handin.Assignments.Build
 
   @impl true
   def render(assigns) do
     ~H"""
     <div>
       <.header>
-        <%= @title %>
+        Edit build
       </.header>
 
       <.simple_form
         for={@form}
-        id="assignment-form"
+        id="build-edit-form"
         phx-target={@myself}
         phx-change="validate"
         phx-submit="save"
       >
-        <.input field={@form[:name]} type="text" label="Name" />
-        <.input field={@form[:start_date]} type="datetime-local" label="Start date" />
-        <.input field={@form[:due_date]} type="datetime-local" label="Due date" />
+        <.input field={@form[:machine_id]} type="text" label="Machine ID" />
+        <.input
+          field={@form[:status]}
+          type="select"
+          label="Role"
+          options={[:running, :failed, :completed]}
+        />
+        <.input
+          field={@form[:assignment_id]}
+          type="select"
+          label="Assignment"
+          options={Assignments.list_assignments() |> Enum.map(&{&1.name, &1.id})}
+        />
+        <.input
+          field={@form[:user_id]}
+          type="select"
+          label="User"
+          options={Accounts.list_users() |> Enum.map(&{&1.email, &1.id})}
+        />
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
@@ -41,8 +57,8 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
   end
 
   @impl true
-  def update(%{assignment: assignment} = assigns, socket) do
-    changeset = Assignments.change_assignment(assignment)
+  def update(%{build: build} = assigns, socket) do
+    changeset = Build.update_changeset(build)
 
     {:ok,
      socket
@@ -51,49 +67,31 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"assignment" => assignment_params}, socket) do
+  def handle_event("validate", %{"build" => build_params}, socket) do
     changeset =
-      socket.assigns.assignment
-      |> Assignments.change_assignment(
-        Map.put(assignment_params, "timezone", socket.assigns.current_user.university.timezone)
-      )
+      socket.assigns.build
+      |> Build.update_changeset(build_params)
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
   end
 
-  def handle_event("save", %{"assignment" => assignment_params}, socket) do
-    save_assignment(
+  def handle_event("save", %{"build" => build_params}, socket) do
+    save_build(
       socket,
       socket.assigns.action,
-      Map.put(assignment_params, "module_id", socket.assigns.module_id)
-      |> Map.put("timezone", socket.assigns.current_user.university.timezone)
+      build_params
     )
   end
 
-  defp save_assignment(socket, :edit, assignment_params) do
-    case Assignments.update_assignment(socket.assigns.assignment, assignment_params) do
-      {:ok, assignment} ->
-        notify_parent({:saved, assignment})
+  defp save_build(socket, :edit, build_params) do
+    case Assignments.update_build(socket.assigns.build, build_params) do
+      {:ok, build} ->
+        notify_parent({:saved, build})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Assignment updated successfully")
-         |> push_patch(to: socket.assigns.patch)}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
-    end
-  end
-
-  defp save_assignment(socket, :new, assignment_params) do
-    case Assignments.create_assignment(assignment_params) do
-      {:ok, assignment} ->
-        notify_parent({:saved, assignment})
-
-        {:noreply,
-         socket
-         |> put_flash(:info, "Assignment created successfully")
+         |> put_flash(:info, "Build updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
