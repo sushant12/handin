@@ -69,7 +69,7 @@ assignment =
   }
   |> Repo.insert!()
 
-%Handin.Modules.ModuleUser{
+%Handin.Modules.ModulesUsers{
   module_id: module.id,
   user_id: admin.id
 }

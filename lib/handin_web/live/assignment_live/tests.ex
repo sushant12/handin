@@ -137,7 +137,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
         </div>
       </div>
       <div class="ml-8 w-1/2">
-        <div class="rounded shadow-md px-4 mb-4">
+        <div class="rounded shadow-md px-4 mb-5 pb-5">
           <.simple_form :if={@assignment_test} for={@form} phx-change="validate" phx-submit="save">
             <.input field={@form[:name]} type="text" label="Name" />
             <.input field={@form[:enable_custom_test]} type="checkbox" label="Enable Custom Test" />
@@ -189,7 +189,13 @@ defmodule HandinWeb.AssignmentLive.Tests do
               Save
             </.button>
           </.simple_form>
-          <div :if={@assignment_test} class="my-5 pb-5">
+          <div
+            :if={
+              @assignment_test &&
+                !Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_custom_test].value)
+            }
+            class="mt-5"
+          >
             <span class="text-black-500">pseudocode: </span>
             if <span class="text-blue-500"><%= @assignment_test.command %></span>
             ==
@@ -323,6 +329,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
          :build,
          GenServer.whereis({:global, "build:assignment_tests:#{assignment.id}"})
        )
+       |> assign(:custom_test, assignment_test.custom_test)
        |> assign_form(
          AssignmentTests.change_assignment_test(
            assignment_test || %AssignmentTest{assignment_id: assignment.id}
@@ -359,6 +366,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
 
     {:noreply,
      assign(socket, :assignment_test, assignment_test)
+     |> assign(:custom_test, assignment_test.custom_test)
      |> assign_form(AssignmentTests.change_assignment_test(assignment_test))}
   end
 
@@ -394,23 +402,12 @@ defmodule HandinWeb.AssignmentLive.Tests do
     {:noreply, assign_form(socket, changeset)}
   end
 
-  def handle_event(
-        "save",
-        %{
-          "assignment_test" => assignment_test_params,
-          "live_monaco_editor" => %{"file" => custom_test}
-        },
-        socket
-      ) do
+  def handle_event("save", %{"assignment_test" => assignment_test_params}, socket) do
     save_assignment_test(
       socket,
       :edit,
-      assignment_test_params |> Map.put("custom_test", custom_test)
+      assignment_test_params |> Map.put("custom_test", socket.assigns.custom_test)
     )
-  end
-
-  def handle_event("save", %{"assignment_test" => assignment_test_params}, socket) do
-    save_assignment_test(socket, :edit, assignment_test_params)
   end
 
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
@@ -440,8 +437,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
      |> assign(:build, GenServer.whereis({:global, "build:assignment_tests:#{assignment_id}"}))}
   end
 
-  def handle_event("code-editor-lost-focus", _, socket) do
-    {:noreply, socket}
+  def handle_event("code-editor-lost-focus", %{"value" => custom_test}, socket) do
+    {:noreply,
+     socket
+     |> assign(:custom_test, custom_test)}
   end
 
   @impl true
