@@ -40,6 +40,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
         <:col :let={file} label="name"><%= file.file.file_name %></:col>
         <:action :let={file}>
           <.link
+            :if={Assignments.is_submission_allowed?(@assignment_submission)}
             class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
             phx-click={JS.push("delete-submission-file", value: %{id: file.id})}
             data-confirm="Are you sure?"
@@ -322,13 +323,13 @@ defmodule HandinWeb.AssignmentLive.Submit do
          )}
 
       "build_completed" ->
-        submission =
-          Assignments.get_submission(socket.assigns.assignment.id, socket.assigns.current_user.id)
-
         Assignments.submit_assignment(
-          submission.id,
+          socket.assigns.assignment_submission.id,
           socket.assigns.assignment.enable_max_attempts
         )
+
+        submission =
+          Assignments.get_submission(socket.assigns.assignment.id, socket.assigns.current_user.id)
 
         Assignments.evaluate_marks(submission.id, build_id)
 
