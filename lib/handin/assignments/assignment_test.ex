@@ -149,6 +149,11 @@ defmodule Handin.Assignments.AssignmentTest do
           |> Handin.Repo.all()
           |> Enum.reduce(0, fn assignment_test, acc -> assignment_test.points_on_pass + acc end)
 
+        total_marks =
+          if assignment.enable_total_marks && assignment.enable_attempt_marks,
+            do: total_marks + assignment.attempt_marks,
+            else: total_marks
+
         if total_marks + points_on_pass > assignment.total_marks do
           add_error(
             changeset,
