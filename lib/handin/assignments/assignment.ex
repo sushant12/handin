@@ -153,7 +153,20 @@ defmodule Handin.Assignments.Assignment do
 
   defp maybe_validate_attempt_marks(changeset) do
     if get_field(changeset, :enable_attempt_marks) do
-      validate_required(changeset, :attempt_marks)
+      changeset = validate_required(changeset, :attempt_marks)
+
+      case get_field(changeset, :attempt_marks) do
+        nil ->
+          changeset
+
+        attempt_marks ->
+          if attempt_marks > get_field(changeset, :total_marks) do
+            changeset
+            |> add_error(:attempt_marks, "cannot exceed total marks")
+          else
+            changeset
+          end
+      end
     else
       changeset
     end

@@ -51,14 +51,6 @@ defmodule HandinWeb.AssignmentLive.Settings do
         />
       </div>
 
-      <.input type="checkbox" field={@form[:enable_attempt_marks]} label="Enable Attempt Marks" />
-      <div class="w-64">
-        <.input
-          :if={Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_attempt_marks].value)}
-          field={@form[:attempt_marks]}
-          type="number"
-        />
-      </div>
       <.input
         :if={Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_cutoff_date].value)}
         type="checkbox"
@@ -75,6 +67,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
           type="number"
         />
       </div>
+
       <.input type="checkbox" field={@form[:enable_max_attempts]} label="Enable Max Attempts" />
       <div class="w-64">
         <.input
@@ -83,8 +76,8 @@ defmodule HandinWeb.AssignmentLive.Settings do
           type="number"
         />
       </div>
-      <.input type="checkbox" field={@form[:enable_total_marks]} label="Enable Total Marks" />
 
+      <.input type="checkbox" field={@form[:enable_total_marks]} label="Enable Total Marks" />
       <div class="w-64">
         <.input
           :if={Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_total_marks].value)}
@@ -92,6 +85,24 @@ defmodule HandinWeb.AssignmentLive.Settings do
           type="number"
         />
       </div>
+
+      <.input
+        :if={Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_total_marks].value)}
+        type="checkbox"
+        field={@form[:enable_attempt_marks]}
+        label="Enable Attempt Marks"
+      />
+      <div class="w-64">
+        <.input
+          :if={
+            Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_total_marks].value) &&
+              Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_attempt_marks].value)
+          }
+          field={@form[:attempt_marks]}
+          type="number"
+        />
+      </div>
+
       <.input type="checkbox" field={@form[:enable_test_output]} label="Show Test Output to Students" />
       <.button
         class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"

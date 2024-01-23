@@ -329,7 +329,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
          :build,
          GenServer.whereis({:global, "build:assignment_tests:#{assignment.id}"})
        )
-       |> assign(:custom_test, assignment_test.custom_test)
+       |> assign(:custom_test, assignment_test[:custom_test])
        |> assign_form(
          AssignmentTests.change_assignment_test(
            assignment_test || %AssignmentTest{assignment_id: assignment.id}
