@@ -141,6 +141,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
           <.simple_form :if={@assignment_test} for={@form} phx-change="validate" phx-submit="save">
             <.input field={@form[:name]} type="text" label="Name" />
             <.input field={@form[:enable_custom_test]} type="checkbox" label="Enable Custom Test" />
+            <%= if @assignment.enable_total_marks do %>
+              <.input field={@form[:points_on_pass]} type="number" label="Points on Pass" />
+              <.input field={@form[:points_on_fail]} type="number" label="Points on Fail" />
+            <% end %>
             <%= if Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_custom_test].value) do %>
               <.label for="Custom Test">Custom Test</.label>
               <LiveMonacoEditor.code_editor
@@ -155,10 +159,6 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 }
               />
             <% else %>
-              <%= if @assignment.enable_total_marks do %>
-                <.input field={@form[:points_on_pass]} type="number" label="Points on Pass" />
-                <.input field={@form[:points_on_fail]} type="number" label="Points on Fail" />
-              <% end %>
               <.input field={@form[:command]} type="text" label="Command" />
               <.input field={@form[:ttl]} type="number" label="Timeout(second)" />
               <.input
@@ -329,7 +329,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
          :build,
          GenServer.whereis({:global, "build:assignment_tests:#{assignment.id}"})
        )
-       |> assign(:custom_test, assignment_test[:custom_test])
+       |> assign(:custom_test, assignment_test && assignment_test.custom_test)
        |> assign_form(
          AssignmentTests.change_assignment_test(
            assignment_test || %AssignmentTest{assignment_id: assignment.id}

@@ -43,7 +43,11 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
         </ul>
       </div>
       <div class="w-1/2">
-        <form phx-change="change_student_email">
+        <form
+          phx-change="change_student_email"
+          id="student_email_selector"
+          phx-hook="ChangeSubmissionEmail"
+        >
           <.input
             name="student_id"
             type="select"

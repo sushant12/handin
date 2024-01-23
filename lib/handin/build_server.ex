@@ -80,7 +80,7 @@ defmodule Handin.BuildServer do
       state.assignment.assignment_tests
       |> Enum.map(&{"#{&1.id}.sh", &1})
       |> Enum.each(fn {file_name, assignment_test} ->
-        case @machine_api.exec(state.machine_id, "sh ./'#{file_name}'") do
+        case @machine_api.exec(state.machine_id, "sh ./'#{file_name}'") |> IO.inspect() do
           {:ok, %{"exit_code" => 0} = response} ->
             case response["stdout"]
                  |> Jason.decode() do
@@ -273,7 +273,7 @@ defmodule Handin.BuildServer do
           assignment_test.custom_test
         else
           """
-          #!bin/bash
+          #!/bin/bash
           output=$(#{assignment_test.command})
           #{if assignment_test.expected_output_type == :string do
             "expected_output=#{assignment_test.expected_output_text}"
