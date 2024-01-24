@@ -61,6 +61,7 @@ defmodule Handin.MixProject do
       {:gen_smtp, "~> 1.0"},
       {:live_monaco_editor, "~> 0.1"},
       {:timex, "~> 3.0"},
+      {:sentry, "~> 10.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
