@@ -77,6 +77,14 @@ if config_env() == :prod do
     base_url: "https://api.machines.dev/v1/apps/",
     fly_auth_token: System.get_env("FLY_AUTH_TOKEN")
 
+  config :swoosh,
+    api_client: Swoosh.ApiClient.Finch,
+    finch_name: Handin.Finch,
+    adapter: Swoosh.Adapters.AmazonSES,
+    region: System.get_env("AWS_REGION"),
+    access_key: System.get_env("AWS_ACCESS_KEY_ID"),
+    secret: System.get_env("AWS_SECRET_ACCESS_KEY")
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

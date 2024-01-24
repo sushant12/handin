@@ -18,8 +18,8 @@ university =
 
 admin =
   %Handin.Accounts.User{
-    email: "admin@admin.com",
-    hashed_password: Bcrypt.hash_pwd_salt("admin"),
+    email: "admin@handin.org",
+    hashed_password: Bcrypt.hash_pwd_salt("Hetauda_04"),
     confirmed_at: now,
     role: :admin,
     university_id: university.id
@@ -27,7 +27,7 @@ admin =
   |> Repo.insert!()
 
 %Handin.Accounts.User{
-  email: "student3@studentmail.ul.ie",
+  email: "22207775@studentmail.ul.ie",
   hashed_password: Bcrypt.hash_pwd_salt("student"),
   confirmed_at: now,
   role: :student,
