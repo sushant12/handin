@@ -77,7 +77,7 @@ if config_env() == :prod do
     base_url: "https://api.machines.dev/v1/apps/",
     fly_auth_token: System.get_env("FLY_AUTH_TOKEN")
 
-  config :swoosh,
+  config :handin, Handin.Mailer,
     api_client: Swoosh.ApiClient.Finch,
     finch_name: Handin.Finch,
     adapter: Swoosh.Adapters.AmazonSES,
