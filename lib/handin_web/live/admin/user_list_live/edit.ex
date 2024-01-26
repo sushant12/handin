@@ -30,6 +30,7 @@ defmodule HandinWeb.Admin.UserListLive.Edit do
           label="University"
           options={Universities.list_universities() |> Enum.map(&{&1.name, &1.id})}
         />
+        <.input field={@form[:confirmed_at]} type="datetime-local" label="Confirmed At" />
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
