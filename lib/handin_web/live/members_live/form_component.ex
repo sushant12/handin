@@ -139,15 +139,24 @@ defmodule HandinWeb.MembersLive.FormComponent do
          |> push_patch(to: socket.assigns.patch)}
 
       nil ->
-        Modules.add_modules_invitations(%{
-          email: email,
-          module_id: socket.assigns.module_id
-        })
+        case Modules.add_modules_invitations(%{
+               email: email,
+               module_id: socket.assigns.module_id
+             }) do
+          {:ok, invitation} ->
+            notify_parent({:invited, invitation})
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "Member added successfully")
-         |> push_patch(to: socket.assigns.patch)}
+            {:noreply,
+             socket
+             |> put_flash(:info, "Member added successfully")
+             |> push_patch(to: socket.assigns.patch)}
+
+          _ ->
+            {:noreply,
+             socket
+             |> put_flash(:error, "Member already added")
+             |> push_patch(to: socket.assigns.patch)}
+        end
     end
   end
 
