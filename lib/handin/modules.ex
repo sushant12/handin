@@ -115,7 +115,27 @@ defmodule Handin.Modules do
         user_id: user.id,
         module_id: module_invitation.module_id
       })
+
+      Repo.delete(module_invitation)
     end)
+  end
+
+  def list_modules_invitations_for_module(id) do
+    ModulesInvitations
+    |> where([mi], mi.module_id == ^id)
+    |> Repo.all()
+  end
+
+  def get_pending_students(module_id) do
+    list_modules_invitations_for_module(module_id)
+    |> Enum.map(&%User{id: &1.id, email: &1.email})
+  end
+
+  def delete_modules_invitations(id) do
+    ModulesInvitations
+    |> where([mi], mi.id == ^id)
+    |> Repo.one()
+    |> Repo.delete()
   end
 
   def assignment_exists?(module_id, assignment_id) do
