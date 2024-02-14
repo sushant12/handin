@@ -28,6 +28,16 @@ defmodule Handin.AccountsFixtures do
     user
   end
 
+  def lecturer_fixture() do
+    %Handin.Accounts.User{
+      email: unique_user_email(),
+      hashed_password: Bcrypt.hash_pwd_salt(valid_user_password()),
+      role: "lecturer",
+      confirmed_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    }
+    |> Handin.Repo.insert!()
+  end
+
   def verify_user(user) do
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 
