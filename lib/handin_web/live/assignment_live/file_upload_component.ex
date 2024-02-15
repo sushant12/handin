@@ -402,11 +402,10 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
      |> assign(assigns)
      |> assign_form(changeset)
      |> assign(:uploaded_files, [])
-     |> allow_upload(:support_file, accept: :any, max_entries: 5, max_file_size: 1_500_000)
-     |> allow_upload(:solution_file, accept: :any, max_entries: 5, max_file_size: 1_500_000)
+     |> allow_upload(:support_file, accept: :any, max_entries: 5)
+     |> allow_upload(:solution_file, accept: :any, max_entries: 5)
      |> allow_upload(:assignment_submission,
        accept: :any,
-       max_entries: 5,
        max_file_size: 1_500_000
      )}
   end
