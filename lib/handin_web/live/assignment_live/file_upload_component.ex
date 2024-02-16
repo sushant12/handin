@@ -230,14 +230,15 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
   @impl true
   def update(%{assignment: assignment} = assigns, socket) do
     changeset = Assignments.change_assignment(assignment)
+    two_hundred_mb = 209_715_200_000
 
     {:ok,
      socket
      |> assign(assigns)
      |> assign_form(changeset)
      |> assign(:uploaded_files, [])
-     |> allow_upload(:support_file, accept: :any, max_entries: 5)
-     |> allow_upload(:solution_file, accept: :any, max_entries: 5)
+     |> allow_upload(:support_file, accept: :any, max_entries: 20, max_file_size: two_hundred_mb)
+     |> allow_upload(:solution_file, accept: :any, max_entries: 20, max_file_size: two_hundred_mb)
      |> allow_upload(:assignment_submission,
        accept: :any,
        max_file_size: 1_500_000
