@@ -30,7 +30,8 @@ defmodule HandinWeb.AssignmentLive.Grade do
 
   @impl true
   def mount(%{"id" => id} = _params, _session, socket) do
-    if Accounts.enrolled_module?(socket.assigns.current_user, id) do
+    if Accounts.enrolled_module?(socket.assigns.current_user, id) ||
+         socket.assigns.current_user.role == :admin do
       module = Modules.get_module!(id)
 
       assignment_submissions =
