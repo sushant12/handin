@@ -105,10 +105,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
         save_modules_invitations(socket, socket.assigns.action, %{"email" => row})
       end)
 
-      {:noreply,
-       socket
-       |> put_flash(:info, "Member added successfully")
-       |> push_patch(to: socket.assigns.patch)}
+    {:noreply, socket}
     else
       save_modules_invitations(
         socket,
@@ -119,7 +116,8 @@ defmodule HandinWeb.MembersLive.FormComponent do
   end
 
   defp save_modules_invitations(socket, :new, %{"email" => email}) do
-    with %User{} = user <- Accounts.get_user_by_email(email),
+    with %Ecto.Changeset{valid?: true} <- User.edit_changeset(%User{}, %{"email" => email, "university_id" => socket.assigns.current_user.university_id}),
+    %User{} = user <- Accounts.get_user_by_email(email),
          {:ok, %ModulesUsers{}} <-
            Modules.add_member(%{
              user_id: user.id,
@@ -137,6 +135,9 @@ defmodule HandinWeb.MembersLive.FormComponent do
          assign_form(socket, changeset)
          |> put_flash(:error, "An error occured")
          |> push_patch(to: socket.assigns.patch)}
+
+      %Ecto.Changeset{valid?: false} = _changeset ->
+        {:noreply, socket |> put_flash(:error, "An error occured")}
 
       nil ->
         case Modules.add_modules_invitations(%{
