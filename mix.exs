@@ -69,7 +69,8 @@ defmodule Handin.MixProject do
       {:esbuild, "~> 0.8.1", runtime: Mix.env() == :dev},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.31.0", only: :dev, runtime: false},
-      {:flop_phoenix, "~> 0.22.4"}
+      {:flop_phoenix, "~> 0.22.4"},
+      {:ecto_psql_extras, "~> 0.6"}
     ]
   end
 
