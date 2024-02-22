@@ -21,6 +21,7 @@ defmodule HandinWeb.Router do
   # scope "/api", HandinWeb do
   #   pipe_through :api
   # end
+  import Phoenix.LiveDashboard.Router
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:handin, :dev_routes) do
@@ -29,18 +30,20 @@ defmodule HandinWeb.Router do
     # If your application does not have an admins-only section yet,
     # you can use Plug.BasicAuth to set up some basic authentication
     # as long as you are also using SSL (which you should anyway).
-    import Phoenix.LiveDashboard.Router
+    # import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
       pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: HandinWeb.Telemetry
+      # live_dashboard "/dashboard", metrics: HandinWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 
   scope "/admin", HandinWeb.Admin, as: :admin do
     pipe_through [:browser, :require_authenticated_user]
+
+    live_dashboard "/live_dashboard", metrics: HandinWeb.Telemetry
 
     live_session :require_authenticated_admin,
       on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}, {HandinWeb.Auth, :admin}] do
