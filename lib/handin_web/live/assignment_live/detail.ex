@@ -50,9 +50,6 @@ defmodule HandinWeb.AssignmentLive.Detail do
 
     <.header>
       <%= @assignment.name %>
-      <span class="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300">
-        <%= @assignment.programming_language && @assignment.programming_language.name %>
-      </span>
     </.header>
 
     <.list>
