@@ -469,8 +469,8 @@ defmodule Handin.Assignments do
 
   def evaluate_marks(submission_id, build_id) do
     submission =
-      Repo.get(AssignmentSubmission, submission_id)
-      |> Repo.preload(:assignment, user: [:university])
+      Repo.get(AssignmentSubmission, "submission_id")
+      |> Repo.preload([:assignment, user: [:university]])
 
     build =
       Repo.get(Build, build_id)
