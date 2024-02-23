@@ -46,7 +46,7 @@ defmodule HandinWeb.MembersLive.Index do
   @impl true
   def handle_event("delete", %{"id" => id, "status" => "confirmed"}, socket) do
     member = Accounts.get_user!(id)
-    Modules.remove_user_from_module(id, socket.assigns.module_id)
+    Modules.remove_user_from_module(id, socket.assigns.module.id)
 
     {:noreply,
      stream_delete(socket, :members, member) |> put_flash(:info, "Member deleted successfully")}
@@ -56,6 +56,7 @@ defmodule HandinWeb.MembersLive.Index do
     {:ok, invitation} = Modules.delete_modules_invitations(id)
 
     {:noreply,
-     stream_delete(socket, :members, invitation) |> put_flash(:info, "Member deleted successfully")}
+     stream_delete(socket, :members, invitation)
+     |> put_flash(:info, "Member deleted successfully")}
   end
 end
