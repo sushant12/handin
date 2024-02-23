@@ -224,7 +224,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
         )
         |> assign(
           :build,
-          GenServer.whereis({:global, "build:assignment_submission:#{assignment.id}"})
+          GenServer.whereis({:global, "build:assignment_submission:#{assignment_submission.id}"})
         )
         |> assign(:assignment_submission, assignment_submission)
         |> assign(
@@ -261,7 +261,9 @@ defmodule HandinWeb.AssignmentLive.Submit do
   @impl true
   def handle_event("submit_assignment", %{"assignment_id" => assignment_id}, socket) do
     if Assignments.is_submission_allowed?(socket.assigns.assignment_submission) do
-      HandinWeb.Endpoint.subscribe("build:assignment_submission:#{assignment_id}")
+      HandinWeb.Endpoint.subscribe(
+        "build:assignment_submission:#{socket.assigns.assignment_submission.id}"
+      )
 
       DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
         id: Handin.BuildServer,
@@ -270,6 +272,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
            [
              %{
                assignment_id: assignment_id,
+               assignment_submission_id: socket.assigns.assignment_submission.id,
                type: "assignment_submission",
                image: socket.assigns.assignment.programming_language.docker_file_url,
                user_id: socket.assigns.current_user.id
@@ -286,7 +289,9 @@ defmodule HandinWeb.AssignmentLive.Submit do
        )
        |> assign(
          :build,
-         GenServer.whereis({:global, "build:assignment_submission:#{assignment_id}"})
+         GenServer.whereis(
+           {:global, "build:assignment_submission:#{socket.assigns.assignment_submission.id}"}
+         )
        )}
     else
       {:noreply, socket}
@@ -319,7 +324,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
          |> assign(
            :build,
            GenServer.whereis(
-             {:global, "build:assignment_submission:#{socket.assigns.assignment.id}"}
+             {:global, "build:assignment_submission:#{socket.assigns.assignment_submission.id}"}
            )
          )}
 

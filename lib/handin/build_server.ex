@@ -11,7 +11,11 @@ defmodule Handin.BuildServer do
   end
 
   def name_for(state) do
-    {:global, "build:#{state.type}:#{state.assignment_id}"}
+    if state.type == "assignment_tests" do
+      {:global, "build:#{state.type}:#{state.assignment_id}"}
+    else
+      {:global, "build:#{state.type}:#{state.assignment_submission_id}"}
+    end
   end
 
   @impl true
@@ -267,11 +271,19 @@ defmodule Handin.BuildServer do
 
     Assignments.get_logs(state.build.id)
 
-    HandinWeb.Endpoint.broadcast!(
-      "build:#{state.type}:#{state.assignment_id}",
-      "build_completed",
-      state.build.id
-    )
+    if state.type == "assignment_tests" do
+      HandinWeb.Endpoint.broadcast!(
+        "build:#{state.type}:#{state.assignment_id}",
+        "build_completed",
+        state.build.id
+      )
+    else
+      HandinWeb.Endpoint.broadcast!(
+        "build:#{state.type}:#{state.assignment_submission_id}",
+        "build_completed",
+        state.build.id
+      )
+    end
 
     @machine_api.exec(state.machine_id, "sh ./upload.sh")
     @machine_api.stop(state.machine_id)
@@ -294,11 +306,19 @@ defmodule Handin.BuildServer do
     log_map = log_map |> Map.put(:build_id, build.id)
     Assignments.log(log_map)
 
-    HandinWeb.Endpoint.broadcast!(
-      "build:#{state.type}:#{state.assignment_id}",
-      "test_result",
-      build.id
-    )
+    if state.type == "assignment_tests" do
+      HandinWeb.Endpoint.broadcast!(
+        "build:#{state.type}:#{state.assignment_id}",
+        "test_result",
+        build.id
+      )
+    else
+      HandinWeb.Endpoint.broadcast!(
+        "build:#{state.type}:#{state.assignment_submission_id}",
+        "test_result",
+        build.id
+      )
+    end
   end
 
   defp build_check_script(assignment) do
