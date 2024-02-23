@@ -11,6 +11,9 @@ defmodule HandinWeb.Admin.UserListLive.Index do
       meta={@meta}
       path={~p"/admin/users"}
     >
+    <:col :let={{_id, user}} label="">
+        <%= user.index %>
+      </:col>
       <:col :let={{_id, user}} field={:email} label="Email">
         <%= user.email %>
       </:col>
@@ -82,6 +85,7 @@ defmodule HandinWeb.Admin.UserListLive.Index do
   defp apply_action(socket, _, params) do
     %{users: users, meta: meta} = Accounts.list_users(params)
 
+    users = users |> Enum.with_index(1) |> Enum.map(fn {u, i} -> Map.put(u, :index, i) end)
     socket
     |> stream(:users, users, reset: true)
     |> assign(:current_page, :users)

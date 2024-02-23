@@ -11,6 +11,9 @@ defmodule HandinWeb.Admin.BuildLive.Index do
       meta={@meta}
       path={~p"/admin/builds"}
     >
+      <:col :let={{_id, build}} label="">
+        <%= build.index %>
+      </:col>
       <:col :let={{_id, build}} label="ID">
         <%= build.id %>
       </:col>
@@ -82,6 +85,7 @@ defmodule HandinWeb.Admin.BuildLive.Index do
   defp apply_action(socket, _, params) do
     %{builds: builds, meta: meta} = Assignments.list_builds(params)
 
+    builds = builds |> Enum.with_index(1) |> Enum.map(fn {b, i} -> Map.put(b, :index, i) end)
     socket
     |> stream(:builds, builds, reset: true)
     |> assign(:current_page, :builds)

@@ -18,6 +18,7 @@
   </.button>
 </.link>
 <.table id="members" rows={@streams.members}>
+  <:col :let={{_, member}} label="ID"><%= member.index %></:col>
   <:col :let={{_, member}} label="Email"><%= member.email %></:col>
   <:col :let={{_id, member}} label="State">
     <%= if member.confirmed_at, do: "Accepted", else: "Pending" %>
