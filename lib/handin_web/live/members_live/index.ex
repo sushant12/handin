@@ -11,8 +11,10 @@ defmodule HandinWeb.MembersLive.Index do
     pending_users =
       Modules.get_pending_students(id)
 
+    members = members ++ pending_users |> Enum.with_index(1) |> Enum.map(fn {u, i} -> Map.put(u, :index, i) end)
+
     {:ok,
-     stream(socket, :members, members ++ pending_users)
+     stream(socket, :members, members )
      |> assign(:module, module)
      |> assign(:current_tab, :members)
      |> assign(:current_page, :modules)}
@@ -46,7 +48,7 @@ defmodule HandinWeb.MembersLive.Index do
   @impl true
   def handle_event("delete", %{"id" => id, "status" => "confirmed"}, socket) do
     member = Accounts.get_user!(id)
-    Modules.remove_user_from_module(id, socket.assigns.module_id)
+    Modules.remove_user_from_module(id, socket.assigns.module.id)
 
     {:noreply,
      stream_delete(socket, :members, member) |> put_flash(:info, "Member deleted successfully")}
@@ -56,6 +58,7 @@ defmodule HandinWeb.MembersLive.Index do
     {:ok, invitation} = Modules.delete_modules_invitations(id)
 
     {:noreply,
-     stream_delete(socket, :members, invitation) |> put_flash(:info, "Member deleted successfully")}
+     stream_delete(socket, :members, invitation)
+     |> put_flash(:info, "Member deleted successfully")}
   end
 end

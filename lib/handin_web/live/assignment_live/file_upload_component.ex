@@ -49,9 +49,13 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
                     <figcaption><%= entry.client_name %></figcaption>&nbsp;
                   </figure>
                 </article>
-                <.error :for={err <- upload_errors(@uploads.solution_file, entry)} class="!mt-0"><%= error_to_string(err) %></.error>
+                <.error :for={err <- upload_errors(@uploads.solution_file, entry)} class="!mt-0">
+                  <%= error_to_string(err) %>
+                </.error>
               <% end %>
-                <.error :for={err <- upload_errors(@uploads.solution_file)}><%= error_to_string(err) %></.error>
+              <.error :for={err <- upload_errors(@uploads.solution_file)}>
+                <%= error_to_string(err) %>
+              </.error>
             </div>
           <% :add_helper_files -> %>
             <div>
@@ -85,10 +89,14 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
                     </svg>
                     <figcaption><%= entry.client_name %></figcaption>&nbsp;
                   </figure>
-                  <.error :for={err <- upload_errors(@uploads.support_file, entry)} class="!mt-0"><%= error_to_string(err) %></.error>
+                  <.error :for={err <- upload_errors(@uploads.support_file, entry)} class="!mt-0">
+                    <%= error_to_string(err) %>
+                  </.error>
                 </article>
               <% end %>
-              <.error :for={err <- upload_errors(@uploads.support_file)}><%= error_to_string(err) %></.error>
+              <.error :for={err <- upload_errors(@uploads.support_file)}>
+                <%= error_to_string(err) %>
+              </.error>
             </div>
           <% :upload_submissions -> %>
             <div>
@@ -150,9 +158,16 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
                     </button>
                   </figure>
                 </article>
-                <.error :for={err <- upload_errors(@uploads.assignment_submission, entry)} class="!mt-0"><%= error_to_string(err) %></.error>
+                <.error
+                  :for={err <- upload_errors(@uploads.assignment_submission, entry)}
+                  class="!mt-0"
+                >
+                  <%= error_to_string(err) %>
+                </.error>
               <% end %>
-              <.error :for={err <- upload_errors(@uploads.assignment_submission)}><%= error_to_string(err) %></.error>
+              <.error :for={err <- upload_errors(@uploads.assignment_submission)}>
+                <%= error_to_string(err) %>
+              </.error>
             </div>
         <% end %>
         <:actions>

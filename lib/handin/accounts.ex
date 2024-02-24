@@ -396,4 +396,13 @@ defmodule Handin.Accounts do
   def delete_user(user) do
     Repo.delete(user)
   end
+
+  def valid_email?(email, university_id) do
+    %Ecto.Changeset{valid?: valid} =
+      User.edit_changeset(%User{}, %{"email" => email, "university_id" => university_id},
+        validate_email: false
+      )
+
+    valid
+  end
 end
