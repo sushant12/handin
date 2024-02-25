@@ -57,15 +57,17 @@ defmodule HandinWeb.AssignmentLive.Settings do
         field={@form[:enable_penalty_per_day]}
         label="Enable Penalty Per Day"
       />
-      <div class="w-64">
-        <.input
-          :if={
-            Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_cutoff_date].value) &&
-              Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_penalty_per_day].value)
-          }
-          field={@form[:penalty_per_day]}
-          type="number"
-        />
+      <div
+        :if={
+          Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_cutoff_date].value) &&
+            Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_penalty_per_day].value)
+        }
+        class="flex items-end"
+      >
+        <div class="w-64">
+          <.input field={@form[:penalty_per_day]} type="number" />
+        </div>
+        <span class="text-sm ml-2 mb-2 whitespace-nowrap">(in percentage)</span>
       </div>
 
       <.input type="checkbox" field={@form[:enable_max_attempts]} label="Enable Max Attempts" />
