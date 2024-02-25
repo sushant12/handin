@@ -2,6 +2,7 @@ defmodule HandinWeb.UserSessionController do
   use HandinWeb, :controller
 
   alias Handin.Accounts
+  alias Handin.Accounts.User
   alias HandinWeb.UserAuth
 
   def create(conn, %{"_action" => "registered"} = params) do
@@ -28,6 +29,7 @@ defmodule HandinWeb.UserSessionController do
     if user = Accounts.get_user_by_email_and_password(email, password) do
       conn
       |> put_flash(:info, info)
+      |> put_user_return_to(user)
       |> UserAuth.log_in_user(user, user_params)
     else
       # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
@@ -43,4 +45,9 @@ defmodule HandinWeb.UserSessionController do
     |> put_flash(:info, "Logged out successfully.")
     |> UserAuth.log_out_user()
   end
+
+  defp put_user_return_to(conn, %User{role: :admin}),
+    do: put_session(conn, :user_return_to, ~p"/")
+
+  defp put_user_return_to(conn, _user), do: put_session(conn, :user_return_to, ~p"/modules")
 end

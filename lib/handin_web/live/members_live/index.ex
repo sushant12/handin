@@ -11,10 +11,13 @@ defmodule HandinWeb.MembersLive.Index do
     pending_users =
       Modules.get_pending_students(id)
 
-    members = members ++ pending_users |> Enum.with_index(1) |> Enum.map(fn {u, i} -> Map.put(u, :index, i) end)
+    members =
+      (members ++ pending_users)
+      |> Enum.with_index(1)
+      |> Enum.map(fn {u, i} -> Map.put(u, :index, i) end)
 
     {:ok,
-     stream(socket, :members, members )
+     stream(socket, :members, members)
      |> assign(:module, module)
      |> assign(:current_tab, :members)
      |> assign(:current_page, :modules)}

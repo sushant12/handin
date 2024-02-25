@@ -21,7 +21,12 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:start_date]} type="datetime-local" label="Start date" />
         <.input field={@form[:due_date]} type="datetime-local" label="Due date" />
-        <.input :if={@form[:enable_cutoff_date].value} field={@form[:cutoff_date]} type="datetime-local" label="Cut Off date" />
+        <.input
+          :if={@form[:enable_cutoff_date].value}
+          field={@form[:cutoff_date]}
+          type="datetime-local"
+          label="Cut Off date"
+        />
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
