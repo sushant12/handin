@@ -86,6 +86,7 @@ defmodule HandinWeb.Admin.BuildLive.Index do
     %{builds: builds, meta: meta} = Assignments.list_builds(params)
 
     builds = builds |> Enum.with_index(1) |> Enum.map(fn {b, i} -> Map.put(b, :index, i) end)
+
     socket
     |> stream(:builds, builds, reset: true)
     |> assign(:current_page, :builds)

@@ -183,7 +183,8 @@ defmodule HandinWeb.MembersLive.FormComponent do
                 {:ok, invitation} ->
                   notify_parent({:invited, invitation})
 
-                _ -> :ok
+                _ ->
+                  :ok
               end
           end
         end)
