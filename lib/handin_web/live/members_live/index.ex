@@ -1,20 +1,12 @@
 defmodule HandinWeb.MembersLive.Index do
   use HandinWeb, :live_view
   alias Handin.{Modules, Accounts}
-  alias Handin.Accounts.User
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    members = Modules.get_students(id)
     module = Modules.get_module!(id)
 
-    pending_users =
-      Modules.get_pending_students(id)
-
-    members =
-      (members ++ pending_users)
-      |> Enum.with_index(1)
-      |> Enum.map(fn {u, i} -> Map.put(u, :index, i) end)
+    members = get_all_members(id) |> put_indexes()
 
     {:ok,
      stream(socket, :members, members)
@@ -40,28 +32,38 @@ defmodule HandinWeb.MembersLive.Index do
   end
 
   @impl true
-  def handle_info({HandinWeb.MembersLive.FormComponent, {:saved, member}}, socket) do
-    {:noreply, stream_insert(socket, :members, member)}
+  def handle_info({HandinWeb.MembersLive.FormComponent, {:saved, _member}}, socket) do
+    members = get_all_members(socket.assigns.module.id) |> put_indexes()
+    {:noreply, stream(socket, :members, members)}
   end
 
-  def handle_info({HandinWeb.MembersLive.FormComponent, {:invited, invitation}}, socket) do
-    {:noreply, stream_insert(socket, :members, %User{id: invitation.id, email: invitation.email})}
+  def handle_info({HandinWeb.MembersLive.FormComponent, {:invited, _invitation}}, socket) do
+    members = get_all_members(socket.assigns.module.id) |> put_indexes()
+    {:noreply, stream(socket, :members, members)}
   end
 
   @impl true
   def handle_event("delete", %{"id" => id, "status" => "confirmed"}, socket) do
-    member = Accounts.get_user!(id)
+    Accounts.get_user!(id)
     Modules.remove_user_from_module(id, socket.assigns.module.id)
 
+    members = get_all_members(socket.assigns.module.id) |> put_indexes()
+
     {:noreply,
-     stream_delete(socket, :members, member) |> put_flash(:info, "Member deleted successfully")}
+     stream(socket, :members, members) |> put_flash(:info, "Member deleted successfully")}
   end
 
   def handle_event("delete", %{"id" => id}, socket) do
-    {:ok, invitation} = Modules.delete_modules_invitations(id)
+    Modules.delete_modules_invitations(id)
+
+    members = get_all_members(socket.assigns.module.id) |> put_indexes()
 
     {:noreply,
-     stream_delete(socket, :members, invitation)
+     stream(socket, :members, members)
      |> put_flash(:info, "Member deleted successfully")}
   end
+
+  defp put_indexes(items), do: Enum.with_index(items, &(Map.put(&1, :index, &2 + 1)))
+
+  defp get_all_members(module_id), do: Modules.get_students(module_id) ++ Modules.get_pending_students(module_id)
 end
