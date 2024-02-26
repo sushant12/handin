@@ -237,7 +237,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
        )
        |> assign(
          :build,
-         GenServer.whereis({:global, "build:assignment_submission:#{assignment.id}"})
+         GenServer.whereis({:global, "build:assignment_submission:#{submission.id}"})
        )}
     else
       {:ok,
@@ -271,7 +271,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
   end
 
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
-    HandinWeb.Endpoint.subscribe("build:assignment_submission:#{assignment_id}")
+    HandinWeb.Endpoint.subscribe("build:assignment_submission:#{socket.assigns.submission.id}")
 
     DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
       id: Handin.BuildServer,
@@ -280,6 +280,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
          [
            %{
              assignment_id: assignment_id,
+             assignment_submission_id: socket.assigns.submission.id,
              type: "assignment_submission",
              image: socket.assigns.assignment.programming_language.docker_file_url,
              user_id: socket.assigns.submission.user.id
@@ -296,7 +297,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
      )
      |> assign(
        :build,
-       GenServer.whereis({:global, "build:assignment_submission:#{assignment_id}"})
+       GenServer.whereis({:global, "build:assignment_submission:#{socket.assigns.submission.id}"})
      )}
   end
 
@@ -409,7 +410,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
          |> assign(
            :build,
            GenServer.whereis(
-             {:global, "build:assignment_submission:#{socket.assigns.assignment.id}"}
+             {:global, "build:assignment_submission:#{socket.assigns.submission.id}"}
            )
          )}
 
