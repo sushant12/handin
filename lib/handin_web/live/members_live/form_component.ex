@@ -101,6 +101,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
           {:ok, rows}
         end)
         |> List.flatten()
+        |> Enum.filter(&(String.trim(&1) != ""))
 
       save_modules_invitations(socket, socket.assigns.action, %{"emails" => emails})
     else
