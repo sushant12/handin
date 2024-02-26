@@ -55,18 +55,23 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
             options={Enum.map(@students, &{&1.email, &1.id})}
           />
         </form>
-        <%= if @assignment.enable_total_marks do %>
-          <div class="flex  mt-4 ">
-            <span class="mt-2 mr-2"> Grade: </span>
+        <div class="flex items-center mt-4">
+          <%= if @assignment.enable_total_marks do %>
+            <span class="mr-2"> Grade: </span>
             <input
               name="student_grade"
               type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500 w-16"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-24 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               value={@submission.total_points}
               phx-blur="change_submission_grade"
-            /> <span class="mt-2 ml-2">/ <%= @assignment.total_marks %></span>
-          </div>
-        <% end %>
+            /> <span class="mx-2 whitespace-nowrap">/ <%= @assignment.total_marks %></span>
+          <% end %>
+          <%= if @assignment.enable_max_attempts do %>
+            <span class="mx-8 whitespace-nowrap">
+              Attempts: <%= @submission.retries %> / <%= @assignment.max_attempts %>
+            </span>
+          <% end %>
+        </div>
       </div>
     </div>
     <div class="flex">
