@@ -63,7 +63,8 @@ defmodule HandinWeb.MembersLive.Index do
      |> put_flash(:info, "Member deleted successfully")}
   end
 
-  defp put_indexes(items), do: Enum.with_index(items, &(Map.put(&1, :index, &2 + 1)))
+  defp put_indexes(items), do: Enum.with_index(items, &Map.put(&1, :index, &2 + 1))
 
-  defp get_all_members(module_id), do: Modules.get_students(module_id) ++ Modules.get_pending_students(module_id)
+  defp get_all_members(module_id),
+    do: Modules.get_students(module_id) ++ Modules.get_pending_students(module_id)
 end
