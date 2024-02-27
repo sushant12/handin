@@ -521,6 +521,7 @@ defmodule Handin.Assignments do
         )
         |> Interval.duration(:days)
 
+      days_after_due_date = if days_after_due_date == 0, do: 1, else: days_after_due_date
       penalty_percentage = days_after_due_date * assignment.penalty_per_day / 100
       marks * (1 - penalty_percentage)
     else
