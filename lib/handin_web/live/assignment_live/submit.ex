@@ -26,6 +26,15 @@ defmodule HandinWeb.AssignmentLive.Submit do
       />
     </.tabs>
 
+    <div class="flex justify-between items-center w-1/2">
+      <span :if={@assignment.enable_max_attempts} class="whitespace-nowrap">
+        Attempts remaining: <%= @assignment.max_attempts - @assignment_submission.retries %>
+      </span>
+      <span :if={@assignment.enable_total_marks} class="whitespace-nowrap">
+        Grade: <%= @assignment_submission.total_points %> / <%= @assignment.total_marks %>
+      </span>
+    </div>
+
     <.header class="mb-4">
       Assignment Submission
     </.header>
@@ -52,20 +61,14 @@ defmodule HandinWeb.AssignmentLive.Submit do
       </.table>
     </div>
 
-    <div class={["w-1/2", @assignment.enable_max_attempts && "flex justify-between items-center"]}>
-      <.button
-        :if={Assignments.is_submission_allowed?(@assignment_submission)}
-        class="text-white inline-flex items-center bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 my-4"
-        phx-click="submit_assignment"
-        phx-value-assignment_id={@assignment.id}
-      >
-        <%= if @build, do: "Submitting...", else: "Submit Assignment" %>
-      </.button>
-
-      <span :if={@assignment.enable_max_attempts} class="whitespace-nowrap">
-        Attempts: <%= @assignment_submission.retries %> / <%= @assignment.max_attempts %>
-      </span>
-    </div>
+    <.button
+      :if={Assignments.is_submission_allowed?(@assignment_submission)}
+      class="text-white inline-flex items-center bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 my-4"
+      phx-click="submit_assignment"
+      phx-value-assignment_id={@assignment.id}
+    >
+      <%= if @build, do: "Submitting...", else: "Submit Assignment" %>
+    </.button>
 
     <div :if={@assignment.enable_test_output} class="w-1/2" id="accordion-open" data-accordion="open">
       <%= for {index, log} <- @logs do %>
