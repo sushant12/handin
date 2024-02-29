@@ -64,10 +64,10 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-24 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               value={@submission.total_points}
               phx-blur="change_submission_grade"
-            /> <span class="mx-2 whitespace-nowrap">/ <%= @assignment.total_marks %></span>
+            /> <span class="mx-2 whitespace-nowrap mr-8">/ <%= @assignment.total_marks %></span>
           <% end %>
           <%= if @assignment.enable_max_attempts do %>
-            <span class="mx-8 whitespace-nowrap">
+            <span class="whitespace-nowrap">
               Attempts: <%= @submission.retries %> / <%= @assignment.max_attempts %>
             </span>
           <% end %>

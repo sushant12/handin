@@ -62,6 +62,8 @@ defmodule Handin.Accounts do
   @spec get_user!(Ecto.UUID) :: %User{}
   def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(:modules)
 
+  def get_user(id), do: Repo.get(User, id) |> Repo.preload(builds: [:assignment])
+
   ## User registration
 
   @doc """
