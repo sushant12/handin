@@ -115,6 +115,7 @@ defmodule HandinWeb.Router do
              :edit_assignment_test
 
         live "/members/new", MembersLive.Index, :new
+        live "/members/:user_id/show", MembersLive.Show, :show
       end
     end
   end

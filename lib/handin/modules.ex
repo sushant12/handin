@@ -131,6 +131,12 @@ defmodule Handin.Modules do
     |> Enum.map(&%User{id: &1.id, email: &1.email})
   end
 
+  def get_modules_invitations(mi_id) do
+    ModulesInvitations
+    |> where([mi], mi.id == ^mi_id)
+    |> Repo.one()
+  end
+
   def delete_modules_invitations(id) do
     ModulesInvitations
     |> where([mi], mi.id == ^id)
