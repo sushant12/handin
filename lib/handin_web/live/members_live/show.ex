@@ -66,7 +66,7 @@ defmodule HandinWeb.MembersLive.Show do
 
   @impl true
   def mount(%{"id" => id, "user_id" => user_id}, _session, socket) do
-    with true <- Accounts.enrolled_module?(socket.assigns.current_user, id) do
+    with true <- Accounts.enrolled_module?(socket.assigns.current_user, id) || socket.assigns.current_user.role == :admin do
       module = Modules.get_module!(id)
 
       socket =
