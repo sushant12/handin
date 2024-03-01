@@ -13,7 +13,7 @@ defmodule HandinWeb.MembersLive.Show do
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item text="Members" href={~p"/modules/#{@module.id}/members"} />
-      <:item text={@student[:email]} href={~p"/modules/#{@module.id}/members"} />
+      <:item text={@student.email} href={~p"/modules/#{@module.id}/members"} />
     </.breadcrumbs>
 
     <%= if @student do %>
@@ -102,6 +102,9 @@ defmodule HandinWeb.MembersLive.Show do
       |> Repo.update!()
       |> Repo.preload(:builds)
 
-    {:noreply, socket |> assign(:student, student)}
+    builds =
+      Enum.filter(student.builds, &Modules.assignment_exists?(socket.assigns.module.id, &1.assignment_id))
+
+    {:noreply, socket |> assign(:student, Map.put(student, :builds, builds))}
   end
 end
