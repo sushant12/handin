@@ -66,7 +66,9 @@ defmodule HandinWeb.MembersLive.Show do
 
   @impl true
   def mount(%{"id" => id, "user_id" => user_id}, _session, socket) do
-    with true <- Accounts.enrolled_module?(socket.assigns.current_user, id) || socket.assigns.current_user.role == :admin do
+    with true <-
+           Accounts.enrolled_module?(socket.assigns.current_user, id) ||
+             socket.assigns.current_user.role in [:admin, :teaching_assistant] do
       module = Modules.get_module!(id)
 
       socket =
@@ -103,7 +105,10 @@ defmodule HandinWeb.MembersLive.Show do
       |> Repo.preload(:builds)
 
     builds =
-      Enum.filter(student.builds, &Modules.assignment_exists?(socket.assigns.module.id, &1.assignment_id))
+      Enum.filter(
+        student.builds,
+        &Modules.assignment_exists?(socket.assigns.module.id, &1.assignment_id)
+      )
 
     {:noreply, socket |> assign(:student, Map.put(student, :builds, builds))}
   end

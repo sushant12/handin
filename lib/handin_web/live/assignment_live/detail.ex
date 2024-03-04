@@ -85,7 +85,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
     with true <-
            Accounts.enrolled_module?(socket.assigns.current_user, id) ||
-             socket.assigns.current_user.role == :admin,
+             socket.assigns.current_user.role in [:admin, :teaching_assistant],
          true <- Modules.assignment_exists?(id, assignment_id) do
       module = Modules.get_module!(id)
       assignment = Assignments.get_assignment!(assignment_id)

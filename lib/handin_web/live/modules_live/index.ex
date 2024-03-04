@@ -6,7 +6,7 @@ defmodule HandinWeb.ModulesLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     modules =
-      if socket.assigns.current_user.role == :admin do
+      if socket.assigns.current_user.role in [:admin, :teaching_assistant] do
         Modules.list_module()
       else
         socket.assigns.current_user |> Handin.Repo.preload(:modules) |> Map.get(:modules)

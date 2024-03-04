@@ -18,7 +18,10 @@ defmodule Handin.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
-    field :role, Ecto.Enum, default: :student, values: [:student, :admin, :lecturer]
+
+    field :role, Ecto.Enum,
+      default: :student,
+      values: [:student, :admin, :lecturer, :teaching_assistant]
 
     belongs_to :university, University
     has_many :test_results, TestResult

@@ -30,6 +30,6 @@ defmodule HandinWeb.Auth do
   defp admin?(user), do: user && user.role == :admin
 
   defp admin_or_lecturer?(user) do
-    user && (user.role == :admin || user.role == :lecturer)
+    user && (user.role == :admin || user.role == :lecturer || user.role == :teaching_assistant)
   end
 end

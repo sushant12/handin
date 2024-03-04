@@ -9,7 +9,7 @@ defmodule HandinWeb.AssignmentLive.Index do
     with module <- Modules.get_module!(id),
          true <-
            Accounts.enrolled_module?(socket.assigns.current_user, id) ||
-             socket.assigns.current_user.role == :admin,
+             socket.assigns.current_user.role in [:admin, :teaching_assistant],
          assignments <-
            Modules.list_assignments_for(id, socket.assigns.current_user) do
       programming_languages =
