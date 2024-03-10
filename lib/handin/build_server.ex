@@ -288,7 +288,7 @@ defmodule Handin.BuildServer do
     @machine_api.exec(state.machine_id, "sh ./upload.sh")
     @machine_api.stop(state.machine_id)
 
-    {:stop, "Server terminated gracefully", state}
+    {:stop, :normal, state}
   end
 
   defp machine_started?(machine) do
