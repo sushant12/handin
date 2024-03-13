@@ -338,15 +338,15 @@ defmodule HandinWeb.AssignmentLive.Submit do
          )}
 
       "build_completed" ->
-        Assignments.submit_assignment(
-          socket.assigns.assignment_submission.id,
-          socket.assigns.assignment.enable_max_attempts
-        )
+        # Assignments.submit_assignment(
+        #   socket.assigns.assignment_submission.id,
+        #   socket.assigns.assignment.enable_max_attempts
+        # )
 
         submission =
           Assignments.get_submission(socket.assigns.assignment.id, socket.assigns.current_user.id)
 
-        Assignments.evaluate_marks(submission.id, build_id)
+        # Assignments.evaluate_marks(submission.id, build_id)
 
         {:noreply,
          socket

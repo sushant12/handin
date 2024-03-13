@@ -278,7 +278,17 @@ defmodule Handin.BuildServer do
         state.build.id
       )
     else
-      HandinWeb.Endpoint.broadcast!(
+      Assignments.submit_assignment(
+        state.assignment_submission_id,
+        state.assignment.enable_max_attempts
+      )
+
+      submission =
+        Assignments.get_submission(state.assignment.id, state.user_id)
+
+      Assignments.evaluate_marks(submission.id, state.build.id)
+
+      HandinWeb.Endpoint.broadcast(
         "build:#{state.type}:#{state.assignment_submission_id}",
         "build_completed",
         state.build.id
