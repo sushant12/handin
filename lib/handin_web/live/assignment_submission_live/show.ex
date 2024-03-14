@@ -222,6 +222,10 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
       submission = submissions |> Enum.find(&(&1.id == submission_id))
       students = submissions |> Enum.map(& &1.user)
 
+      if connected?(socket) do
+        HandinWeb.Endpoint.subscribe("build:assignment_submission:#{submission.id}")
+      end
+
       {:ok,
        socket
        |> assign(current_page: :modules)
@@ -271,8 +275,6 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
   end
 
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
-    HandinWeb.Endpoint.subscribe("build:assignment_submission:#{socket.assigns.submission.id}")
-
     DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
       id: Handin.BuildServer,
       start:

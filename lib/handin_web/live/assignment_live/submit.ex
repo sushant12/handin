@@ -216,6 +216,10 @@ defmodule HandinWeb.AssignmentLive.Submit do
         Assignments.get_submission(assignment_id, socket.assigns.current_user.id) ||
           Assignments.create_submission(assignment_id, socket.assigns.current_user.id)
 
+      if connected?(socket) do
+        HandinWeb.Endpoint.subscribe("build:assignment_submission:#{assignment_submission.id}")
+      end
+
       {
         :ok,
         socket
@@ -270,10 +274,6 @@ defmodule HandinWeb.AssignmentLive.Submit do
   @impl true
   def handle_event("submit_assignment", %{"assignment_id" => assignment_id}, socket) do
     if Assignments.is_submission_allowed?(socket.assigns.assignment_submission) do
-      HandinWeb.Endpoint.subscribe(
-        "build:assignment_submission:#{socket.assigns.assignment_submission.id}"
-      )
-
       DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
         id: Handin.BuildServer,
         start:
@@ -338,15 +338,8 @@ defmodule HandinWeb.AssignmentLive.Submit do
          )}
 
       "build_completed" ->
-        # Assignments.submit_assignment(
-        #   socket.assigns.assignment_submission.id,
-        #   socket.assigns.assignment.enable_max_attempts
-        # )
-
         submission =
           Assignments.get_submission(socket.assigns.assignment.id, socket.assigns.current_user.id)
-
-        # Assignments.evaluate_marks(submission.id, build_id)
 
         {:noreply,
          socket

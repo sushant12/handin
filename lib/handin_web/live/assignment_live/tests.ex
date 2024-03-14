@@ -310,6 +310,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
       assignment_test = Enum.at(assignment.assignment_tests, 0)
       module = Modules.get_module!(id)
 
+      if connected?(socket) do
+        HandinWeb.Endpoint.subscribe("build:assignment_tests:#{assignment_id}")
+      end
+
       {:ok,
        socket
        |> assign(current_page: :modules)
@@ -411,8 +415,6 @@ defmodule HandinWeb.AssignmentLive.Tests do
   end
 
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
-    HandinWeb.Endpoint.subscribe("build:assignment_tests:#{assignment_id}")
-
     DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
       id: Handin.BuildServer,
       start:
