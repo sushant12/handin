@@ -24,10 +24,13 @@ defmodule Handin.Accounts.User do
       values: [:student, :admin, :lecturer, :teaching_assistant]
 
     belongs_to :university, University
+
     has_many :test_results, TestResult
     has_many :run_script_results, RunScriptResult
-    many_to_many :modules, Module, join_through: ModulesUsers
     has_many :builds, Build
+
+    many_to_many :modules, Module, join_through: ModulesUsers
+
     timestamps()
   end
 

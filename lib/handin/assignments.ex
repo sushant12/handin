@@ -14,7 +14,8 @@ defmodule Handin.Assignments do
     Build,
     Log,
     RunScriptResult,
-    TestResult
+    TestResult,
+    CustomAssignmentDate
   }
 
   alias Handin.AssignmentSubmission.{AssignmentSubmission, AssignmentSubmissionFile}
@@ -568,5 +569,30 @@ defmodule Handin.Assignments do
     else
       true
     end
+  end
+
+  def change_custom_assignment_date(
+        %CustomAssignmentDate{} = custom_assignment_date,
+        attrs \\ %{}
+      ) do
+    CustomAssignmentDate.changeset(custom_assignment_date, attrs)
+  end
+
+  def create_custom_assignment_date(attrs \\ %{}) do
+    %CustomAssignmentDate{}
+    |> CustomAssignmentDate.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_custom_assignment_date(%CustomAssignmentDate{} = custom_assignment_date, attrs) do
+    custom_assignment_date
+    |> CustomAssignmentDate.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def list_custom_assignment_dates(assignment_id) do
+    CustomAssignmentDate
+    |> where(assignment_id: ^assignment_id)
+    |> Repo.all()
   end
 end

@@ -2,6 +2,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
   use HandinWeb, :live_view
 
   alias Handin.{Modules, Assignments}
+  alias Handin.Assignments.CustomAssignmentDate
 
   @impl true
   def render(assigns) do
@@ -112,7 +113,57 @@ defmodule HandinWeb.AssignmentLive.Settings do
       >
         Save
       </.button>
+      <.link
+        class="text-white inline-flex items-center bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 mb-4"
+        patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings/add_custom_assignment_date"}
+      >
+        Add Custom Dates
+      </.link>
     </.simple_form>
+    <%!-- WIP --%>
+    <%!-- <.table id="custom_assignment_dates" rows={@custom_assignment_dates}>
+      <:col :let={custom_assignment_date} label="ID"><%= member.index %></:col>
+      <:col :let={custom_assignment_date} label="Email"><%= member.email %></:col>
+      <:col :let={{_id, member}} label="State">
+        <%= if member.confirmed_at, do: "Accepted", else: "Pending" %>
+      </:col>
+      <:action :let={{id, member}} :if={@current_user.role != :student}>
+        <.link
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          patch={~p"/modules/#{@module.id}/members/#{member.id}/show"}
+        >
+          Show
+        </.link>
+        <.link
+          class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800"
+          phx-click={
+            JS.push("delete", value: %{id: member.id, status: member.confirmed_at && "confirmed"})
+            |> hide("##{id}")
+          }
+          data-confirm="Are you sure?"
+        >
+          Remove
+        </.link>
+      </:action>
+    </.table> --%>
+    <.modal
+      :if={@live_action in [:add_custom_assignment_date, :edit_custom_assignment_date]}
+      id="custom_assignment_dates-modal"
+      show
+      on_cancel={JS.patch(~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings")}
+    >
+      <.live_component
+        module={HandinWeb.AssignmentLive.CustomDateComponent}
+        title={@page_title}
+        id={@assignment.id}
+        action={@live_action}
+        module_id={@module.id}
+        assignment={@assignment}
+        custom_assignment_date={@custom_assignment_date}
+        current_user={@current_user}
+        patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"}
+      />
+    </.modal>
     """
   end
 
@@ -123,18 +174,41 @@ defmodule HandinWeb.AssignmentLive.Settings do
       module = Modules.get_module!(id)
       changeset = Assignments.change_assignment(assignment)
 
+      custom_assignment_dates = Assignments.list_assignments(assignment_id)
+
       {:ok,
        socket
        |> assign(current_page: :modules)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
        |> assign(:module, module)
        |> assign(:assignment, assignment)
+       |> assign(:custom_assignment_dates, custom_assignment_dates)
        |> assign_form(changeset)}
     else
       {:ok,
        push_navigate(socket, to: ~p"/modules/#{id}/assignments")
        |> put_flash(:error, "You are not authorized to view this page")}
     end
+  end
+
+  @impl true
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  defp apply_action(socket, :add_custom_assignment_date, _) do
+    socket
+    |> assign(:page_title, "Add Custom Date")
+    |> assign(:custom_assignment_date, %CustomAssignmentDate{})
+  end
+
+  defp apply_action(socket, :edit_custom_assignment_date, _) do
+    socket
+    |> assign(:page_title, "Edit Custom Date")
+  end
+
+  defp apply_action(socket, _, _) do
+    socket
   end
 
   @impl true

@@ -104,6 +104,8 @@ defmodule HandinWeb.Router do
           live "/tests", AssignmentLive.Tests, :index
           live "/submissions", AssignmentLive.Submission, :index
           live "/settings", AssignmentLive.Settings, :index
+          live "/settings/add_custom_assignment_date", AssignmentLive.Settings, :add_custom_assignment_date
+          live "/settings/edit_custom_assignment_date", AssignmentLive.Settings, :edit_custom_assignment_date
         end
 
         live "/assignments/:assignment_id/add_test",

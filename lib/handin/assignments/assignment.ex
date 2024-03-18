@@ -4,7 +4,16 @@ defmodule Handin.Assignments.Assignment do
   import Ecto.Changeset
   alias Handin.Modules.Module
   alias Handin.ProgrammingLanguages.ProgrammingLanguage
-  alias Handin.Assignments.{AssignmentTest, Build, SupportFile, SolutionFile, RunScriptResult}
+
+  alias Handin.Assignments.{
+    AssignmentTest,
+    Build,
+    SupportFile,
+    SolutionFile,
+    RunScriptResult,
+    CustomAssignmentDate
+  }
+
   alias Handin.AssignmentSubmission.AssignmentSubmission
 
   schema "assignments" do
@@ -37,6 +46,7 @@ defmodule Handin.Assignments.Assignment do
     has_many :support_files, SupportFile, on_delete: :delete_all
     has_many :solution_files, SolutionFile, on_delete: :delete_all
     has_many :run_script_results, RunScriptResult, on_delete: :delete_all
+    has_many :custom_assignment_dates, CustomAssignmentDate, on_delete: :delete_all
 
     timestamps()
   end
