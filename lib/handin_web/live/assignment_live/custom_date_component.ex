@@ -70,11 +70,19 @@ defmodule HandinWeb.AssignmentLive.CustomDateComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"custom_assignment_date" => custom_assignment_date_params}, socket) do
+  def handle_event(
+        "validate",
+        %{"custom_assignment_date" => custom_assignment_date_params},
+        socket
+      ) do
     changeset =
       socket.assigns.custom_assignment_date
       |> Assignments.change_custom_assignment_date(
-        Map.put(custom_assignment_date_params, "timezone", socket.assigns.current_user.university.timezone)
+        Map.put(
+          custom_assignment_date_params,
+          "timezone",
+          socket.assigns.current_user.university.timezone
+        )
       )
       |> Map.put(:action, :validate)
 
@@ -91,7 +99,11 @@ defmodule HandinWeb.AssignmentLive.CustomDateComponent do
     )
   end
 
-  defp save_custom_assignment_date(socket, :add_custom_assignment_date, custom_assignment_date_params) do
+  defp save_custom_assignment_date(
+         socket,
+         :add_custom_assignment_date,
+         custom_assignment_date_params
+       ) do
     case Assignments.create_custom_assignment_date(custom_assignment_date_params) do
       {:ok, custom_assignment_date} ->
         notify_parent({:saved, custom_assignment_date})
@@ -106,7 +118,11 @@ defmodule HandinWeb.AssignmentLive.CustomDateComponent do
     end
   end
 
-  defp save_custom_assignment_date(socket, :edit_custom_assignment_date, custom_assignment_date_params) do
+  defp save_custom_assignment_date(
+         socket,
+         :edit_custom_assignment_date,
+         custom_assignment_date_params
+       ) do
     case Assignments.update_custom_assignment_date(
            socket.assigns.custom_assignment_date,
            custom_assignment_date_params

@@ -4,6 +4,7 @@ defmodule Handin.Modules do
   """
 
   import Ecto.Query, warn: false
+  alias Handin.Assignments.CustomAssignmentDate
   alias Handin.Repo
   alias Handin.Accounts.User
   alias Handin.Modules.ModulesInvitations
@@ -167,8 +168,14 @@ defmodule Handin.Modules do
         now = DateTime.utc_now() |> DateTime.shift_zone!(user.university.timezone)
 
         query
-        |> where([m, a], a.start_date <= ^now)
-
+        |> where(
+          [m, a],
+          a.id in subquery(
+            CustomAssignmentDate
+            |> select([cad], cad.assignment_id)
+            |> where([cad], cad.user_id == ^user.id and cad.start_date <= ^now)
+          ) or a.start_date <= ^now
+        )
       _ ->
         query
     end

@@ -24,10 +24,31 @@
     <%= assignment.name %>
   </:col>
   <:col :let={{_id, assignment}} label="Start date">
-    <%= Handin.DisplayHelper.format_date(assignment.start_date, @current_user.university.timezone) %>
+    <%= if cad =
+             Handin.Assignments.get_custom_assignment_date_by_user_and_assignment(
+               @current_user.id,
+               assignment.id
+             ),
+           do:
+             Handin.DisplayHelper.format_date(cad.start_date, @current_user.university.timezone),
+           else:
+             Handin.DisplayHelper.format_date(
+               assignment.start_date,
+               @current_user.university.timezone
+             ) %>
   </:col>
   <:col :let={{_id, assignment}} label="Due date">
-    <%= Handin.DisplayHelper.format_date(assignment.due_date, @current_user.university.timezone) %>
+    <%= if cad =
+             Handin.Assignments.get_custom_assignment_date_by_user_and_assignment(
+               @current_user.id,
+               assignment.id
+             ),
+           do: Handin.DisplayHelper.format_date(cad.due_date, @current_user.university.timezone),
+           else:
+             Handin.DisplayHelper.format_date(
+               assignment.due_date,
+               @current_user.university.timezone
+             ) %>
   </:col>
   <:action :let={{id, assignment}}>
     <.link

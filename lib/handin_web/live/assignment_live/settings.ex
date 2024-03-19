@@ -115,37 +115,58 @@ defmodule HandinWeb.AssignmentLive.Settings do
       </.button>
       <.link
         class="text-white inline-flex items-center bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 mb-4"
-        patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings/add_custom_assignment_date"}
+        patch={
+          ~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings/add_custom_assignment_date"
+        }
       >
         Add Custom Dates
       </.link>
     </.simple_form>
-    <%!-- WIP --%>
-    <%!-- <.table id="custom_assignment_dates" rows={@custom_assignment_dates}>
-      <:col :let={custom_assignment_date} label="ID"><%= member.index %></:col>
-      <:col :let={custom_assignment_date} label="Email"><%= member.email %></:col>
-      <:col :let={{_id, member}} label="State">
-        <%= if member.confirmed_at, do: "Accepted", else: "Pending" %>
+    <.table id="custom_assignment_dates" rows={@streams.custom_assignment_dates}>
+      <:col :let={{_id, custom_assignment_date}} label="Email">
+        <%= custom_assignment_date.user.email %>
       </:col>
-      <:action :let={{id, member}} :if={@current_user.role != :student}>
+      <:col :let={{_id, custom_assignment_date}} label="Start Date">
+        <%= Handin.DisplayHelper.format_date(
+          custom_assignment_date.start_date,
+          @current_user.university.timezone
+        ) %>
+      </:col>
+      <:col :let={{_id, custom_assignment_date}} label="Due Date">
+        <%= Handin.DisplayHelper.format_date(
+          custom_assignment_date.due_date,
+          @current_user.university.timezone
+        ) %>
+      </:col>
+      <:col :let={{_id, custom_assignment_date}} label="Cutoff Date">
+        <%= if custom_assignment_date.enable_cutoff_date,
+          do:
+            Handin.DisplayHelper.format_date(
+              custom_assignment_date.cutoff_date,
+              @current_user.university.timezone
+            ) %>
+      </:col>
+      <:action :let={{id, custom_assignment_date}}>
         <.link
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          patch={~p"/modules/#{@module.id}/members/#{member.id}/show"}
+          patch={
+            ~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings/edit_custom_assignment_date/#{custom_assignment_date.id}"
+          }
         >
-          Show
+          Edit
         </.link>
         <.link
           class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800"
           phx-click={
-            JS.push("delete", value: %{id: member.id, status: member.confirmed_at && "confirmed"})
+            JS.push("delete", value: %{id: custom_assignment_date.id})
             |> hide("##{id}")
           }
-          data-confirm="Are you sure?"
+          data-confirm="Remove custom assignment date?"
         >
           Remove
         </.link>
       </:action>
-    </.table> --%>
+    </.table>
     <.modal
       :if={@live_action in [:add_custom_assignment_date, :edit_custom_assignment_date]}
       id="custom_assignment_dates-modal"
@@ -174,7 +195,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
       module = Modules.get_module!(id)
       changeset = Assignments.change_assignment(assignment)
 
-      custom_assignment_dates = Assignments.list_assignments(assignment_id)
+      custom_assignment_dates = Assignments.list_custom_assignment_dates(assignment_id)
 
       {:ok,
        socket
@@ -182,7 +203,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
        |> assign(:module, module)
        |> assign(:assignment, assignment)
-       |> assign(:custom_assignment_dates, custom_assignment_dates)
+       |> stream(:custom_assignment_dates, custom_assignment_dates)
        |> assign_form(changeset)}
     else
       {:ok,
@@ -202,9 +223,22 @@ defmodule HandinWeb.AssignmentLive.Settings do
     |> assign(:custom_assignment_date, %CustomAssignmentDate{})
   end
 
-  defp apply_action(socket, :edit_custom_assignment_date, _) do
-    socket
-    |> assign(:page_title, "Edit Custom Date")
+  defp apply_action(socket, :edit_custom_assignment_date, %{
+         "id" => id,
+         "assignment_id" => assignment_id,
+         "custom_assignment_date_id" => custom_assignment_date_id
+       }) do
+    custom_assignment_date =
+      Assignments.get_custom_assignment_date(custom_assignment_date_id)
+
+    if custom_assignment_date.assignment_id == assignment_id do
+      socket
+      |> assign(:page_title, "Edit Custom Date")
+      |> assign(:custom_assignment_date, custom_assignment_date)
+    else
+      push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+      |> put_flash(:error, "You are not authorized to view this page")
+    end
   end
 
   defp apply_action(socket, _, _) do
@@ -225,6 +259,15 @@ defmodule HandinWeb.AssignmentLive.Settings do
     save_assignment(socket, :edit, assignment_params)
   end
 
+  def handle_event("delete", %{"id" => custom_assignment_date_id}, socket) do
+    custom_assignment_date =
+      custom_assignment_date_id
+      |> Assignments.get_custom_assignment_date()
+      |> Assignments.delete_custom_assignment_date!()
+
+    {:noreply, socket |> stream_delete(:custom_assignment_dates, custom_assignment_date)}
+  end
+
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :form, to_form(changeset))
   end
@@ -240,5 +283,18 @@ defmodule HandinWeb.AssignmentLive.Settings do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
     end
+  end
+
+  @impl true
+  def handle_info(
+        {HandinWeb.AssignmentLive.CustomDateComponent, {:saved, custom_assignment_date}},
+        socket
+      ) do
+    {:noreply,
+     stream_insert(
+       socket,
+       :custom_assignment_dates,
+       Assignments.get_custom_assignment_date(custom_assignment_date.id)
+     )}
   end
 end

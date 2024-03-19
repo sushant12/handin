@@ -2,6 +2,7 @@ defmodule Handin.Assignments do
   @moduledoc """
   The Assignments context.
   """
+  alias Handin.Assignments
   use Timex
   import Ecto.Query, warn: false
   alias Handin.Repo
@@ -509,24 +510,52 @@ defmodule Handin.Assignments do
   end
 
   defp calculate_penalty_marks(assignment, submission, marks) do
-    if assignment.enable_penalty_per_day &&
-         Timex.after?(
-           DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone),
-           assignment.due_date
-         ) do
-      days_after_due_date =
-        Interval.new(
-          from: assignment.due_date,
-          until:
-            DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone)
-        )
-        |> Interval.duration(:days)
+    custom_date =
+      Assignments.get_custom_assignment_date_by_user_and_assignment(
+        submission.user_id,
+        assignment.id
+      )
 
-      days_after_due_date = if days_after_due_date == 0, do: 1, else: days_after_due_date
-      penalty_percentage = days_after_due_date * assignment.penalty_per_day / 100
-      marks * (1 - penalty_percentage)
+    if custom_date do
+      if assignment.enable_penalty_per_day &&
+           Timex.after?(
+             DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone),
+             custom_date.due_date
+           ) do
+        days_after_due_date =
+          Interval.new(
+            from: custom_date.due_date,
+            until:
+              DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone)
+          )
+          |> Interval.duration(:days)
+
+        days_after_due_date = if days_after_due_date == 0, do: 1, else: days_after_due_date
+        penalty_percentage = days_after_due_date * assignment.penalty_per_day / 100
+        marks * (1 - penalty_percentage)
+      else
+        marks
+      end
     else
-      marks
+      if assignment.enable_penalty_per_day &&
+           Timex.after?(
+             DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone),
+             assignment.due_date
+           ) do
+        days_after_due_date =
+          Interval.new(
+            from: assignment.due_date,
+            until:
+              DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone)
+          )
+          |> Interval.duration(:days)
+
+        days_after_due_date = if days_after_due_date == 0, do: 1, else: days_after_due_date
+        penalty_percentage = days_after_due_date * assignment.penalty_per_day / 100
+        marks * (1 - penalty_percentage)
+      else
+        marks
+      end
     end
   end
 
@@ -552,14 +581,40 @@ defmodule Handin.Assignments do
   end
 
   defp submission_date_valid?(assignment_submission) do
-    if assignment_submission.assignment.enable_cutoff_date &&
-         assignment_submission.assignment.cutoff_date do
-      Timex.compare(
-        DateTime.shift_zone!(DateTime.utc_now(), assignment_submission.user.university.timezone),
-        assignment_submission.assignment.cutoff_date
-      ) < 0
+    custom_date =
+      Assignments.get_custom_assignment_date_by_user_and_assignment(
+        assignment_submission.user_id,
+        assignment_submission.assignment_id
+      )
+
+      # why the utc time in future being returned as before the cutoff
+    if custom_date do
+      if custom_date.enable_cutoff_date &&
+           custom_date.cutoff_date do
+        Timex.compare(
+          DateTime.shift_zone!(
+            DateTime.utc_now(),
+            assignment_submission.user.university.timezone |> IO.inspect()
+          ),
+          custom_date.cutoff_date
+        )
+        |> IO.inspect() < 0
+      else
+        true
+      end
     else
-      true
+      if assignment_submission.assignment.enable_cutoff_date &&
+           assignment_submission.assignment.cutoff_date do
+        Timex.compare(
+          DateTime.shift_zone!(
+            DateTime.utc_now(),
+            assignment_submission.user.university.timezone
+          ),
+          assignment_submission.assignment.cutoff_date
+        ) < 0
+      else
+        true
+      end
     end
   end
 
@@ -594,5 +649,18 @@ defmodule Handin.Assignments do
     CustomAssignmentDate
     |> where(assignment_id: ^assignment_id)
     |> Repo.all()
+    |> Repo.preload(:user)
   end
+
+  def get_custom_assignment_date(id),
+    do: Repo.get(CustomAssignmentDate, id) |> Repo.preload(:user)
+
+  def get_custom_assignment_date_by_user_and_assignment(user_id, assignment_id) do
+    CustomAssignmentDate
+    |> where([cad], cad.assignment_id == ^assignment_id and cad.user_id == ^user_id)
+    |> Repo.one()
+  end
+
+  def delete_custom_assignment_date!(%CustomAssignmentDate{} = custom_assignment_date),
+    do: Repo.delete!(custom_assignment_date)
 end
