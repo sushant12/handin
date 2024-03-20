@@ -587,18 +587,16 @@ defmodule Handin.Assignments do
         assignment_submission.assignment_id
       )
 
-      # why the utc time in future being returned as before the cutoff
     if custom_date do
       if custom_date.enable_cutoff_date &&
            custom_date.cutoff_date do
         Timex.compare(
           DateTime.shift_zone!(
             DateTime.utc_now(),
-            assignment_submission.user.university.timezone |> IO.inspect()
+            assignment_submission.user.university.timezone
           ),
           custom_date.cutoff_date
-        )
-        |> IO.inspect() < 0
+        ) < 0
       else
         true
       end

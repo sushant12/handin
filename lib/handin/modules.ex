@@ -20,6 +20,18 @@ defmodule Handin.Modules do
     |> Repo.all()
   end
 
+  def get_students_without_custom_assignment_date(module_id, assignment_id) do
+    Module
+    |> where([m], m.id == ^module_id)
+    |> join(:inner, [m], u in assoc(m, :users), on: u.role == :student)
+    |> join(:left, [m, u], cad in assoc(u, :custom_assignment_dates),
+      on: cad.user_id == u.id and cad.assignment_id == ^assignment_id
+    )
+    |> where([m, u, cad], is_nil(cad.id))
+    |> select([m, u], u)
+    |> Repo.all()
+  end
+
   @spec get_students_count(module_id :: Ecto.UUID) :: integer()
   def get_students_count(module_id) do
     Module
@@ -176,6 +188,7 @@ defmodule Handin.Modules do
             |> where([cad], cad.user_id == ^user.id and cad.start_date <= ^now)
           ) or a.start_date <= ^now
         )
+
       _ ->
         query
     end

@@ -5,7 +5,7 @@ defmodule Handin.Accounts.User do
   alias Handin.Universities.University
   alias Handin.Modules.ModulesUsers
   alias Handin.Modules.Module
-  alias Handin.Assignments.{TestResult, RunScriptResult, Build}
+  alias Handin.Assignments.{TestResult, RunScriptResult, Build, CustomAssignmentDate}
   @type t :: %__MODULE__{}
 
   @derive {
@@ -28,6 +28,7 @@ defmodule Handin.Accounts.User do
     has_many :test_results, TestResult
     has_many :run_script_results, RunScriptResult
     has_many :builds, Build
+    has_many :custom_assignment_dates, CustomAssignmentDate
 
     many_to_many :modules, Module, join_through: ModulesUsers
 

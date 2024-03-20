@@ -61,11 +61,18 @@ defmodule HandinWeb.AssignmentLive.CustomDateComponent do
 
   @impl true
   def update(
-        %{custom_assignment_date: custom_assignment_date, module_id: module_id} = assigns,
+        %{
+          custom_assignment_date: custom_assignment_date,
+          module_id: module_id,
+          assignment: assignment
+        } = assigns,
         socket
       ) do
     changeset = Assignments.change_custom_assignment_date(custom_assignment_date)
-    students = Modules.get_students(module_id)
+
+    students =
+      Modules.get_students_without_custom_assignment_date(module_id, assignment.id)
+
     {:ok, socket |> assign(assigns) |> assign_form(changeset) |> assign(:students, students)}
   end
 
