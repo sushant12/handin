@@ -486,9 +486,11 @@ defmodule Handin.Assignments do
     total_points_after_penalty =
       calculate_penalty_marks(submission.assignment, submission, total_points_after_attempt_marks)
 
+    total_points = if total_points_after_penalty < 0, do: 0, else: total_points_after_penalty
+
     submission
     |> Handin.AssignmentSubmission.AssignmentSubmission.changeset(%{
-      total_points: total_points_after_penalty
+      total_points: total_points
     })
     |> Repo.update()
   end
@@ -530,9 +532,8 @@ defmodule Handin.Assignments do
           )
           |> Interval.duration(:days)
 
-        days_after_due_date = if days_after_due_date == 0, do: 1, else: days_after_due_date
-        penalty_percentage = days_after_due_date * assignment.penalty_per_day / 100
-        marks * (1 - penalty_percentage)
+        penalty_percentage = (days_after_due_date + 1) * assignment.penalty_per_day / 100
+        (marks * (1 - penalty_percentage)) |> Float.round(2)
       else
         marks
       end
@@ -550,9 +551,8 @@ defmodule Handin.Assignments do
           )
           |> Interval.duration(:days)
 
-        days_after_due_date = if days_after_due_date == 0, do: 1, else: days_after_due_date
-        penalty_percentage = days_after_due_date * assignment.penalty_per_day / 100
-        marks * (1 - penalty_percentage)
+        penalty_percentage = (days_after_due_date + 1) * assignment.penalty_per_day / 100
+        (marks * (1 - penalty_percentage)) |> Float.round(2)
       else
         marks
       end

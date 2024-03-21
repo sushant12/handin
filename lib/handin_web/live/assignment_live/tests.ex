@@ -142,8 +142,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
             <.input field={@form[:name]} type="text" label="Name" />
             <.input field={@form[:enable_custom_test]} type="checkbox" label="Enable Custom Test" />
             <%= if @assignment.enable_total_marks do %>
-              <.input field={@form[:points_on_pass]} type="number" label="Points on Pass" />
-              <.input field={@form[:points_on_fail]} type="number" label="Points on Fail" />
+              <.input field={@form[:points_on_pass]} type="number" label="Points on Pass" step="0.5" />
+              <.input field={@form[:points_on_fail]} type="number" label="Points on Fail" step="0.5" />
             <% end %>
             <%= if Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_custom_test].value) do %>
               <.label for="Custom Test">Custom Test</.label>

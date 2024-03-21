@@ -54,19 +54,24 @@ defmodule HandinWeb.AssignmentLive.Detail do
 
     <.list>
       <:item title="Start Date">
-        <%= Handin.DisplayHelper.format_date(
-          @assignment.start_date,
-          @current_user.university.timezone
-        ) %>
+        <%= ((@custom_assignment_date && @custom_assignment_date.start_date) || @assignment.start_date)
+        |> Handin.DisplayHelper.format_date(@current_user.university.timezone) %>
       </:item>
       <:item title="Due Date">
-        <%= Handin.DisplayHelper.format_date(@assignment.due_date, @current_user.university.timezone) %>
+        <%= ((@custom_assignment_date && @custom_assignment_date.due_date) || @assignment.due_date)
+        |> Handin.DisplayHelper.format_date(@current_user.university.timezone) %>
       </:item>
-      <:item :if={@assignment.enable_cutoff_date} title="Cut off Date">
-        <%= Handin.DisplayHelper.format_date(
-          @assignment.cutoff_date,
-          @current_user.university.timezone
-        ) %>
+      <:item
+        :if={
+          if @custom_assignment_date,
+            do: @custom_assignment_date.enable_cutoff_date,
+            else: @assignment.enable_cutoff_date
+        }
+        title="Cut off Date"
+      >
+        <%= ((@custom_assignment_date && @custom_assignment_date.cutoff_date) ||
+               @assignment.cutoff_date)
+        |> Handin.DisplayHelper.format_date(@current_user.university.timezone) %>
       </:item>
       <:item :if={@assignment.enable_total_marks} title="Total marks">
         <%= @assignment.total_marks %>
@@ -90,12 +95,19 @@ defmodule HandinWeb.AssignmentLive.Detail do
       module = Modules.get_module!(id)
       assignment = Assignments.get_assignment!(assignment_id)
 
+      custom_assignment_date =
+        Handin.Assignments.get_custom_assignment_date_by_user_and_assignment(
+          socket.assigns.current_user.id,
+          assignment_id
+        )
+
       {:ok,
        socket
        |> assign(current_page: :modules)
        |> assign(:module, module)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
-       |> assign(:assignment, assignment)}
+       |> assign(:assignment, assignment)
+       |> assign(:custom_assignment_date, custom_assignment_date)}
     else
       false ->
         {:ok,
