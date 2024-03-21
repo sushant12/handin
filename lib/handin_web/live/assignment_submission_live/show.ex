@@ -60,16 +60,22 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
             <span class="mr-2"> Grade: </span>
             <input
               name="student_grade"
-              type="text"
+              type="number"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-24 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               value={@submission.total_points}
               phx-blur="change_submission_grade"
             /> <span class="mx-2 whitespace-nowrap mr-8">/ <%= @assignment.total_marks %></span>
           <% end %>
           <%= if @assignment.enable_max_attempts do %>
-            <span class="whitespace-nowrap">
-              Attempts: <%= @submission.retries %> / <%= @assignment.max_attempts %>
-            </span>
+            <span class="mr-2"> Attempts: </span>
+            <input
+              name="student_attempts"
+              type="number"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-24 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+              value={@submission.retries}
+              phx-blur="change_submission_attempts"
+              step="1"
+            /> <span class="mx-2 whitespace-nowrap mr-8">/ <%= @assignment.max_attempts %></span>
           <% end %>
         </div>
       </div>
@@ -395,6 +401,17 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
         user_id: socket.assigns.submission.user_id,
         assignment_id: socket.assigns.assignment.id,
         total_points: total_points
+      })
+
+    {:noreply, socket |> assign(:submission, submission)}
+  end
+
+  def handle_event("change_submission_attempts", %{"value" => retries}, socket) do
+    {:ok, submission} =
+      Assignments.create_or_update_submission(%{
+        user_id: socket.assigns.submission.user_id,
+        assignment_id: socket.assigns.assignment.id,
+        retries: retries
       })
 
     {:noreply, socket |> assign(:submission, submission)}
