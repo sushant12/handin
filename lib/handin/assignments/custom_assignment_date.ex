@@ -1,5 +1,6 @@
 defmodule Handin.Assignments.CustomAssignmentDate do
   use Handin.Schema
+  use Timex
 
   import Ecto.Changeset
 
@@ -15,7 +16,7 @@ defmodule Handin.Assignments.CustomAssignmentDate do
     timestamps()
   end
 
-  @req_attrs [:user_id, :assignment_id]
+  @req_attrs [:start_date, :due_date, :user_id, :assignment_id]
 
   @attrs [:start_date, :due_date, :enable_cutoff_date, :cutoff_date, :assignment_id, :user_id]
   def changeset(custom_assignment_date, attrs) do
@@ -73,11 +74,18 @@ defmodule Handin.Assignments.CustomAssignmentDate do
           changeset
 
         cutoff_date ->
-          if start_date && due_date && NaiveDateTime.compare(cutoff_date, due_date) == :lt do
-            changeset
-            |> add_error(:cutoff_date, "must come after start date and due date")
-          else
-            changeset
+          cond do
+            start_date && due_date && NaiveDateTime.compare(cutoff_date, due_date) == :lt ->
+              changeset
+              |> add_error(:cutoff_date, "must come after start date and due date")
+
+            due_date &&
+                Interval.new(from: due_date, until: cutoff_date) |> Interval.duration(:days) > 4 ->
+              changeset
+              |> add_error(:cutoff_date, "must be less than or equal to 4 days after due date")
+
+            true ->
+              changeset
           end
       end
     else
