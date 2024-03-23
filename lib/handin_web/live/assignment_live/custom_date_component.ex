@@ -20,6 +20,7 @@ defmodule HandinWeb.AssignmentLive.CustomDateComponent do
         class="mt-2"
       >
         <.input
+          :if={@action == :add_custom_assignment_date}
           field={@form[:user_id]}
           type="select"
           label="User"
