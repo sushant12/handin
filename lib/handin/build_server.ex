@@ -485,7 +485,7 @@ defmodule Handin.BuildServer do
             # $output > #{assignment_test.id}.out 2>&1 &
             output=$(#{assignment_test.command})
             echo "$output" > #{assignment_test.id}.out
-            if diff -q #{assignment_test.id}.out #{assignment_test.expected_output_file} >/dev/null; then
+            if diff -wi #{assignment_test.id}.out #{assignment_test.expected_output_file} >/dev/null; then
               state="pass"
             else
               state="fail"
