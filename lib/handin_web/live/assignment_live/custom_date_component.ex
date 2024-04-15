@@ -24,7 +24,7 @@ defmodule HandinWeb.AssignmentLive.CustomDateComponent do
           field={@form[:user_id]}
           type="select"
           label="User"
-          options={Enum.map(@students, &{&1.email, &1.id})}
+          options={Enum.map(@students, &{&1.email, &1.id}) |> Enum.sort()}
           prompt="Select User"
           required
         />
