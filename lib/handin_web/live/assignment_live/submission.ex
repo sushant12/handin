@@ -33,6 +33,15 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:item text="Settings" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"} />
     </.tabs>
 
+    <div>
+      <.button
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 mb-5"
+        phx-click="download_csv"
+      >
+        Download Submission Details
+      </.button>
+    </div>
+
     <.table id="submitted_assignment_submissions" rows={@assignment_submissions}>
       <:col :let={{_, i}} label="id">
         <%= i %>
@@ -82,5 +91,41 @@ defmodule HandinWeb.AssignmentLive.Submission do
        push_navigate(socket, to: ~p"/modules/#{id}/assignments")
        |> put_flash(:error, "You are not authorized to view this page")}
     end
+  end
+
+  @impl true
+  def handle_event("download_csv", _, socket) do
+    students_with_submission =
+      Enum.map(socket.assigns.assignment_submissions, fn {submission, _} ->
+        submission.user
+      end)
+
+    students_without_submission =
+      Modules.get_students(socket.assigns.module.id)
+      |> Enum.filter(&(&1 not in students_with_submission))
+
+    csv_content =
+      "email,marks\n" <>
+        Enum.map_join(socket.assigns.assignment_submissions, "\n", fn {submission, _} ->
+          "#{submission.user.email},#{submission.total_points}/#{socket.assigns.assignment.total_marks}"
+        end) <>
+        "\n" <>
+        Enum.map_join(students_without_submission, "\n", fn student ->
+          "#{student.email},0.0/#{socket.assigns.assignment.total_marks}"
+        end)
+
+    File.mkdir_p("priv/static/submission_csv/#{socket.assigns.module.id}")
+
+    File.write(
+      "priv/static/submission_csv/#{socket.assigns.module.id}/#{socket.assigns.assignment.name}.csv",
+      csv_content
+    )
+
+    {:noreply,
+     socket
+     |> redirect(
+       to:
+         ~p"/submission_csv/#{socket.assigns.module.id}/#{socket.assigns.assignment.name <> ".csv"}"
+     )}
   end
 end
