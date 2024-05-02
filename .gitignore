@@ -38,4 +38,3 @@ npm-debug.log
 
 /uploads
 .env
-/priv/static/submission_csv

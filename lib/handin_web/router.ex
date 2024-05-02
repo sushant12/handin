@@ -112,6 +112,8 @@ defmodule HandinWeb.Router do
           live "/settings/edit_custom_assignment_date/:custom_assignment_date_id",
                AssignmentLive.Settings,
                :edit_custom_assignment_date
+
+          post "/download", SubmissionController, :download
         end
 
         live "/assignments/:assignment_id/add_test",
