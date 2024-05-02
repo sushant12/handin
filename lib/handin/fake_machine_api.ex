@@ -48,6 +48,7 @@ defmodule Handin.FakeMachineApi do
   end
 
   def exec(_machine_id, _cmd) do
-    {:ok, %{"stdout" => %{"state" => "pass"}, "exit_code" => 0}}
+    state = Enum.random(["pass", "fail"])
+    {:ok, %{"stdout" => Jason.encode!(%{"state" => state}), "exit_code" => 0}}
   end
 end

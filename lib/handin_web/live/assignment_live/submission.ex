@@ -33,6 +33,21 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:item text="Settings" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"} />
     </.tabs>
 
+    <div>
+      <.form
+        for={%{}}
+        action={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/download"}
+        method="post"
+      >
+        <button
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 mb-5"
+          type="submit"
+        >
+          Download Submission Details
+        </button>
+      </.form>
+    </div>
+
     <.table id="submitted_assignment_submissions" rows={@assignment_submissions}>
       <:col :let={{_, i}} label="id">
         <%= i %>

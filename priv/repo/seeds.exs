@@ -19,21 +19,12 @@ university =
 admin =
   %Handin.Accounts.User{
     email: "admin@handin.org",
-    hashed_password: Bcrypt.hash_pwd_salt("Hetauda_04"),
+    hashed_password: Bcrypt.hash_pwd_salt("admin"),
     confirmed_at: now,
     role: :admin,
     university_id: university.id
   }
   |> Repo.insert!()
-
-%Handin.Accounts.User{
-  email: "22207775@studentmail.ul.ie",
-  hashed_password: Bcrypt.hash_pwd_salt("student"),
-  confirmed_at: now,
-  role: :student,
-  university_id: university.id
-}
-|> Repo.insert!()
 
 %Handin.Accounts.User{
   email: "paddy@ul.ie",
@@ -58,6 +49,12 @@ module =
   }
   |> Repo.insert!()
 
+%Handin.Modules.ModulesUsers{
+  module_id: module.id,
+  user_id: admin.id
+}
+|> Repo.insert!()
+
 assignment =
   %Handin.Assignments.Assignment{
     name: "Week 0",
@@ -69,8 +66,33 @@ assignment =
   }
   |> Repo.insert!()
 
-%Handin.Modules.ModulesUsers{
-  module_id: module.id,
-  user_id: admin.id
-}
-|> Repo.insert!()
+1..4
+|> Enum.each(fn i ->
+  %Handin.Assignments.AssignmentTest{
+    assignment_id: assignment.id,
+    name: "Test #{i}",
+    command: "./main #{i} 2",
+    expected_output_type: :string,
+    expected_output_text: "3"
+  }
+  |> Repo.insert!()
+end)
+
+1..20
+|> Enum.each(fn i ->
+  user =
+    %Handin.Accounts.User{
+      email: "#{i}@studentmail.ul.ie",
+      hashed_password: Bcrypt.hash_pwd_salt("password"),
+      confirmed_at: now,
+      role: :student,
+      university_id: university.id
+    }
+    |> Repo.insert!()
+
+  %Handin.Modules.ModulesUsers{
+    module_id: module.id,
+    user_id: user.id
+  }
+  |> Repo.insert!()
+end)
