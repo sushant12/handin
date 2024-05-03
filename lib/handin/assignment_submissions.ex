@@ -1,10 +1,8 @@
 defmodule Handin.AssignmentSubmissions do
   import Ecto.Query, warn: false
 
-  alias Handin.Assignments.Build
   alias Handin.Assignments.Assignment
   alias Handin.Repo
-  alias Handin.AssignmentSubmission.AssignmentSubmission
   alias Handin.AssignmentSubmission.AssignmentSubmissionFile
 
   def get_assignment_submission_file!(assignment_submission_id) do
@@ -17,23 +15,31 @@ defmodule Handin.AssignmentSubmissions do
       Assignment
       |> where([a], a.id == ^assignment_id)
       |> Repo.one()
-      |> Repo.preload([:assignment_tests, module: [:users]])
+      |> Repo.preload([
+        :assignment_tests,
+        :assignment_submissions,
+        builds: [:run_script_result, test_results: [:assignment_test]],
+        module: [:users]
+      ])
 
     assignment.module.users
     |> Enum.filter(fn user -> user.role == :student end)
     |> Enum.map(fn user ->
       build =
-        Build
-        |> where([b], b.user_id == ^user.id and b.assignment_id == ^assignment_id)
-        |> order_by([b], desc: b.inserted_at)
-        |> limit(1)
-        |> Repo.one()
-        |> Repo.preload([:run_script_result, test_results: [:assignment_test]])
+        assignment.builds
+        |> Enum.filter(fn build -> build.user_id == user.id end)
+        |> case do
+          [] -> nil
+          builds -> Enum.sort_by(builds, & &1.inserted_at, {:desc, DateTime}) |> List.first()
+        end
 
       assignment_submission =
-        AssignmentSubmission
-        |> where([as], as.assignment_id == ^assignment_id and as.user_id == ^user.id)
-        |> Repo.one()
+        if is_nil(build) do
+          nil
+        else
+          assignment.assignment_submissions
+          |> Enum.find(fn assingment_submission -> assingment_submission.user_id == user.id end)
+        end
 
       attempt_marks =
         if not is_nil(build) && build.run_script_result.state == :pass do
@@ -72,7 +78,7 @@ defmodule Handin.AssignmentSubmissions do
       Map.merge(test_result_marks, %{
         "email" => user.email,
         "attempt_marks" => attempt_marks,
-        "total" => "#{total_points}/#{assignment.total_marks}"
+        "total" => total_points
       })
     end)
   end

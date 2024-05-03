@@ -299,11 +299,11 @@ defmodule Handin.Assignments do
 
     build =
       assignment.builds
-      |> Enum.sort_by(& &1.inserted_at, :desc)
+      |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
       |> List.first()
 
     if build do
-      build |> Map.get(:logs) |> Enum.sort_by(& &1.inserted_at, :asc)
+      build |> Map.get(:logs) |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
     else
       []
     end
