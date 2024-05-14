@@ -59,7 +59,7 @@ defmodule Handin.AssignmentSubmissions do
           |> Enum.reduce(%{}, fn test_result, acc ->
             test_marks =
               if test_result.state == :pass do
-                assignment.attempt_marks
+                test_result.assignment_test.points_on_pass
               else
                 0
               end
