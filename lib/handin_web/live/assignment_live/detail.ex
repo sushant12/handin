@@ -10,16 +10,12 @@ defmodule HandinWeb.AssignmentLive.Detail do
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
-        text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
-      />
-      <:item
         text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
       />
     </.breadcrumbs>
-    <%= if @current_user.role != "student" do %>
+    <%= if @current_user.role != :student do %>
       <.tabs>
         <:item
           text="Details"
@@ -41,7 +37,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
         />
       </.tabs>
     <% end %>
-    <%= if @current_user.role == "student" do %>
+    <%= if @current_user.role == :student do %>
       <.tabs>
         <:item
           text="Details"
@@ -54,30 +50,37 @@ defmodule HandinWeb.AssignmentLive.Detail do
 
     <.header>
       <%= @assignment.name %>
-      <span class="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300">
-        <%= @assignment.programming_language && @assignment.programming_language.name %>
-      </span>
     </.header>
 
     <.list>
-      <:item title="Total marks">
-        <%= if @assignment.enable_total_marks, do: @assignment.total_marks %>
-      </:item>
-      <:item title="Max attempts">
-        <%= if @assignment.enable_max_attempts, do: @assignment.max_attempts %>
-      </:item>
-      <:item title="Penalty per day">
-        <%= if @assignment.enable_penalty_per_day, do: @assignment.penalty_per_day %>%
-      </:item>
       <:item title="Start Date">
-        <%= Handin.DisplayHelper.format_date(@assignment.start_date, "Europe/Dublin") %>
+        <%= ((@custom_assignment_date && @custom_assignment_date.start_date) || @assignment.start_date)
+        |> Handin.DisplayHelper.format_date(@current_user.university.timezone) %>
       </:item>
       <:item title="Due Date">
-        <%= Handin.DisplayHelper.format_date(@assignment.due_date, "Europe/Dublin") %>
+        <%= ((@custom_assignment_date && @custom_assignment_date.due_date) || @assignment.due_date)
+        |> Handin.DisplayHelper.format_date(@current_user.university.timezone) %>
       </:item>
-      <:item title="Cut off Date">
-        <%= if @assignment.enable_cutoff_date && @assignment.cutoff_date,
-          do: Handin.DisplayHelper.format_date(@assignment.cutoff_date, "Europe/Dublin") %>
+      <:item
+        :if={
+          if @custom_assignment_date,
+            do: @custom_assignment_date.enable_cutoff_date,
+            else: @assignment.enable_cutoff_date
+        }
+        title="Cut off Date"
+      >
+        <%= ((@custom_assignment_date && @custom_assignment_date.cutoff_date) ||
+               @assignment.cutoff_date)
+        |> Handin.DisplayHelper.format_date(@current_user.university.timezone) %>
+      </:item>
+      <:item :if={@assignment.enable_total_marks} title="Total marks">
+        <%= @assignment.total_marks %>
+      </:item>
+      <:item :if={@assignment.enable_max_attempts} title="Max attempts">
+        <%= @assignment.max_attempts %>
+      </:item>
+      <:item :if={@assignment.enable_penalty_per_day} title="Penalty per day">
+        <%= @assignment.penalty_per_day %>%
       </:item>
     </.list>
     """
@@ -85,17 +88,26 @@ defmodule HandinWeb.AssignmentLive.Detail do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    with true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
+    with true <-
+           Accounts.enrolled_module?(socket.assigns.current_user, id) ||
+             socket.assigns.current_user.role in [:admin, :teaching_assistant],
          true <- Modules.assignment_exists?(id, assignment_id) do
       module = Modules.get_module!(id)
       assignment = Assignments.get_assignment!(assignment_id)
+
+      custom_assignment_date =
+        Handin.Assignments.get_custom_assignment_date_by_user_and_assignment(
+          socket.assigns.current_user.id,
+          assignment_id
+        )
 
       {:ok,
        socket
        |> assign(current_page: :modules)
        |> assign(:module, module)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
-       |> assign(:assignment, assignment)}
+       |> assign(:assignment, assignment)
+       |> assign(:custom_assignment_date, custom_assignment_date)}
     else
       false ->
         {:ok,

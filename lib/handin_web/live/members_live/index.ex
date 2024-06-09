@@ -4,11 +4,13 @@ defmodule HandinWeb.MembersLive.Index do
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    members = Modules.get_students(id)
+    module = Modules.get_module!(id)
+
+    members = get_all_members(id) |> put_indexes()
 
     {:ok,
      stream(socket, :members, members)
-     |> assign(:module_id, id)
+     |> assign(:module, module)
      |> assign(:current_tab, :members)
      |> assign(:current_page, :modules)}
   end
@@ -30,16 +32,39 @@ defmodule HandinWeb.MembersLive.Index do
   end
 
   @impl true
-  def handle_info({HandinWeb.MembersLive.FormComponent, {:saved, member}}, socket) do
-    {:noreply, stream_insert(socket, :members, member)}
+  def handle_info({HandinWeb.MembersLive.FormComponent, {:saved, _member}}, socket) do
+    members = get_all_members(socket.assigns.module.id) |> put_indexes()
+    {:noreply, stream(socket, :members, members)}
+  end
+
+  def handle_info({HandinWeb.MembersLive.FormComponent, {:invited, _invitation}}, socket) do
+    members = get_all_members(socket.assigns.module.id) |> put_indexes()
+    {:noreply, stream(socket, :members, members)}
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    member = Accounts.get_user!(id)
-    Modules.remove_user_from_module(id, socket.assigns.module_id)
+  def handle_event("delete", %{"id" => id, "status" => "confirmed"}, socket) do
+    Accounts.get_user!(id)
+    Modules.remove_user_from_module(id, socket.assigns.module.id)
+
+    members = get_all_members(socket.assigns.module.id) |> put_indexes()
 
     {:noreply,
-     stream_delete(socket, :members, member) |> put_flash(:info, "Member deleted successfully")}
+     stream(socket, :members, members) |> put_flash(:info, "Member deleted successfully")}
   end
+
+  def handle_event("delete", %{"id" => id}, socket) do
+    Modules.delete_modules_invitations(id)
+
+    members = get_all_members(socket.assigns.module.id) |> put_indexes()
+
+    {:noreply,
+     stream(socket, :members, members)
+     |> put_flash(:info, "Member deleted successfully")}
+  end
+
+  defp put_indexes(items), do: Enum.with_index(items, &Map.put(&1, :index, &2 + 1))
+
+  defp get_all_members(module_id),
+    do: Modules.get_students(module_id) ++ Modules.get_pending_students(module_id)
 end

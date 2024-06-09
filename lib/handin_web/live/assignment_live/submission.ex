@@ -12,10 +12,6 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
-        text="Assignments"
-        href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
-      />
-      <:item
         text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
@@ -37,9 +33,21 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:item text="Settings" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"} />
     </.tabs>
 
-    <.header class="mt-5">
-      Student Submissions
-    </.header>
+    <div>
+      <.form
+        for={%{}}
+        action={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/download"}
+        method="post"
+      >
+        <button
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 mb-5"
+          type="submit"
+        >
+          Download Submission Details
+        </button>
+      </.form>
+    </div>
+
     <.table id="submitted_assignment_submissions" rows={@assignment_submissions}>
       <:col :let={{_, i}} label="id">
         <%= i %>
@@ -49,6 +57,12 @@ defmodule HandinWeb.AssignmentLive.Submission do
       </:col>
       <:col :let={{submission, _}} :if={@assignment.enable_total_marks} label="Total marks">
         <%= submission.total_points %> / <%= @assignment.total_marks %>
+      </:col>
+      <:col :let={{submission, _}} label="Submitted At">
+        <%= Handin.DisplayHelper.format_date(
+          submission.submitted_at,
+          @current_user.university.timezone
+        ) %>
       </:col>
       <:action :let={{submission, _}}>
         <.link

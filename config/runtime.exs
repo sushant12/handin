@@ -73,9 +73,27 @@ if config_env() == :prod do
     secret_access_key: System.get_env("AWS_SECRET_ACCESS_KEY"),
     region: System.get_env("AWS_REGION")
 
-  config :fly,
+  config :handin,
     base_url: "https://api.machines.dev/v1/apps/",
-    fly_auth_token: System.get_env("FLY_AUTH_TOKEN")
+    fly_auth_token: System.get_env("FLY_API_TOKEN")
+
+  config :handin, Handin.Mailer,
+    api_client: Swoosh.ApiClient.Finch,
+    finch_name: Handin.Finch,
+    adapter: Swoosh.Adapters.AmazonSES,
+    region: System.get_env("AWS_REGION"),
+    access_key: System.get_env("AWS_ACCESS_KEY_ID"),
+    secret: System.get_env("AWS_SECRET_ACCESS_KEY")
+
+  config :sentry,
+    dsn: System.get_env("SENTRY_DSN"),
+    environment_name: :prod,
+    enable_source_code_context: true,
+    root_source_code_path: File.cwd!(),
+    tags: %{
+      env: "production"
+    },
+    included_environments: [:prod]
 
   # ## SSL Support
   #

@@ -21,6 +21,12 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
         <.input field={@form[:name]} type="text" label="Name" />
         <.input field={@form[:start_date]} type="datetime-local" label="Start date" />
         <.input field={@form[:due_date]} type="datetime-local" label="Due date" />
+        <.input
+          :if={@form[:enable_cutoff_date].value}
+          field={@form[:cutoff_date]}
+          type="datetime-local"
+          label="Cut Off date"
+        />
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
@@ -54,7 +60,9 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
   def handle_event("validate", %{"assignment" => assignment_params}, socket) do
     changeset =
       socket.assigns.assignment
-      |> Assignments.change_assignment(assignment_params)
+      |> Assignments.change_assignment(
+        Map.put(assignment_params, "timezone", socket.assigns.current_user.university.timezone)
+      )
       |> Map.put(:action, :validate)
 
     {:noreply, assign_form(socket, changeset)}
@@ -65,6 +73,7 @@ defmodule HandinWeb.AssignmentLive.FormComponent do
       socket,
       socket.assigns.action,
       Map.put(assignment_params, "module_id", socket.assigns.module_id)
+      |> Map.put("timezone", socket.assigns.current_user.university.timezone)
     )
   end
 

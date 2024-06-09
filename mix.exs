@@ -37,15 +37,15 @@ defmodule Handin.MixProject do
   defp deps do
     [
       {:bcrypt_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.7.6"},
+      {:phoenix, "~> 1.7.11"},
       {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.6"},
+      {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.3"},
-      {:phoenix_live_view, "~> 0.20.1"},
+      {:phoenix_live_view, "~> 0.20.3"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
-      {:swoosh, "~> 1.3"},
-      {:finch, "~> 0.13"},
+      {:swoosh, "~> 1.15"},
+      {:finch, "~> 0.17"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
@@ -61,13 +61,16 @@ defmodule Handin.MixProject do
       {:gen_smtp, "~> 1.0"},
       {:live_monaco_editor, "~> 0.1"},
       {:timex, "~> 3.0"},
+      {:sentry, "~> 10.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:dialyxir, "~> 1.3", only: [:dev], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.8.1", runtime: Mix.env() == :dev},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:ex_doc, "~> 0.31.0", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.31.0", only: :dev, runtime: false},
+      {:flop_phoenix, "~> 0.22.4"},
+      {:ecto_psql_extras, "~> 0.6"}
     ]
   end
 

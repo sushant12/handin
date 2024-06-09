@@ -39,7 +39,7 @@ defmodule HandinWeb.UserRegistrationLive do
             </.error>
             <div>
               <.input
-                field={@form[:university]}
+                field={@form[:university_id]}
                 type="select"
                 prompt="Select your university"
                 options={@universities}

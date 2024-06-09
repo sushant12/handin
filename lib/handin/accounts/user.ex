@@ -2,23 +2,36 @@ defmodule Handin.Accounts.User do
   use Handin.Schema
   import Ecto.Changeset
   alias Handin.Universities
+  alias Handin.Universities.University
   alias Handin.Modules.ModulesUsers
   alias Handin.Modules.Module
-  alias Handin.Assignments.{TestResult, RunScriptResult, Build}
+  alias Handin.Assignments.{TestResult, RunScriptResult, Build, CustomAssignmentDate}
   @type t :: %__MODULE__{}
+
+  @derive {
+    Flop.Schema,
+    filterable: [:email], sortable: [:email], default_limit: 15
+  }
 
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
-    field :university, :string, virtual: true
-    field :role, :string, default: "student"
+
+    field :role, Ecto.Enum,
+      default: :student,
+      values: [:student, :admin, :lecturer, :teaching_assistant]
+
+    belongs_to :university, University
 
     has_many :test_results, TestResult
     has_many :run_script_results, RunScriptResult
-    many_to_many :modules, Module, join_through: ModulesUsers
     has_many :builds, Build
+    has_many :custom_assignment_dates, CustomAssignmentDate
+
+    many_to_many :modules, Module, join_through: ModulesUsers
+
     timestamps()
   end
 
@@ -47,10 +60,16 @@ defmodule Handin.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :university])
-    |> validate_required([:university])
+    |> cast(attrs, [:email, :password, :university_id])
+    |> validate_required([:university_id])
     |> validate_email(opts)
     |> password_changeset(attrs, opts)
+  end
+
+  def edit_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :role, :university_id, :confirmed_at])
+    |> validate_email(opts)
   end
 
   defp validate_email(changeset, opts) do
@@ -62,7 +81,7 @@ defmodule Handin.Accounts.User do
   end
 
   defp maybe_validate_email_format(changeset) do
-    case get_field(changeset, :university) do
+    case get_field(changeset, :university_id) do
       nil ->
         changeset
 
@@ -79,7 +98,7 @@ defmodule Handin.Accounts.User do
   defp validate_password(changeset, opts) do
     changeset
     |> validate_required([:password])
-    |> validate_length(:password, min: 12, max: 72)
+    |> validate_length(:password, min: 5)
     # Examples of additional password validation:
     # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
     # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")

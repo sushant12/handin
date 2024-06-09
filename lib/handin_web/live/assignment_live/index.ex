@@ -6,9 +6,12 @@ defmodule HandinWeb.AssignmentLive.Index do
 
   @impl true
   def mount(%{"id" => id} = _params, _session, socket) do
-    with true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
+    with module <- Modules.get_module!(id),
+         true <-
+           Accounts.enrolled_module?(socket.assigns.current_user, id) ||
+             socket.assigns.current_user.role in [:admin, :teaching_assistant],
          assignments <-
-           Modules.list_assignments_for(id, socket.assigns.current_user.role) do
+           Modules.list_assignments_for(id, socket.assigns.current_user) do
       programming_languages =
         ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
 
@@ -16,7 +19,7 @@ defmodule HandinWeb.AssignmentLive.Index do
        socket
        |> stream(:assignments, assignments)
        |> assign(:programming_languages, programming_languages)
-       |> assign(:module_id, id)
+       |> assign(:module, module)
        |> assign(:current_page, :modules)}
     else
       false ->

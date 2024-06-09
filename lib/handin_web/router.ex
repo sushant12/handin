@@ -21,7 +21,7 @@ defmodule HandinWeb.Router do
   # scope "/api", HandinWeb do
   #   pipe_through :api
   # end
-
+  import Phoenix.LiveDashboard.Router
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:handin, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
@@ -29,18 +29,19 @@ defmodule HandinWeb.Router do
     # If your application does not have an admins-only section yet,
     # you can use Plug.BasicAuth to set up some basic authentication
     # as long as you are also using SSL (which you should anyway).
-    import Phoenix.LiveDashboard.Router
+    # import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
       pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: HandinWeb.Telemetry
+      # live_dashboard "/dashboard", metrics: HandinWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 
   scope "/admin", HandinWeb.Admin, as: :admin do
     pipe_through [:browser, :require_authenticated_user]
+    live_dashboard "/live_dashboard", metrics: HandinWeb.Telemetry
 
     live_session :require_authenticated_admin,
       on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}, {HandinWeb.Auth, :admin}] do
@@ -57,6 +58,12 @@ defmodule HandinWeb.Router do
 
       live "/programming_languages/:id", ProgrammingLanguageLive.Show, :show
       live "/programming_languages/:id/show/edit", ProgrammingLanguageLive.Show, :edit
+
+      live "/users", UserListLive.Index, :index
+      live "/users/:user_id/edit", UserListLive.Index, :edit
+
+      live "/builds", BuildLive.Index, :index
+      live "/builds/:build_id/edit", BuildLive.Index, :edit
     end
   end
 
@@ -97,6 +104,16 @@ defmodule HandinWeb.Router do
           live "/tests", AssignmentLive.Tests, :index
           live "/submissions", AssignmentLive.Submission, :index
           live "/settings", AssignmentLive.Settings, :index
+
+          live "/settings/add_custom_assignment_date",
+               AssignmentLive.Settings,
+               :add_custom_assignment_date
+
+          live "/settings/edit_custom_assignment_date/:custom_assignment_date_id",
+               AssignmentLive.Settings,
+               :edit_custom_assignment_date
+
+          post "/download", SubmissionController, :download
         end
 
         live "/assignments/:assignment_id/add_test",
@@ -108,6 +125,7 @@ defmodule HandinWeb.Router do
              :edit_assignment_test
 
         live "/members/new", MembersLive.Index, :new
+        live "/members/:user_id/show", MembersLive.Show, :show
       end
     end
   end

@@ -14,7 +14,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
       <:item
-        text="Assignments"
+        text={@assignment.name}
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/details"}
         current={true}
       />
@@ -32,49 +32,62 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
         href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submissions"}
         current={true}
       />
+      <:item text="Settings" href={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/settings"} />
     </.tabs>
-
-    <div id="student_email_selector" class="grid grid-cols-12 p-4" phx-hook="ChangeSubmissionEmail">
-      <div class="keyboard-shortcut-instructions col-span-4">
-        <pre>
-          Right Arrow &rarr; = Next Student
-          Left Arrow &larr; = Previous Student
-        </pre>
+    <div class="flex mb-5">
+      <div class="mr-8 w-64 bg-gray-50 p-4">
+        Keyboards Shortcuts:
+        <ul class="mt-2">
+          <li>Right Arrow &rarr; : Next</li>
+          <li>Left Arrow &larr; : Previous</li>
+        </ul>
       </div>
-      <div class="col-span-8">
-        <div class="flex justify-between items-center">
-          <form phx-change="change_student_email">
-            <.input
-              name="student_id"
-              type="select"
-              value={@submission.user.id}
-              options={Enum.map(@students, &{&1.email, &1.id})}
-            />
-          </form>
-        </div>
-        <div class="flex  items-center">
+      <div class="w-1/2">
+        <form
+          phx-change="change_student_email"
+          id="student_email_selector"
+          phx-hook="ChangeSubmissionEmail"
+        >
+          <.input
+            name="student_id"
+            type="select"
+            value={@submission.user.id}
+            options={Enum.map(@students, &{&1.email, &1.id})}
+          />
+        </form>
+        <div class="flex items-center mt-4">
           <%= if @assignment.enable_total_marks do %>
-            Grade:
-            <.input
+            <span class="mr-2"> Grade: </span>
+            <input
               name="student_grade"
-              type="text"
-              class="w-15"
+              type="number"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-24 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               value={@submission.total_points}
               phx-blur="change_submission_grade"
-            /> / <%= @assignment.total_marks %>
+            /> <span class="mx-2 whitespace-nowrap mr-8">/ <%= @assignment.total_marks %></span>
+          <% end %>
+          <%= if @assignment.enable_max_attempts do %>
+            <span class="mr-2"> Attempts: </span>
+            <input
+              name="student_attempts"
+              type="number"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-24 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+              value={@submission.retries}
+              phx-blur="change_submission_attempts"
+              step="1"
+            /> <span class="mx-2 whitespace-nowrap mr-8">/ <%= @assignment.max_attempts %></span>
           <% end %>
         </div>
       </div>
     </div>
-
-    <div class="flex h-screen">
-      <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-full ">
+    <div class="flex">
+      <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-auto overflow-y-auto p-4">
         <div class="assignment-test-files">
           <ul>
             <li
               :for={submission_file <- @submission.assignment_submission_files}
               class={[
-                "py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-[5px] rounded cursor-pointer",
+                "py-1 flex items-center cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700",
                 submission_file.id == @selected_assignment_submission_file && "bg-gray-300"
               ]}
               phx-click="select_file"
@@ -94,7 +107,6 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
                   />
                 </svg>
               </span>
-
               <span class="truncate" title={submission_file.file.file_name}>
                 <%= submission_file.file.file_name %>
               </span>
@@ -102,8 +114,8 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
           </ul>
         </div>
       </div>
-      <div class="flex-1 ml-4">
-        <div class="assignment-test-form bg-white rounded shadow-md px-4 mb-4  w-full">
+      <div class="ml-8 w-1/2">
+        <div class="mb-4">
           <LiveMonacoEditor.code_editor
             style="min-height: 450px; width: 100%;"
             opts={LiveMonacoEditor.default_opts()}
@@ -115,9 +127,8 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
             class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
             phx-click="run_tests"
             phx-value-assignment_id={@assignment.id}
-            disabled={@build && @build.status == "running"}
           >
-            <%= if @build, do: "Running", else: "Run All Tests" %>
+            <%= if @build, do: "Running...", else: "Run All Tests" %>
           </button>
         </div>
 
@@ -217,6 +228,10 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
       submission = submissions |> Enum.find(&(&1.id == submission_id))
       students = submissions |> Enum.map(& &1.user)
 
+      if connected?(socket) do
+        HandinWeb.Endpoint.subscribe("build:assignment_submission:#{submission.id}")
+      end
+
       {:ok,
        socket
        |> assign(current_page: :modules)
@@ -232,7 +247,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
        )
        |> assign(
          :build,
-         Assignments.get_running_build(assignment_id, submission.user_id)
+         GenServer.whereis({:global, "build:assignment_submission:#{submission.id}"})
        )}
     else
       {:ok,
@@ -266,8 +281,6 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
   end
 
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
-    HandinWeb.Endpoint.subscribe("build:assignment_tests:#{assignment_id}")
-
     DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
       id: Handin.BuildServer,
       start:
@@ -275,6 +288,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
          [
            %{
              assignment_id: assignment_id,
+             assignment_submission_id: socket.assigns.submission.id,
              type: "assignment_submission",
              image: socket.assigns.assignment.programming_language.docker_file_url,
              user_id: socket.assigns.submission.user.id
@@ -291,7 +305,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
      )
      |> assign(
        :build,
-       Assignments.get_running_build(assignment_id, socket.assigns.submission.user.id)
+       GenServer.whereis({:global, "build:assignment_submission:#{socket.assigns.submission.id}"})
      )}
   end
 
@@ -392,19 +406,40 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
     {:noreply, socket |> assign(:submission, submission)}
   end
 
+  def handle_event("change_submission_attempts", %{"value" => retries}, socket) do
+    {:ok, submission} =
+      Assignments.create_or_update_submission(%{
+        user_id: socket.assigns.submission.user_id,
+        assignment_id: socket.assigns.assignment.id,
+        retries: retries
+      })
+
+    {:noreply, socket |> assign(:submission, submission)}
+  end
+
   @impl true
   def handle_info(
-        %Phoenix.Socket.Broadcast{event: "test_result", payload: build_id},
+        %Phoenix.Socket.Broadcast{event: event, payload: build_id},
         socket
       ) do
-    {:noreply,
-     assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
-     |> assign(
-       :build,
-       Assignments.get_running_build(
-         socket.assigns.assignment.id,
-         socket.assigns.submission.user.id
-       )
-     )}
+    case event do
+      "test_result" ->
+        {:noreply,
+         assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
+         |> assign(
+           :build,
+           GenServer.whereis(
+             {:global, "build:assignment_submission:#{socket.assigns.submission.id}"}
+           )
+         )}
+
+      "build_completed" ->
+        {:noreply,
+         assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
+         |> assign(
+           :build,
+           nil
+         )}
+    end
   end
 end
