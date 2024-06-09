@@ -10,12 +10,13 @@ defmodule Handin.AccountsFixtures do
   def valid_user_password, do: "password1234"
 
   def valid_user_attributes(attrs \\ %{}) do
-    university = if attrs[:university], do: attrs[:university], else: university_fixture().id
+    university_id =
+      if attrs[:university], do: attrs[:university].id, else: university_fixture().id
 
     Enum.into(attrs, %{
       email: unique_user_email(),
       password: valid_user_password(),
-      university: university
+      university_id: university_id
     })
   end
 
@@ -32,7 +33,7 @@ defmodule Handin.AccountsFixtures do
     %Handin.Accounts.User{
       email: unique_user_email(),
       hashed_password: Bcrypt.hash_pwd_salt(valid_user_password()),
-      role: "lecturer",
+      role: :lecturer,
       confirmed_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
     }
     |> Handin.Repo.insert!()

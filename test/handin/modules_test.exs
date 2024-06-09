@@ -2,7 +2,7 @@ defmodule Handin.ModulesTest do
   use Handin.DataCase
 
   import Handin.{ModulesFixtures, AccountsFixtures, UniversitiesFixtures, AssignmentsFixtures}
-  alias Handin.{Modules, Accounts}
+  alias Handin.{Modules, Accounts, Assignments}
   alias Handin.Modules.Module
 
   @invalid_attrs %{name: nil, code: nil}
@@ -10,12 +10,14 @@ defmodule Handin.ModulesTest do
   setup do
     university = university_fixture()
     lecturer = lecturer_fixture()
+    module = module_fixture(%{user_id: lecturer.id})
+    assignment = assignment_fixture(%{module_id: module.id})
 
     %{
       lecturer: lecturer,
       university: university,
       user: user_fixture(%{university: university.id}),
-      module: module_fixture(%{user_id: lecturer.id})
+      module: module
     }
   end
 
@@ -106,6 +108,26 @@ defmodule Handin.ModulesTest do
       Modules.add_member(%{user_id: user2.id, module_id: module.id})
 
       assert Enum.count(Modules.get_students(module.id)) == 2
+    end
+  end
+
+  describe "get_students_without_custom_assignment_date/2" do
+    test "returns a list of students without custom assignment date", %{
+      module: module,
+      university: university,
+      assignment: assignment
+    } do
+      user1 = user_fixture(%{university: university.id})
+      user2 = user_fixture(%{university: university.id})
+      user3 = user_fixture(%{university: university.id})
+
+      Modules.add_member(%{user_id: user1.id, module_id: module.id})
+      Modules.add_member(%{user_id: user2.id, module_id: module.id})
+      Modules.add_member(%{user_id: user3.id, module_id: module.id})
+
+      # assert Enum.count(Modules.get_students_without_custom_assignment_date(module.id, assignment.id)) == 3
+
+      # Assignments.create_custom_assignment_date()
     end
   end
 

@@ -12,7 +12,8 @@ defmodule Handin.UniversitiesFixtures do
       attrs
       |> Enum.into(%{
         name: "University of Limerick",
-        student_email_regex: "^\\d+@studentmail.ul.ie$"
+        student_email_regex: "^\\d+@studentmail.ul.ie$",
+        timezone: "Europe/Dublin"
       })
       |> Handin.Universities.create_university()
 

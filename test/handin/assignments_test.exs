@@ -2,12 +2,10 @@ defmodule Handin.AssignmentsTest do
   use Handin.DataCase
 
   alias Handin.Assignments
+  alias Handin.Assignments.Assignment
+  import Handin.{ModulesFixtures, AccountsFixtures, UniversitiesFixtures, AssignmentsFixtures}
 
   describe "assignments" do
-    alias Handin.Assignments.Assignment
-
-    import Handin.AssignmentsFixtures
-
     @invalid_attrs %{
       name: nil,
       max_attempts: nil,
@@ -18,34 +16,57 @@ defmodule Handin.AssignmentsTest do
       penalty_per_day: nil
     }
 
-    test "list_assignments/0 returns all assignments" do
-      assignment = assignment_fixture()
-      assert Assignments.list_assignments() == [assignment]
+    setup do
+      university = university_fixture()
+      lecturer = lecturer_fixture()
+      module = module_fixture(%{user_id: lecturer.id})
+      assignment = assignment_fixture(%{module_id: module.id})
+
+      %{
+        lecturer: lecturer,
+        university: university,
+        user: user_fixture(%{university: university}),
+        module: module,
+        assignment: assignment
+      }
     end
 
-    test "get_assignment!/1 returns the assignment with given id" do
-      assignment = assignment_fixture()
-      assert Assignments.get_assignment!(assignment.id) == assignment
+    test "list_assignments/0 returns all assignments", %{module: module} do
+      assignment_fixture(%{module_id: module.id})
+      assignment_fixture(%{module_id: module.id})
+      assignment_fixture(%{module_id: module.id})
+      assert Enum.count( Assignments.list_assignments() ) == 4
     end
 
-    test "create_assignment/1 with valid data creates a assignment" do
+    test "get_assignment!/1 returns the assignment with given id", %{assignment: assignment} do
+      assert Assignments.get_assignment!(assignment.id).id == assignment.id
+    end
+
+    test "create_assignment/1 with valid data creates a assignment", %{module: module} do
+      now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+      start_date = NaiveDateTime.add(now, 1, :day)
+      due_date = NaiveDateTime.add(now, 2, :day)
+      cutoff_date = NaiveDateTime.add(now, 3, :day)
       valid_attrs = %{
         name: "some name",
         max_attempts: 42,
         total_marks: 42,
-        start_date: ~U[2023-07-22 12:41:00Z],
-        due_date: ~U[2023-07-22 12:41:00Z],
-        cutoff_date: ~U[2023-07-22 12:41:00Z],
-        penalty_per_day: 120.5
+        start_date: start_date,
+        due_date: due_date,
+        cutoff_date: cutoff_date,
+        penalty_per_day: 120.5,
+        timezone: "Europe/London"
       }
 
-      assert {:ok, %Assignment{} = assignment} = Assignments.create_assignment(valid_attrs)
+      assert {:ok, %Assignment{} = assignment} =
+               Assignments.create_assignment(valid_attrs |> Map.put(:module_id, module.id))
+
       assert assignment.name == "some name"
       assert assignment.max_attempts == 42
       assert assignment.total_marks == 42
-      assert assignment.start_date == ~U[2023-07-22 12:41:00Z]
-      assert assignment.due_date == ~U[2023-07-22 12:41:00Z]
-      assert assignment.cutoff_date == ~U[2023-07-22 12:41:00Z]
+      assert assignment.start_date ==start_date
+      assert assignment.due_date ==due_date
+      assert assignment.cutoff_date ==cutoff_date
       assert assignment.penalty_per_day == 120.5
     end
 
@@ -53,48 +74,49 @@ defmodule Handin.AssignmentsTest do
       assert {:error, %Ecto.Changeset{}} = Assignments.create_assignment(@invalid_attrs)
     end
 
-    test "update_assignment/2 with valid data updates the assignment" do
-      assignment = assignment_fixture()
-
+    test "update_assignment/2 with valid data updates the assignment", %{assignment: assignment} do
+      now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+      start_date = NaiveDateTime.add(now, 1, :day)
+      due_date = NaiveDateTime.add(now, 2, :day)
+      cutoff_date = NaiveDateTime.add(now, 3, :day)
       update_attrs = %{
         name: "some updated name",
-        max_attempts: 43,
-        total_marks: 43,
-        start_date: ~U[2023-07-23 12:41:00Z],
-        due_date: ~U[2023-07-23 12:41:00Z],
-        cutoff_date: ~U[2023-07-23 12:41:00Z],
-        penalty_per_day: 456.7
+        max_attempts: 4,
+        total_marks: 30,
+        start_date: start_date,
+        due_date: due_date,
+        cutoff_date: cutoff_date,
+        penalty_per_day: 30,
+        timezone: "Europe/London"
       }
 
       assert {:ok, %Assignment{} = assignment} =
                Assignments.update_assignment(assignment, update_attrs)
 
       assert assignment.name == "some updated name"
-      assert assignment.max_attempts == 43
-      assert assignment.total_marks == 43
-      assert assignment.start_date == ~U[2023-07-23 12:41:00Z]
-      assert assignment.due_date == ~U[2023-07-23 12:41:00Z]
-      assert assignment.cutoff_date == ~U[2023-07-23 12:41:00Z]
-      assert assignment.penalty_per_day == 456.7
+      assert assignment.max_attempts == 4
+      assert assignment.total_marks == 30
+      assert assignment.start_date == start_date
+      assert assignment.due_date == due_date
+      assert assignment.cutoff_date == cutoff_date
+      assert assignment.penalty_per_day == 30
     end
 
-    test "update_assignment/2 with invalid data returns error changeset" do
-      assignment = assignment_fixture()
-
+    test "update_assignment/2 with invalid data returns error changeset", %{
+      assignment: %{id: assignment_id} = assignment
+    } do
       assert {:error, %Ecto.Changeset{}} =
                Assignments.update_assignment(assignment, @invalid_attrs)
 
-      assert assignment == Assignments.get_assignment!(assignment.id)
+      assert %Assignment{id: ^assignment_id} = Assignments.get_assignment!(assignment.id)
     end
 
-    test "delete_assignment/1 deletes the assignment" do
-      assignment = assignment_fixture()
+    test "delete_assignment/1 deletes the assignment", %{assignment: assignment} do
       assert {:ok, %Assignment{}} = Assignments.delete_assignment(assignment)
       assert_raise Ecto.NoResultsError, fn -> Assignments.get_assignment!(assignment.id) end
     end
 
-    test "change_assignment/1 returns a assignment changeset" do
-      assignment = assignment_fixture()
+    test "change_assignment/1 returns a assignment changeset", %{assignment: assignment} do
       assert %Ecto.Changeset{} = Assignments.change_assignment(assignment)
     end
   end

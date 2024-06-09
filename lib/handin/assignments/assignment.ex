@@ -110,7 +110,7 @@ defmodule Handin.Assignments.Assignment do
         changeset
 
       start_date ->
-        now = DateTime.utc_now() |> DateTime.shift_zone!(attrs["timezone"]) |> DateTime.to_naive()
+        now = DateTime.utc_now() |> DateTime.shift_zone!(attrs["timezone"] || attrs[:timezone]) |> DateTime.to_naive()
 
         if NaiveDateTime.compare(start_date, now) == :lt do
           add_error(changeset, :start_date, "must be in the future")
