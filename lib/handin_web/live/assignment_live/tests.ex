@@ -474,7 +474,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
   end
 
   defp save_assignment_test(socket, :edit, assignment_test_params) do
-    case Assignments.update_assignment_test(
+    case AssignmentTests.update_assignment_test(
            socket.assigns.assignment_test,
            assignment_test_params
          ) do
@@ -484,7 +484,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
 
         {:noreply,
          socket
-         |> assign_form(Assignments.change_assignment_test(assignment_test))
+         |> assign_form(AssignmentTests.change_assignment_test(assignment_test))
          |> assign(:assignment_test, assignment_test)
          |> assign(:assignment_tests, assignment.assignment_tests)
          |> put_flash(:info, "Test saved successfully")}

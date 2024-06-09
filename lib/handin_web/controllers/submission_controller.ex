@@ -15,7 +15,10 @@ defmodule HandinWeb.SubmissionController do
     Repo.transaction(fn ->
       student_grades = AssignmentSubmissions.get_student_grades_for_assignment(assignment_id)
 
-      test_headers = List.first(student_grades) |> Map.keys() |> Enum.filter(& &1 not in ["email", "attempt_marks", "total"])
+      test_headers =
+        List.first(student_grades)
+        |> Map.keys()
+        |> Enum.filter(&(&1 not in ["email", "attempt_marks", "total"]))
 
       headers = ["email", "attempt_marks"] ++ test_headers ++ ["total"]
 
@@ -24,7 +27,9 @@ defmodule HandinWeb.SubmissionController do
 
       rows =
         AssignmentSubmissions.get_student_grades_for_assignment(assignment_id)
-        |> Enum.map(fn student_grade -> Enum.map(headers, fn header -> student_grade[header] end) end)
+        |> Enum.map(fn student_grade ->
+          Enum.map(headers, fn header -> student_grade[header] end)
+        end)
         |> NimbleCSV.RFC4180.dump_to_iodata()
 
       {:ok, _conn} = chunk(conn, rows)

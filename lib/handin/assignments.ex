@@ -9,7 +9,6 @@ defmodule Handin.Assignments do
 
   alias Handin.Assignments.{
     Assignment,
-    AssignmentTest,
     SupportFile,
     SolutionFile,
     Build,
@@ -100,13 +99,6 @@ defmodule Handin.Assignments do
     |> Repo.update()
   end
 
-  def update_assignment_test(%AssignmentTest{} = assignment_test, attrs) do
-    assignment_test
-    |> Repo.preload(assignment: [:support_files])
-    |> AssignmentTest.changeset(attrs)
-    |> Repo.update()
-  end
-
   def update_new_assignment(%Assignment{} = assignment, attrs) do
     assignment
     |> Assignment.new_changeset(attrs)
@@ -144,16 +136,6 @@ defmodule Handin.Assignments do
 
   def change_new_assignment(%Assignment{} = assignment, attrs \\ %{}) do
     Assignment.new_changeset(assignment, attrs)
-  end
-
-  def change_assignment_test(%AssignmentTest{} = assignment_test, attrs \\ %{}) do
-    AssignmentTest.changeset(assignment_test, attrs)
-  end
-
-  def create_assignment_test(attrs \\ %{}) do
-    %AssignmentTest{}
-    |> AssignmentTest.changeset(attrs)
-    |> Repo.insert()
   end
 
   def valid_submission_date?(assignment) do
