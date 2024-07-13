@@ -47,7 +47,16 @@ defmodule HandinWeb.UserRegistrationLive do
                 required
               />
             </div>
-
+            <div>
+              <.input
+                field={@form[:role]}
+                type="select"
+                prompt="Select your role"
+                options={[{"Lecturer", "lecturer"}, {"Student", "student"}]}
+                label="Role"
+                required
+              />
+            </div>
             <div>
               <.input
                 field={@form[:email]}
