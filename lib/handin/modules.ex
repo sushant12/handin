@@ -10,6 +10,7 @@ defmodule Handin.Modules do
   alias Handin.Modules.ModulesInvitations
   alias Handin.Modules.Module
   alias Handin.Modules.ModulesUsers
+  alias Handin.Modules.ModuleTAs
 
   @spec get_students(module_id :: Ecto.UUID) :: list(User.t())
   def get_students(module_id) do
@@ -192,5 +193,20 @@ defmodule Handin.Modules do
       _ ->
         query
     end
+  end
+
+  def get_all_tas(module_id) do
+    from(ta in ModuleTAs,
+    join: u in assoc(ta, :user),
+    where: ta.module_id == ^module_id,
+    preload: [user: u]
+    )
+    |> Repo.all()
+  end
+
+  def add_ta(attrs) do
+    %ModuleTAs{}
+    |> ModuleTAs.changeset(attrs)
+    |> Repo.insert()
   end
 end

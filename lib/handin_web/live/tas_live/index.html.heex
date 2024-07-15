@@ -4,9 +4,9 @@
   <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
 </.breadcrumbs>
 <.tabs>
-  <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"} current={true} />
+  <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"}/>
   <:item text="Members" href={~p"/modules/#{@module.id}/members"} />
-  <:item text="Task Assistants" href={~p"/modules/#{@module.id}/tas"} />
+  <:item text="Task Assistants" href={~p"/modules/#{@module.id}/tas"} current={true} />
 
   <:item
     :if={@current_user.role == :student}

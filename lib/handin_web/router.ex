@@ -126,6 +126,10 @@ defmodule HandinWeb.Router do
 
         live "/members/new", MembersLive.Index, :new
         live "/members/:user_id/show", MembersLive.Show, :show
+
+        live "/tas", TAsLive.Index, :index
+        live "/tas/new", TAsLive.Index, :new
+        live "/tas/edit/:ta_id", TAsLive.Index, :edit
       end
     end
   end
