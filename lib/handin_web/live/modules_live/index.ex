@@ -1,20 +1,13 @@
 defmodule HandinWeb.ModulesLive.Index do
   use HandinWeb, :live_view
-  alias Handin.Modules.Module
   alias Handin.Modules
+  alias Handin.Modules.{Module}
 
   @impl true
   def mount(_params, _session, socket) do
-    modules =
-      if socket.assigns.current_user.role in [:admin, :teaching_assistant] do
-        Modules.list_module()
-      else
-        socket.assigns.current_user |> Handin.Repo.preload(:modules) |> Map.get(:modules)
-      end
+    modules = Modules.list_module(socket.assigns.current_user)
 
-    {:ok,
-     stream(socket, :modules, modules)
-     |> assign(:current_page, :modules)}
+    {:ok, assign(socket, :current_page, :modules) |> stream(:modules, modules)}
   end
 
   @impl true
@@ -42,8 +35,32 @@ defmodule HandinWeb.ModulesLive.Index do
     |> assign(:module, nil)
   end
 
+  defp apply_action(socket, :clone, %{"id" => id}) do
+    module = Modules.get_module!(id)
+
+    socket
+    |> assign(:page_title, "Clone Module")
+    |> assign(:module, module)
+  end
+
+  defp apply_action(socket, :archive, %{"id" => id}) do
+    module = Modules.get_module!(id)
+
+    socket
+    |> assign(:page_title, "Archive Module")
+    |> assign(:module, module)
+  end
+
   @impl true
   def handle_info({HandinWeb.ModulesLive.FormComponent, {:saved, module}}, socket) do
     {:noreply, stream_insert(socket, :modules, module)}
+  end
+
+  def handle_info({HandinWeb.ModulesLive.ConfirmationComponent, {:cloned, module}}, socket) do
+    {:noreply, stream_insert(socket, :modules, module)}
+  end
+
+  def handle_info({HandinWeb.ModulesLive.ConfirmationComponent, {:archived, module}}, socket) do
+    {:noreply, stream_delete(socket, :modules, module)}
   end
 end

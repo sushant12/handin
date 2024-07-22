@@ -60,10 +60,16 @@ defmodule Handin.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :university_id])
+    |> cast(attrs, [:email, :password, :university_id, :role])
+    |> maybe_validate_role()
     |> validate_required([:university_id])
     |> validate_email(opts)
     |> password_changeset(attrs, opts)
+  end
+
+  defp maybe_validate_role(changeset) do
+    changeset
+    |> validate_inclusion(:role, [:student, :lecturer])
   end
 
   def edit_changeset(user, attrs, opts \\ []) do
@@ -200,5 +206,17 @@ defmodule Handin.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
+  end
+
+  def module_user_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email])
+    |> validate_required([:email])
+    |> validate_change(:email, fn :email, email ->
+      case Handin.Repo.get_by(__MODULE__, email: email) do
+        nil -> [{:email, "User with this email does not exist"}]
+        _ -> []
+      end
+    end)
   end
 end

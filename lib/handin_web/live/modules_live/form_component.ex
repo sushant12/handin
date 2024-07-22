@@ -19,8 +19,19 @@ defmodule HandinWeb.ModulesLive.FormComponent do
         phx-submit="save"
       >
         <div class="grid gap-4 mb-4 sm:grid-cols-1">
-          <.input field={@form[:name]} label="Name" type="text" />
-          <.input field={@form[:code]} label="Code" type="text" />
+          <.input
+            field={@form[:name]}
+            label="Name"
+            type="text"
+            placeholder="eg: Data Structures and Algorithms"
+          />
+          <.input field={@form[:code]} label="Code" type="text" placeholder="eg: CS4115" />
+          <.input
+            field={@form[:term]}
+            label="Term"
+            type="text"
+            placeholder={"eg: Fall #{Date.utc_today().year}"}
+          />
         </div>
         <:actions>
           <.button

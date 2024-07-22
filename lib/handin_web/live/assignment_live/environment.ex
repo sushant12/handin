@@ -63,13 +63,13 @@ defmodule HandinWeb.AssignmentLive.Environment do
         Save
       </.button>
     </.simple_form>
-    <.header class="mb-4 mt-10">Helper Files</.header>
+    <.header class="mb-4 mt-10">Test Case Files</.header>
     <div class="w-1/2">
       <.link
         class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 mb-4"
         patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/add_helper_files"}
       >
-        Add Helper Files
+        Add
       </.link>
       <.table id="helper-files" rows={@assignment.support_files}>
         <:col :let={file} label="name"><%= file.file.file_name %></:col>

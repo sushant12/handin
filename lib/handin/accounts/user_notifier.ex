@@ -17,13 +17,37 @@ defmodule Handin.Accounts.UserNotifier do
     end
   end
 
+  def deliver_temporary_password_email(email, temp_password) do
+    deliver(email, "Temporary password", """
+    Hello,
+
+    Your account has been created with a temporary password: #{temp_password}
+
+    Please log in and change your password as soon as possible.
+
+    Interesting times!!!
+    """)
+  end
+
+  def deliver_module_addition(email, module_name) do
+    deliver(email, "You've been added to module: #{module_name}", """
+
+    Hello #{email},
+
+    You have been added to the module #{module_name}.
+
+    Log in to your account to access the new module and its content.
+
+    Interesting times!!!
+    """)
+  end
+
   @doc """
   Deliver instructions to confirm account.
   """
   def deliver_confirmation_instructions(user, url) do
     deliver(user.email, "Confirmation instructions", """
 
-    ==============================
 
     Hi #{user.email},
 
@@ -33,7 +57,6 @@ defmodule Handin.Accounts.UserNotifier do
 
     If you didn't create an account with us, please ignore this.
 
-    ==============================
     """)
   end
 
@@ -43,7 +66,6 @@ defmodule Handin.Accounts.UserNotifier do
   def deliver_reset_password_instructions(user, url) do
     deliver(user.email, "Reset password instructions", """
 
-    ==============================
 
     Hi #{user.email},
 
@@ -53,7 +75,6 @@ defmodule Handin.Accounts.UserNotifier do
 
     If you didn't request this change, please ignore this.
 
-    ==============================
     """)
   end
 
@@ -63,7 +84,6 @@ defmodule Handin.Accounts.UserNotifier do
   def deliver_update_email_instructions(user, url) do
     deliver(user.email, "Update email instructions", """
 
-    ==============================
 
     Hi #{user.email},
 
@@ -73,7 +93,6 @@ defmodule Handin.Accounts.UserNotifier do
 
     If you didn't request this change, please ignore this.
 
-    ==============================
     """)
   end
 end

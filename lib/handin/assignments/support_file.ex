@@ -24,4 +24,10 @@ defmodule Handin.Assignments.SupportFile do
     |> cast_attachments(attrs, [:file])
     |> validate_required([:file])
   end
+
+  def clone_changeset(support_file, attrs) do
+    support_file
+    |> cast(attrs, [:assignment_id, :file])
+    |> validate_required([:assignment_id, :file])
+  end
 end

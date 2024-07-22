@@ -50,28 +50,26 @@ defmodule HandinWeb.UserRegistrationLive do
 
             <div>
               <.input
-                field={@form[:email]}
-                label="Email"
-                type="email"
+                field={@form[:role]}
+                type="select"
+                prompt="Select your role"
+                options={[:student, :lecturer]}
+                label="Role"
                 required
-                placeholder="email@example.com"
               />
             </div>
+
             <div>
-              <.input
-                field={@form[:password]}
-                label="Password"
-                type="password"
-                placeholder="••••••••"
-                required
-              />
+              <.input field={@form[:email]} label="Email" type="email" required />
+            </div>
+            <div>
+              <.input field={@form[:password]} label="Password" type="password" required />
             </div>
             <div>
               <.input
                 field={@form[:password_confirmation]}
                 label="Confirm password"
                 type="password"
-                placeholder="••••••••"
                 required
               />
             </div>

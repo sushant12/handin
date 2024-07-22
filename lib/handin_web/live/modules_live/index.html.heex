@@ -7,6 +7,7 @@
 </.link>
 <.table id="modules" rows={@streams.modules}>
   <:col :let={{_, module}} label="Module"><%= "#{module.name} (#{module.code})" %></:col>
+  <:col :let={{_, module}} label="Term"><%= module.term %></:col>
   <:col :let={{_, module}} label="Students"><%= Modules.get_students_count(module.id) %></:col>
   <:col :let={{_, module}} label="Assignments">
     <%= Modules.get_assignments_count(module.id, @current_user) %>
@@ -25,6 +26,20 @@
     >
       Edit
     </.link>
+    <.link
+      :if={@current_user.role != :student}
+      patch={~p"/modules/#{module.id}/clone"}
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    >
+      Clone
+    </.link>
+    <.link
+      :if={@current_user.role != :student}
+      patch={~p"/modules/#{module.id}/archive"}
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    >
+      Archive
+    </.link>
   </:action>
 </.table>
 <.modal
@@ -40,6 +55,31 @@
     action={@live_action}
     modulee={@module}
     current_user={@current_user}
+    patch={~p"/modules"}
+  />
+</.modal>
+<.modal :if={@live_action in [:clone]} id="clone-modal" show on_cancel={JS.patch(~p"/modules")}>
+  <.live_component
+    module={HandinWeb.ModulesLive.ConfirmationComponent}
+    id={@module.id}
+    user_id={@current_user.id}
+    timezone={@current_user.university.timezone}
+    message="Are you sure you want to clone this module?"
+    confirm_event="clone"
+    patch={~p"/modules"}
+  />
+</.modal>
+<.modal
+  :if={@live_action in [:archive]}
+  id="archive-modal"
+  show
+  on_cancel={JS.patch(~p"/modules")}
+>
+  <.live_component
+    module={HandinWeb.ModulesLive.ConfirmationComponent}
+    id={@module.id}
+    message="Are you sure you want to archive this module?"
+    confirm_event="archive"
     patch={~p"/modules"}
   />
 </.modal>

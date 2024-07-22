@@ -6,10 +6,10 @@ defmodule HandinWeb.MembersLive.Index do
   def mount(%{"id" => id}, _session, socket) do
     module = Modules.get_module!(id)
 
-    members = get_all_members(id) |> put_indexes()
+    students = Modules.get_students(module.id)
 
     {:ok,
-     stream(socket, :members, members)
+     stream(socket, :members, students)
      |> assign(:module, module)
      |> assign(:current_tab, :members)
      |> assign(:current_page, :modules)}
@@ -32,39 +32,17 @@ defmodule HandinWeb.MembersLive.Index do
   end
 
   @impl true
-  def handle_info({HandinWeb.MembersLive.FormComponent, {:saved, _member}}, socket) do
-    members = get_all_members(socket.assigns.module.id) |> put_indexes()
-    {:noreply, stream(socket, :members, members)}
-  end
-
-  def handle_info({HandinWeb.MembersLive.FormComponent, {:invited, _invitation}}, socket) do
-    members = get_all_members(socket.assigns.module.id) |> put_indexes()
-    {:noreply, stream(socket, :members, members)}
+  def handle_info({HandinWeb.MembersLive.FormComponent, {:saved, users}}, socket) do
+    {:noreply, stream_insert(socket, :members, users)}
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id, "status" => "confirmed"}, socket) do
-    Accounts.get_user!(id)
-    Modules.remove_user_from_module(id, socket.assigns.module.id)
-
-    members = get_all_members(socket.assigns.module.id) |> put_indexes()
-
-    {:noreply,
-     stream(socket, :members, members) |> put_flash(:info, "Member deleted successfully")}
-  end
-
   def handle_event("delete", %{"id" => id}, socket) do
-    Modules.delete_modules_invitations(id)
-
-    members = get_all_members(socket.assigns.module.id) |> put_indexes()
+    Accounts.get_user!(id)
+    {:ok, module_user} = Modules.remove_user_from_module(id, socket.assigns.module.id)
 
     {:noreply,
-     stream(socket, :members, members)
+     stream_delete(socket, :members, module_user.user)
      |> put_flash(:info, "Member deleted successfully")}
   end
-
-  defp put_indexes(items), do: Enum.with_index(items, &Map.put(&1, :index, &2 + 1))
-
-  defp get_all_members(module_id),
-    do: Modules.get_students(module_id) ++ Modules.get_pending_students(module_id)
 end

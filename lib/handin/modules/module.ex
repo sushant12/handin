@@ -10,6 +10,8 @@ defmodule Handin.Modules.Module do
   schema "module" do
     field :name, :string
     field :code, :string
+    field :term, :string
+    field :archived, :boolean, default: false
     field :deleted_at, :utc_datetime
     has_many :invitations, ModulesInvitations
     has_many :assignments, Assignment
@@ -21,7 +23,7 @@ defmodule Handin.Modules.Module do
   @doc false
   def changeset(module, attrs) do
     module
-    |> cast(attrs, [:name, :code])
-    |> validate_required([:name, :code])
+    |> cast(attrs, [:name, :code, :term, :archived])
+    |> validate_required([:name, :code, :term])
   end
 end

@@ -90,8 +90,13 @@ defmodule HandinWeb.Router do
         {HandinWeb.Auth, :admin_or_lecturer}
       ] do
       live "/modules/new", ModulesLive.Index, :new
+      live "/modules/archived", ArchivedModulesLive.Index, :index
 
       scope "/modules/:id" do
+        live "/clone", ModulesLive.Index, :clone
+        live "/archive", ModulesLive.Index, :archive
+        live "/unarchive", ArchivedModulesLive.Index, :unarchive
+
         live "/edit", ModulesLive.Index, :edit
         live "/assignments/new", AssignmentLive.Index, :new
         live "/assignments/:assignment_id/edit", AssignmentLive.Index, :edit
@@ -126,6 +131,8 @@ defmodule HandinWeb.Router do
 
         live "/members/new", MembersLive.Index, :new
         live "/members/:user_id/show", MembersLive.Show, :show
+        live "/teaching_assistants/new", TeachingAssistantsLive.Index, :new
+        live "/teaching_assistants/delete", TeachingAssistantsLive.Index, :delete
       end
     end
   end
@@ -158,6 +165,7 @@ defmodule HandinWeb.Router do
              :show
 
         live "/members", MembersLive.Index, :index
+        live "/teaching_assistants", TeachingAssistantsLive.Index, :index
       end
     end
   end

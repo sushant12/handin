@@ -1,16 +1,12 @@
 defmodule HandinWeb.MembersLive.FormComponent do
   use HandinWeb, :live_component
-  alias NimbleCSV.RFC4180, as: CSVParser
+  alias NimbleCSV.RFC4180, as: CSV
   alias Handin.Modules
-  alias Handin.Accounts
-  alias Handin.Accounts.User
-  alias Handin.Modules.ModulesUsers
-
+  alias Handin.Modules.AddUserToModuleParams
   @impl true
   def mount(socket) do
     {:ok,
      socket
-     |> assign(:uploaded_files, [])
      |> allow_upload(:csv_file_input, accept: ~w(.csv), max_entries: 1, max_file_size: 1_500_000)}
   end
 
@@ -85,127 +81,58 @@ defmodule HandinWeb.MembersLive.FormComponent do
   end
 
   @impl true
-  def handle_event(
-        "save",
-        %{"modules_invitations" => modules_invitations_params},
-        socket
-      ) do
-    if socket.assigns.uploads.csv_file_input.entries != [] do
-      emails =
-        consume_uploaded_entries(socket, :csv_file_input, fn %{path: path}, _entry ->
-          rows =
-            path
-            |> File.read!()
-            |> CSVParser.parse_string()
+  def handle_event("save", %{"user" => user_params}, socket) do
+    email = user_params["email"]
+    csv_emails = process_csv_upload(socket)
 
-          {:ok, rows}
+    emails = [email | csv_emails] |> Enum.reject(&is_nil/1) |> Enum.uniq()
+    module = Modules.get_module!(socket.assigns.module_id)
+
+    params = %AddUserToModuleParams{
+      emails: emails,
+      university_id: socket.assigns.current_user.university.id,
+      module: module
+    }
+
+    case Modules.add_users_to_module(params) do
+      {:ok, %{users: users}} ->
+        notify_parent({:saved, users})
+
+        socket =
+          socket
+          |> put_flash(:info, "Users added to module successfully")
+          |> push_navigate(to: socket.assigns.patch)
+
+        {:noreply, socket}
+
+      {:error, failed_operation, _failed_value, _changes_so_far} ->
+        socket =
+          socket
+          |> put_flash(:error, "Failed to add users: #{inspect(failed_operation)}")
+          |> assign(form: to_form(%{email: email}, as: :user))
+
+        {:noreply, socket}
+    end
+  end
+
+  defp process_csv_upload(socket) do
+    socket.assigns.uploads.csv_file_input.entries
+    |> Enum.flat_map(fn entry ->
+      consume_uploaded_entry(socket, entry, fn %{path: path} ->
+        File.read!(path)
+        |> CSV.parse_string()
+        |> Enum.map(fn
+          [email] -> email
+          _ -> nil
         end)
-        |> List.flatten()
-        |> Enum.filter(&(String.trim(&1) != ""))
-
-      save_modules_invitations(socket, socket.assigns.action, %{"emails" => emails})
-    else
-      save_modules_invitations(
-        socket,
-        socket.assigns.action,
-        modules_invitations_params
-      )
-    end
-  end
-
-  defp save_modules_invitations(socket, :new, %{"email" => email} = params) do
-    with true <- Accounts.valid_email?(email, socket.assigns.current_user.university_id),
-         %User{} = user <- Accounts.get_user_by_email(email),
-         {:ok, %ModulesUsers{}} <-
-           Modules.add_member(%{
-             user_id: user.id,
-             module_id: socket.assigns.module_id
-           }) do
-      notify_parent({:saved, user})
-
-      {:noreply,
-       socket
-       |> put_flash(:info, "Member added successfully")
-       |> push_patch(to: socket.assigns.patch)}
-    else
-      {:error, _} ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "Member already added")
-         |> push_patch(to: socket.assigns.patch)}
-
-      false ->
-        {:noreply, socket |> assign_form(params, errors: [email: {"invalid email", []}])}
-
-      nil ->
-        case Modules.add_modules_invitations(%{
-               email: email,
-               module_id: socket.assigns.module_id
-             }) do
-          {:ok, invitation} ->
-            notify_parent({:invited, invitation})
-
-            {:noreply,
-             socket
-             |> put_flash(:info, "Member added successfully")
-             |> push_patch(to: socket.assigns.patch)}
-
-          _ ->
-            {:noreply,
-             socket
-             |> put_flash(:error, "Member already added")
-             |> push_patch(to: socket.assigns.patch)}
-        end
-    end
-  end
-
-  defp save_modules_invitations(socket, :new, %{"emails" => emails} = params) do
-    emails
-    |> Enum.filter(fn email ->
-      !Accounts.valid_email?(email, socket.assigns.current_user.university_id)
+      end)
     end)
-    |> case do
-      [] ->
-        Enum.each(emails, fn email ->
-          case Accounts.get_user_by_email(email) do
-            %User{} = user ->
-              notify_parent({:saved, user})
-
-              Modules.add_member(%{
-                user_id: user.id,
-                module_id: socket.assigns.module_id
-              })
-
-            nil ->
-              case Modules.add_modules_invitations(%{
-                     email: email,
-                     module_id: socket.assigns.module_id
-                   }) do
-                {:ok, invitation} ->
-                  notify_parent({:invited, invitation})
-
-                _ ->
-                  :ok
-              end
-          end
-        end)
-
-        {:noreply,
-         socket
-         |> put_flash(:info, "Member added successfully")
-         |> push_patch(to: socket.assigns.patch)}
-
-      emails ->
-        {:noreply,
-         socket
-         |> assign_form(params,
-           errors: [csv_file_input: "invalid emails #{Enum.join(emails, ", ")}"]
-         )}
-    end
+    |> List.flatten()
+    |> Enum.reject(&is_nil/1)
   end
 
   defp assign_form(socket, changeset \\ %{}, opts \\ []) do
-    assign(socket, :form, to_form(changeset, opts ++ [as: "modules_invitations"]))
+    assign(socket, :form, to_form(changeset, opts ++ [as: "user"]))
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
