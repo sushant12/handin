@@ -1,4 +1,4 @@
-defmodule HandinWeb.MembersLive.FormComponent do
+defmodule HandinWeb.StudentsLive.FormComponent do
   use HandinWeb, :live_component
   alias NimbleCSV.RFC4180, as: CSVParser
   alias Handin.Modules
@@ -25,7 +25,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
       </div>
       <.simple_form
         for={@form}
-        id="member-form"
+        id="student-form"
         phx-target={@myself}
         phx-submit="save"
         phx-change="validate"
@@ -117,7 +117,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
     with true <- Accounts.valid_email?(email, socket.assigns.current_user.university_id),
          %User{} = user <- Accounts.get_user_by_email(email),
          {:ok, %ModulesUsers{}} <-
-           Modules.add_member(%{
+           Modules.add_student(%{
              user_id: user.id,
              module_id: socket.assigns.module_id
            }) do
@@ -125,13 +125,13 @@ defmodule HandinWeb.MembersLive.FormComponent do
 
       {:noreply,
        socket
-       |> put_flash(:info, "Member added successfully")
+       |> put_flash(:info, "Student added successfully")
        |> push_patch(to: socket.assigns.patch)}
     else
       {:error, _} ->
         {:noreply,
          socket
-         |> put_flash(:error, "Member already added")
+         |> put_flash(:error, "Student already added")
          |> push_patch(to: socket.assigns.patch)}
 
       false ->
@@ -147,13 +147,13 @@ defmodule HandinWeb.MembersLive.FormComponent do
 
             {:noreply,
              socket
-             |> put_flash(:info, "Member added successfully")
+             |> put_flash(:info, "Student added successfully")
              |> push_patch(to: socket.assigns.patch)}
 
           _ ->
             {:noreply,
              socket
-             |> put_flash(:error, "Member already added")
+             |> put_flash(:error, "Student already added")
              |> push_patch(to: socket.assigns.patch)}
         end
     end
@@ -171,7 +171,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
             %User{} = user ->
               notify_parent({:saved, user})
 
-              Modules.add_member(%{
+              Modules.add_student(%{
                 user_id: user.id,
                 module_id: socket.assigns.module_id
               })
@@ -192,7 +192,7 @@ defmodule HandinWeb.MembersLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Member added successfully")
+         |> put_flash(:info, "Student added successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       emails ->

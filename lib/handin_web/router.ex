@@ -124,8 +124,8 @@ defmodule HandinWeb.Router do
              AssignmentLive.Show,
              :edit_assignment_test
 
-        live "/members/new", MembersLive.Index, :new
-        live "/members/:user_id/show", MembersLive.Show, :show
+        live "/students/new", StudentsLive.Index, :new
+        live "/students/:user_id/show", StudentsLive.Show, :show
       end
     end
   end
@@ -157,7 +157,7 @@ defmodule HandinWeb.Router do
              AssignmentSubmissionLive.Show,
              :show
 
-        live "/members", MembersLive.Index, :index
+        live "/students", StudentsLive.Index, :index
       end
     end
   end

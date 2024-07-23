@@ -5,7 +5,7 @@
 </.breadcrumbs>
 <.tabs>
   <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"} current={true} />
-  <:item text="Members" href={~p"/modules/#{@module.id}/members"} />
+  <:item text="Students" href={~p"/modules/#{@module.id}/students"} />
   <:item
     :if={@current_user.role == :student}
     text="Grades"

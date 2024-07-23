@@ -70,9 +70,9 @@ defmodule Handin.Modules do
     end)
   end
 
-  @spec add_member(params :: %{user_id: Ecto.UUID, module_id: Ecto.UUID}) ::
+  @spec add_student(params :: %{user_id: Ecto.UUID, module_id: Ecto.UUID}) ::
           {:ok, ModulesUsers.t()}
-  def add_member(params) do
+  def add_student(params) do
     ModulesUsers.changeset(%ModulesUsers{}, params) |> Repo.insert()
   end
 
@@ -124,7 +124,7 @@ defmodule Handin.Modules do
     |> where([mi], mi.email == ^user.email)
     |> Repo.all()
     |> Enum.each(fn module_invitation ->
-      add_member(%{
+      add_student(%{
         user_id: user.id,
         module_id: module_invitation.module_id
       })

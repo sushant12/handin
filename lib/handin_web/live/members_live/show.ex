@@ -1,4 +1,4 @@
-defmodule HandinWeb.MembersLive.Show do
+defmodule HandinWeb.StudentsLive.Show do
   use HandinWeb, :live_view
 
   alias Handin.{Modules, Accounts, Repo}
@@ -12,8 +12,8 @@ defmodule HandinWeb.MembersLive.Show do
       <:item text="Home" href={~p"/"} />
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
-      <:item text="Members" href={~p"/modules/#{@module.id}/members"} />
-      <:item text={@student.email} href={~p"/modules/#{@module.id}/members"} />
+      <:item text="Students" href={~p"/modules/#{@module.id}/students"} />
+      <:item text={@student.email} href={~p"/modules/#{@module.id}/students"} />
     </.breadcrumbs>
 
     <%= if @student do %>
