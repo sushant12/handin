@@ -560,7 +560,7 @@ defmodule Handin.Assignments do
     end
   end
 
-  def is_submission_allowed?(assignment_submission) do
+  def submission_allowed?(assignment_submission) do
     attempts_valid?(assignment_submission) &&
       submission_date_valid?(assignment_submission)
   end

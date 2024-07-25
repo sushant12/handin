@@ -327,7 +327,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
     next_submission = socket.assigns.submissions |> Enum.at(current_submission_index + 1)
 
     next_submission =
-      if(next_submission) do
+      if next_submission do
         next_submission
       else
         Enum.at(socket.assigns.submissions, 0)
@@ -348,7 +348,7 @@ defmodule HandinWeb.AssignmentSubmissionLive.Show do
     prev_submission = socket.assigns.submissions |> Enum.at(current_submission_index - 1)
 
     prev_submission =
-      if(prev_submission) do
+      if prev_submission do
         prev_submission
       else
         Enum.at(socket.assigns.submissions, 0)

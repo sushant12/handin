@@ -69,7 +69,7 @@ defmodule Handin.AssignmentSubmissions do
         end
 
       total_points =
-        if(is_nil(assignment_submission)) do
+        if is_nil(assignment_submission) do
           0
         else
           assignment_submission.total_points

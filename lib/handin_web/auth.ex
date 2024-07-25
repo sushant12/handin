@@ -15,7 +15,7 @@ defmodule HandinWeb.Auth do
   end
 
   def on_mount(:admin_or_lecturer, _params, _session, socket) do
-    if(admin_or_lecturer?(socket.assigns.current_user)) do
+    if admin_or_lecturer?(socket.assigns.current_user) do
       {:cont, socket}
     else
       socket =

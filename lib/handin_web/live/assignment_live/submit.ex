@@ -39,7 +39,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
       Assignment Submission
     </.header>
     <.link
-      :if={Assignments.is_submission_allowed?(@assignment_submission)}
+      :if={Assignments.submission_allowed?(@assignment_submission)}
       class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 mb-4"
       patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/upload_submissions"}
     >
@@ -50,7 +50,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
         <:col :let={file} label="name"><%= file.file.file_name %></:col>
         <:action :let={file}>
           <.link
-            :if={Assignments.is_submission_allowed?(@assignment_submission)}
+            :if={Assignments.submission_allowed?(@assignment_submission)}
             class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
             phx-click={JS.push("delete-submission-file", value: %{id: file.id})}
             data-confirm="Are you sure?"
@@ -62,7 +62,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
     </div>
 
     <.button
-      :if={Assignments.is_submission_allowed?(@assignment_submission)}
+      :if={Assignments.submission_allowed?(@assignment_submission)}
       class="text-white inline-flex items-center bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 my-4"
       phx-click="submit_assignment"
       phx-value-assignment_id={@assignment.id}
@@ -273,7 +273,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
 
   @impl true
   def handle_event("submit_assignment", %{"assignment_id" => assignment_id}, socket) do
-    if Assignments.is_submission_allowed?(socket.assigns.assignment_submission) do
+    if Assignments.submission_allowed?(socket.assigns.assignment_submission) do
       DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
         id: Handin.BuildServer,
         start:

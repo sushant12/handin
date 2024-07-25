@@ -57,8 +57,8 @@ defmodule Handin.Modules do
   def get_module!(id),
     do: Repo.get(Module, id) |> Repo.preload(assignments: [:programming_language])
 
-  @spec create_module(attrs :: %{name: String.t(), code: String.t()}, user_id :: Ecto.UUID) ::
-          {:ok, Module.t()} | {:error, %Ecto.Changeset{}}
+    @spec create_module(attrs :: %{name: String.t(), code: String.t()}, user_id :: Ecto.UUID) ::
+    {:ok, Module.t()} | {:error, Ecto.Changeset.t()}
   def create_module(attrs, user_id) do
     Repo.transaction(fn ->
       module = Module.changeset(%Module{}, attrs) |> Repo.insert!()
