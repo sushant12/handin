@@ -19,6 +19,14 @@ defmodule Handin.Assignments.CustomAssignmentDate do
   @req_attrs [:start_date, :due_date, :user_id, :assignment_id]
 
   @attrs [:start_date, :due_date, :enable_cutoff_date, :cutoff_date, :assignment_id, :user_id]
+  @spec changeset(
+          {map(), map()}
+          | %{
+              :__struct__ => atom() | %{:__changeset__ => any(), optional(any()) => any()},
+              optional(atom()) => any()
+            },
+          :invalid | %{optional(:__struct__) => none(), optional(atom() | binary()) => any()}
+        ) :: Ecto.Changeset.t()
   def changeset(custom_assignment_date, attrs) do
     custom_assignment_date
     |> cast(attrs, @attrs)
@@ -62,27 +70,30 @@ defmodule Handin.Assignments.CustomAssignmentDate do
 
   defp maybe_validate_cutoff_date(changeset) do
     if get_field(changeset, :enable_cutoff_date) do
-      start_date = get_field(changeset, :start_date)
-      due_date = get_field(changeset, :due_date)
-
-      changeset =
-        changeset
-        |> validate_required(:cutoff_date)
-
-      case get_field(changeset, :cutoff_date) do
-        nil ->
-          changeset
-
-        cutoff_date ->
-          if start_date && due_date && NaiveDateTime.compare(cutoff_date, due_date) == :lt do
-            changeset
-            |> add_error(:cutoff_date, "must come after start date and due date")
-          else
-            changeset
-          end
-      end
+      changeset
+      |> validate_required(:cutoff_date)
+      |> validate_cutoff_date_order()
     else
       changeset
     end
+  end
+
+  defp validate_cutoff_date_order(changeset) do
+    start_date = get_field(changeset, :start_date)
+    due_date = get_field(changeset, :due_date)
+    cutoff_date = get_field(changeset, :cutoff_date)
+
+    cond do
+      is_nil(cutoff_date) ->
+        changeset
+      invalid_cutoff_date?(start_date, due_date, cutoff_date) ->
+        add_error(changeset, :cutoff_date, "must come after start date and due date")
+      true ->
+        changeset
+    end
+  end
+
+  defp invalid_cutoff_date?(start_date, due_date, cutoff_date) do
+    start_date && due_date && NaiveDateTime.compare(cutoff_date, due_date) == :lt
   end
 end

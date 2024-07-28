@@ -114,93 +114,85 @@ defmodule HandinWeb.StudentsLive.FormComponent do
   end
 
   defp save_modules_invitations(socket, :new, %{"email" => email} = params) do
-    with true <- Accounts.valid_email?(email, socket.assigns.current_user.university_id),
-         %User{} = user <- Accounts.get_user_by_email(email),
-         {:ok, %ModulesUsers{}} <-
-           Modules.add_student(%{
-             user_id: user.id,
-             module_id: socket.assigns.module_id
-           }) do
-      notify_parent({:saved, user})
-
-      {:noreply,
-       socket
-       |> put_flash(:info, "Student added successfully")
-       |> push_patch(to: socket.assigns.patch)}
-    else
-      {:error, _} ->
+    case process_single_email(socket, email) do
+      {:ok, message} ->
         {:noreply,
          socket
-         |> put_flash(:error, "Student already added")
+         |> put_flash(:info, message)
          |> push_patch(to: socket.assigns.patch)}
 
-      false ->
+      {:error, message} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, message)
+         |> push_patch(to: socket.assigns.patch)}
+
+      {:invalid_email, _} ->
         {:noreply, socket |> assign_form(params, errors: [email: {"invalid email", []}])}
-
-      nil ->
-        case Modules.add_modules_invitations(%{
-               email: email,
-               module_id: socket.assigns.module_id
-             }) do
-          {:ok, invitation} ->
-            notify_parent({:invited, invitation})
-
-            {:noreply,
-             socket
-             |> put_flash(:info, "Student added successfully")
-             |> push_patch(to: socket.assigns.patch)}
-
-          _ ->
-            {:noreply,
-             socket
-             |> put_flash(:error, "Student already added")
-             |> push_patch(to: socket.assigns.patch)}
-        end
     end
   end
 
   defp save_modules_invitations(socket, :new, %{"emails" => emails} = params) do
-    emails
-    |> Enum.filter(fn email ->
-      !Accounts.valid_email?(email, socket.assigns.current_user.university_id)
-    end)
-    |> case do
-      [] ->
-        Enum.each(emails, fn email ->
-          case Accounts.get_user_by_email(email) do
-            %User{} = user ->
-              notify_parent({:saved, user})
-
-              Modules.add_student(%{
-                user_id: user.id,
-                module_id: socket.assigns.module_id
-              })
-
-            nil ->
-              case Modules.add_modules_invitations(%{
-                     email: email,
-                     module_id: socket.assigns.module_id
-                   }) do
-                {:ok, invitation} ->
-                  notify_parent({:invited, invitation})
-
-                _ ->
-                  :ok
-              end
-          end
-        end)
-
+    case process_multiple_emails(socket, emails) do
+      :ok ->
         {:noreply,
          socket
-         |> put_flash(:info, "Student added successfully")
+         |> put_flash(:info, "Students added successfully")
          |> push_patch(to: socket.assigns.patch)}
 
-      emails ->
+      {:error, invalid_emails} ->
         {:noreply,
          socket
          |> assign_form(params,
-           errors: [csv_file_input: "invalid emails #{Enum.join(emails, ", ")}"]
+           errors: [csv_file_input: "invalid emails #{Enum.join(invalid_emails, ", ")}"]
          )}
+    end
+  end
+
+  defp process_single_email(socket, email) do
+    with true <- Accounts.valid_email?(email, socket.assigns.current_user.university_id),
+         result <- add_or_invite_user(socket, email) do
+      result
+    else
+      false -> {:invalid_email, email}
+    end
+  end
+
+  defp add_or_invite_user(socket, email) do
+    case Accounts.get_user_by_email(email) do
+      %User{} = user -> add_existing_user(socket, user)
+      nil -> invite_new_user(socket, email)
+    end
+  end
+
+  defp add_existing_user(socket, user) do
+    case Modules.add_student(%{user_id: user.id, module_id: socket.assigns.module_id}) do
+      {:ok, %ModulesUsers{}} ->
+        notify_parent({:saved, user})
+        {:ok, "Student added successfully"}
+      {:error, _} ->
+        {:error, "Student already added"}
+    end
+  end
+
+  defp invite_new_user(socket, email) do
+    case Modules.add_modules_invitations(%{email: email, module_id: socket.assigns.module_id}) do
+      {:ok, invitation} ->
+        notify_parent({:invited, invitation})
+        {:ok, "Student invited successfully"}
+      _ ->
+        {:error, "Student already invited"}
+    end
+  end
+
+  defp process_multiple_emails(socket, emails) do
+    invalid_emails = Enum.filter(emails, &(!Accounts.valid_email?(&1, socket.assigns.current_user.university_id)))
+
+    if invalid_emails == [] do
+      Enum.each(emails, &process_single_email(socket, &1))
+      :ok
+    else
+      {:error, invalid_emails}
     end
   end
 

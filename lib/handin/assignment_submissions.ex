@@ -11,75 +11,74 @@ defmodule Handin.AssignmentSubmissions do
   end
 
   def get_student_grades_for_assignment(assignment_id) do
-    assignment =
-      Assignment
-      |> where([a], a.id == ^assignment_id)
-      |> Repo.one()
-      |> Repo.preload([
-        :assignment_tests,
-        :assignment_submissions,
-        builds: [:run_script_result, test_results: [:assignment_test]],
-        module: [:users]
-      ])
+    assignment = get_assignment_with_preloads(assignment_id)
 
     assignment.module.users
-    |> Enum.filter(fn user -> user.role == :student end)
-    |> Enum.map(fn user ->
-      build =
-        assignment.builds
-        |> Enum.filter(fn build -> build.user_id == user.id end)
-        |> case do
-          [] -> nil
-          builds -> Enum.sort_by(builds, & &1.inserted_at, {:desc, DateTime}) |> List.first()
-        end
+    |> Enum.filter(&(&1.role == :student))
+    |> Enum.map(&get_student_grade(assignment, &1))
+  end
 
-      assignment_submission =
-        if is_nil(build) do
-          nil
-        else
-          assignment.assignment_submissions
-          |> Enum.find(fn assingment_submission -> assingment_submission.user_id == user.id end)
-        end
+  defp get_assignment_with_preloads(assignment_id) do
+    Assignment
+    |> where([a], a.id == ^assignment_id)
+    |> Repo.one()
+    |> Repo.preload([
+      :assignment_tests,
+      :assignment_submissions,
+      builds: [:run_script_result, test_results: [:assignment_test]],
+      module: [:users]
+    ])
+  end
 
-      attempt_marks =
-        if not is_nil(build) && build.run_script_result.state == :pass do
-          assignment.attempt_marks
-        else
-          0
-        end
+  defp get_student_grade(assignment, user) do
+    build = get_latest_build(assignment.builds, user.id)
+    assignment_submission = get_assignment_submission(assignment, user.id, build)
+    attempt_marks = calculate_attempt_marks(assignment, build)
+    test_result_marks = calculate_test_result_marks(assignment, build, attempt_marks)
+    total_points = get_total_points(assignment_submission)
 
-      test_result_marks =
-        if attempt_marks == 0 do
-          assignment.assignment_tests
-          |> Enum.reduce(%{}, fn assignment_test, acc ->
-            Map.merge(acc, %{assignment_test.command => 0})
-          end)
-        else
-          build.test_results
-          |> Enum.reduce(%{}, fn test_result, acc ->
-            test_marks =
-              if test_result.state == :pass do
-                test_result.assignment_test.points_on_pass
-              else
-                0
-              end
+    Map.merge(test_result_marks, %{
+      "email" => user.email,
+      "attempt_marks" => attempt_marks,
+      "total" => total_points
+    })
+  end
 
-            Map.merge(acc, %{test_result.assignment_test.command => test_marks})
-          end)
-        end
+  defp get_latest_build(builds, user_id) do
+    builds
+    |> Enum.filter(&(&1.user_id == user_id))
+    |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
+    |> List.first()
+  end
 
-      total_points =
-        if is_nil(assignment_submission) do
-          0
-        else
-          assignment_submission.total_points
-        end
+  defp get_assignment_submission(assignment, user_id, build) do
+    if is_nil(build), do: nil, else: Enum.find(assignment.assignment_submissions, &(&1.user_id == user_id))
+  end
 
-      Map.merge(test_result_marks, %{
-        "email" => user.email,
-        "attempt_marks" => attempt_marks,
-        "total" => total_points
-      })
+  defp calculate_attempt_marks(assignment, build) do
+    if not is_nil(build) && build.run_script_result.state == :pass, do: assignment.attempt_marks, else: 0
+  end
+
+  defp calculate_test_result_marks(assignment, build, attempt_marks) do
+    if attempt_marks == 0 do
+      zero_marks_map(assignment.assignment_tests)
+    else
+      calculate_non_zero_test_marks(build.test_results)
+    end
+  end
+
+  defp zero_marks_map(assignment_tests) do
+    Enum.reduce(assignment_tests, %{}, &Map.put(&2, &1.command, 0))
+  end
+
+  defp calculate_non_zero_test_marks(test_results) do
+    Enum.reduce(test_results, %{}, fn test_result, acc ->
+      test_marks = if test_result.state == :pass, do: test_result.assignment_test.points_on_pass, else: 0
+      Map.put(acc, test_result.assignment_test.command, test_marks)
     end)
+  end
+
+  defp get_total_points(assignment_submission) do
+    if is_nil(assignment_submission), do: 0, else: assignment_submission.total_points
   end
 end

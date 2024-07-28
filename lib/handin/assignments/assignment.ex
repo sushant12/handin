@@ -138,48 +138,51 @@ defmodule Handin.Assignments.Assignment do
 
   defp maybe_validate_cutoff_date(changeset) do
     if get_field(changeset, :enable_cutoff_date) do
-      start_date = get_field(changeset, :start_date)
-      due_date = get_field(changeset, :due_date)
-
-      changeset =
-        changeset
-        |> validate_required(:cutoff_date)
-
-      case get_field(changeset, :cutoff_date) do
-        nil ->
-          changeset
-
-        cutoff_date ->
-          if start_date && due_date && NaiveDateTime.compare(cutoff_date, due_date) == :lt do
-            changeset
-            |> add_error(:cutoff_date, "must come after start date and due date")
-          else
-            changeset
-          end
-      end
+      changeset
+      |> validate_required(:cutoff_date)
+      |> validate_cutoff_date_value()
     else
       changeset
     end
   end
 
+  defp validate_cutoff_date_value(changeset) do
+    start_date = get_field(changeset, :start_date)
+    due_date = get_field(changeset, :due_date)
+    cutoff_date = get_field(changeset, :cutoff_date)
+
+    cond do
+      is_nil(cutoff_date) ->
+        changeset
+      valid_cutoff_date?(start_date, due_date, cutoff_date) ->
+        changeset
+      true ->
+        add_error(changeset, :cutoff_date, "must come after start date and due date")
+    end
+  end
+
+  defp valid_cutoff_date?(start_date, due_date, cutoff_date) do
+    is_nil(start_date) or is_nil(due_date) or NaiveDateTime.compare(cutoff_date, due_date) != :lt
+  end
+
   defp maybe_validate_attempt_marks(changeset) do
     if get_field(changeset, :enable_attempt_marks) do
-      changeset = validate_required(changeset, :attempt_marks)
-
-      case get_field(changeset, :attempt_marks) do
-        nil ->
-          changeset
-
-        attempt_marks ->
-          if attempt_marks > get_field(changeset, :total_marks) do
-            changeset
-            |> add_error(:attempt_marks, "cannot exceed total marks")
-          else
-            changeset
-          end
-      end
+      changeset
+      |> validate_required(:attempt_marks)
+      |> validate_attempt_marks_value()
     else
       changeset
+    end
+  end
+
+  defp validate_attempt_marks_value(changeset) do
+    attempt_marks = get_field(changeset, :attempt_marks)
+    total_marks = get_field(changeset, :total_marks)
+
+    if is_nil(attempt_marks) or attempt_marks <= total_marks do
+      changeset
+    else
+      add_error(changeset, :attempt_marks, "cannot exceed total marks")
     end
   end
 
