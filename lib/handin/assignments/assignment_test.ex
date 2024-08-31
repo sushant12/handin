@@ -106,9 +106,9 @@ defmodule Handin.Assignments.AssignmentTest do
         changeset |> validate_required([:expected_output_file])
 
       :string ->
-        if !get_field(changeset, :enable_custom_test),
-          do: validate_required(changeset, [:expected_output_text]),
-          else: changeset
+        if get_field(changeset, :enable_custom_test),
+          do: changeset,
+          else: validate_required(changeset, [:expected_output_text])
 
       _ ->
         changeset

@@ -336,7 +336,7 @@ defmodule Handin.Modules do
           attrs :: %{name: String.t(), code: String.t(), term: String.t()},
           user_id :: Ecto.UUID
         ) ::
-          {:ok, Module.t()} | {:error, %Ecto.Changeset{}}
+          {:ok, Module.t()} | {:error, Ecto.Changeset.t()}
   def create_module(attrs, user_id) do
     Multi.new()
     |> Multi.insert(:module, Module.changeset(%Module{}, attrs))
@@ -475,30 +475,42 @@ defmodule Handin.Modules do
       when is_list(emails) and not is_nil(university_id) do
     Multi.new()
     |> Multi.run(:users, fn _repo, _changes ->
-      Enum.reduce_while(emails, {:ok, []}, fn email, {:ok, acc} ->
-        case ensure_user(email, university_id) do
-          {:ok, user} -> {:cont, {:ok, [user | acc]}}
-          {:error, reason} -> {:halt, {:error, reason}}
-        end
-      end)
+      process_users(emails, university_id)
     end)
     |> Multi.run(:module_users, fn _repo, %{users: users} ->
-      Enum.reduce_while(users, {:ok, []}, fn user, {:ok, acc} ->
-        case add_user_to_module(user.id, module.id) do
-          {:ok, module_user} -> {:cont, {:ok, [module_user | acc]}}
-          {:error, reason} -> {:halt, {:error, reason}}
-        end
-      end)
+      process_module_users(users, module.id)
     end)
     |> Multi.run(:emails, fn _repo, %{users: users} ->
-      Enum.reduce_while(users, {:ok, []}, fn user, {:ok, acc} ->
-        case send_emails(user, module.name) do
-          :ok -> {:cont, {:ok, [user.email | acc]}}
-          {:error, reason} -> {:halt, {:error, reason}}
-        end
-      end)
+      process_emails(users, module.name)
     end)
     |> Repo.transaction()
+  end
+
+  defp process_users(emails, university_id) do
+    Enum.reduce_while(emails, {:ok, []}, fn email, {:ok, acc} ->
+      case ensure_user(email, university_id) do
+        {:ok, user} -> {:cont, {:ok, [user | acc]}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+  end
+
+  defp process_module_users(users, module_id) do
+    Enum.reduce_while(users, {:ok, []}, fn user, {:ok, acc} ->
+      case add_user_to_module(user.id, module_id) do
+        {:ok, module_user} -> {:cont, {:ok, [module_user | acc]}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+  end
+
+  defp process_emails(users, module_name) do
+    Enum.reduce_while(users, {:ok, []}, fn user, {:ok, acc} ->
+      case send_emails(user, module_name) do
+        :ok -> {:cont, {:ok, [user.email | acc]}}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
   end
 
   defp ensure_user(email, university_id) do
@@ -563,7 +575,7 @@ defmodule Handin.Modules do
   end
 
   @spec remove_teaching_assistant(Ecto.UUID.t(), Ecto.UUID.t()) ::
-          {:ok, User.t()} | {:error, %Ecto.Changeset{}}
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def remove_teaching_assistant(user_id, module_id) do
     from(mu in ModulesUsers,
       where:

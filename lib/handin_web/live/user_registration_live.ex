@@ -116,24 +116,24 @@ defmodule HandinWeb.UserRegistrationLive do
   end
 
   def handle_event("save", %{"user" => user_params}, socket) do
-    with {:ok, user} <-
-           Accounts.register_user(user_params) do
-      {:ok, _} =
-        Accounts.deliver_user_confirmation_instructions(
-          user,
-          &url(~p"/users/confirm/#{&1}")
-        )
+    case Accounts.register_user(user_params) do
+      {:ok, user} ->
+        {:ok, _} =
+          Accounts.deliver_user_confirmation_instructions(
+            user,
+            &url(~p"/users/confirm/#{&1}")
+          )
 
-      Modules.check_and_add_new_user_modules_invitations(user)
+        Modules.check_and_add_new_user_modules_invitations(user)
 
-      changeset = Accounts.change_user_registration(user)
+        changeset = Accounts.change_user_registration(user)
 
-      {:noreply,
-       socket
-       |> assign(trigger_submit: true)
-       |> assign_form(changeset)
-       |> put_flash(:info, "User created successfully")}
-    else
+        {:noreply,
+         socket
+         |> assign(trigger_submit: true)
+         |> assign_form(changeset)
+         |> put_flash(:info, "User created successfully")}
+
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply,
          socket

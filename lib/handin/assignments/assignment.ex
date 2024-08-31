@@ -138,25 +138,22 @@ defmodule Handin.Assignments.Assignment do
 
   defp maybe_validate_cutoff_date(changeset) do
     if get_field(changeset, :enable_cutoff_date) do
-      start_date = get_field(changeset, :start_date)
-      due_date = get_field(changeset, :due_date)
+      changeset
+      |> validate_required(:cutoff_date)
+      |> validate_cutoff_date_order()
+    else
+      changeset
+    end
+  end
 
-      changeset =
-        changeset
-        |> validate_required(:cutoff_date)
+  defp validate_cutoff_date_order(changeset) do
+    start_date = get_field(changeset, :start_date)
+    due_date = get_field(changeset, :due_date)
+    cutoff_date = get_field(changeset, :cutoff_date)
 
-      case get_field(changeset, :cutoff_date) do
-        nil ->
-          changeset
-
-        cutoff_date ->
-          if start_date && due_date && NaiveDateTime.compare(cutoff_date, due_date) == :lt do
-            changeset
-            |> add_error(:cutoff_date, "must come after start date and due date")
-          else
-            changeset
-          end
-      end
+    if start_date && due_date && cutoff_date &&
+         NaiveDateTime.compare(cutoff_date, due_date) == :lt do
+      add_error(changeset, :cutoff_date, "must come after start date and due date")
     else
       changeset
     end
@@ -164,20 +161,20 @@ defmodule Handin.Assignments.Assignment do
 
   defp maybe_validate_attempt_marks(changeset) do
     if get_field(changeset, :enable_attempt_marks) do
-      changeset = validate_required(changeset, :attempt_marks)
+      changeset
+      |> validate_required(:attempt_marks)
+      |> validate_attempt_marks_value()
+    else
+      changeset
+    end
+  end
 
-      case get_field(changeset, :attempt_marks) do
-        nil ->
-          changeset
+  defp validate_attempt_marks_value(changeset) do
+    attempt_marks = get_field(changeset, :attempt_marks)
+    total_marks = get_field(changeset, :total_marks)
 
-        attempt_marks ->
-          if attempt_marks > get_field(changeset, :total_marks) do
-            changeset
-            |> add_error(:attempt_marks, "cannot exceed total marks")
-          else
-            changeset
-          end
-      end
+    if attempt_marks && total_marks && attempt_marks > total_marks do
+      add_error(changeset, :attempt_marks, "cannot exceed total marks")
     else
       changeset
     end

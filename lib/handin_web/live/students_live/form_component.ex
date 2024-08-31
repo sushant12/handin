@@ -117,19 +117,24 @@ defmodule HandinWeb.StudentsLive.FormComponent do
 
   defp process_csv_upload(socket) do
     socket.assigns.uploads.csv_file_input.entries
-    |> Enum.flat_map(fn entry ->
-      consume_uploaded_entry(socket, entry, fn %{path: path} ->
-        File.read!(path)
-        |> CSV.parse_string()
-        |> Enum.map(fn
-          [email] -> email
-          _ -> nil
-        end)
-      end)
-    end)
+    |> Enum.flat_map(&process_csv_entry(socket, &1))
     |> List.flatten()
     |> Enum.reject(&is_nil/1)
   end
+
+  defp process_csv_entry(socket, entry) do
+    consume_uploaded_entry(socket, entry, &parse_csv_file/1)
+  end
+
+  defp parse_csv_file(%{path: path}) do
+    path
+    |> File.read!()
+    |> CSV.parse_string()
+    |> Enum.map(&extract_email/1)
+  end
+
+  defp extract_email([email]), do: email
+  defp extract_email(_), do: nil
 
   defp assign_form(socket, changeset \\ %{}, opts \\ []) do
     assign(socket, :form, to_form(changeset, opts ++ [as: "user"]))

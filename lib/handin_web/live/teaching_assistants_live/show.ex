@@ -66,9 +66,8 @@ defmodule HandinWeb.TeachingAssistantLive.Show do
 
   @impl true
   def mount(%{"id" => id, "user_id" => user_id}, _session, socket) do
-    with true <-
-           Accounts.enrolled_module?(socket.assigns.current_user, id) ||
-             socket.assigns.current_user.role in [:admin, :teaching_assistant] do
+    if Accounts.enrolled_module?(socket.assigns.current_user, id) ||
+         socket.assigns.current_user.role in [:admin, :teaching_assistant] do
       module = Modules.get_module!(id)
 
       socket =
@@ -89,10 +88,9 @@ defmodule HandinWeb.TeachingAssistantLive.Show do
 
       {:ok, socket |> assign(:module, module)}
     else
-      false ->
-        {:ok,
-         push_navigate(socket, to: ~p"/modules/#{id}/assignments")
-         |> put_flash(:error, "You are not authorized to view this page")}
+      {:ok,
+       push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+       |> put_flash(:error, "You are not authorized to view this page")}
     end
   end
 

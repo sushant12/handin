@@ -62,25 +62,22 @@ defmodule Handin.Assignments.CustomAssignmentDate do
 
   defp maybe_validate_cutoff_date(changeset) do
     if get_field(changeset, :enable_cutoff_date) do
-      start_date = get_field(changeset, :start_date)
-      due_date = get_field(changeset, :due_date)
+      changeset
+      |> validate_required(:cutoff_date)
+      |> validate_cutoff_date_order()
+    else
+      changeset
+    end
+  end
 
-      changeset =
-        changeset
-        |> validate_required(:cutoff_date)
+  defp validate_cutoff_date_order(changeset) do
+    start_date = get_field(changeset, :start_date)
+    due_date = get_field(changeset, :due_date)
+    cutoff_date = get_field(changeset, :cutoff_date)
 
-      case get_field(changeset, :cutoff_date) do
-        nil ->
-          changeset
-
-        cutoff_date ->
-          if start_date && due_date && NaiveDateTime.compare(cutoff_date, due_date) == :lt do
-            changeset
-            |> add_error(:cutoff_date, "must come after start date and due date")
-          else
-            changeset
-          end
-      end
+    if start_date && due_date && cutoff_date &&
+         NaiveDateTime.compare(cutoff_date, due_date) == :lt do
+      add_error(changeset, :cutoff_date, "must come after start date and due date")
     else
       changeset
     end

@@ -21,6 +21,34 @@ defmodule Handin.Assignments do
 
   alias Handin.AssignmentSubmission.{AssignmentSubmission, AssignmentSubmissionFile}
 
+  # def s3_links(assignment_id) do
+  #   assignment_submissions =
+  #     Assignments.get_submissions_for_assignment(assignment_id)
+  #     |> Repo.preload([:assignment_submission_files, :user])
+
+  #   assignment_submissions
+  #   |> Enum.map(fn assignment_submission ->
+  #     urls =
+  #       assignment_submission.assignment_submission_files
+  #       |> Enum.map(fn assignment_submission_file ->
+  #         submission_file =
+  #           Handin.AssignmentSubmissions.get_assignment_submission_file!(
+  #             assignment_submission_file.id
+  #           )
+
+  #         url =
+  #           Handin.AssignmentSubmissionFileUploader.url(
+  #             {submission_file.file.file_name, submission_file},
+  #             signed: true
+  #           )
+
+  #         %{url: url, name: submission_file.file.file_name}
+  #       end)
+
+  #     %{email: assignment_submission.user.email, urls: urls}
+  #   end)
+  # end
+
   @doc """
   Returns the list of assignments.
 
@@ -560,7 +588,7 @@ defmodule Handin.Assignments do
     end
   end
 
-  def is_submission_allowed?(assignment_submission) do
+  def submission_allowed?(assignment_submission) do
     attempts_valid?(assignment_submission) &&
       submission_date_valid?(assignment_submission)
   end
