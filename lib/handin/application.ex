@@ -7,6 +7,7 @@ defmodule Handin.Application do
 
   @impl true
   def start(_type, _args) do
+    maybe_install_ecto_dev_logger()
     Logger.add_backend(Sentry.LoggerBackend)
 
     children = [
@@ -29,6 +30,13 @@ defmodule Handin.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Handin.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  if Code.ensure_loaded?(Ecto.DevLogger) do
+    defp maybe_install_ecto_dev_logger,
+      do: Ecto.DevLogger.install(Handin.Repo)
+  else
+    defp maybe_install_ecto_dev_logger, do: :ok
   end
 
   # Tell Phoenix to update the endpoint configuration

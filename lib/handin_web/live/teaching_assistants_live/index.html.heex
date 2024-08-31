@@ -1,9 +1,9 @@
-<.breadcrumbs>
+<.breadcrumbs :if={@module}>
   <:item text="Home" href={~p"/"} />
   <:item text="Modules" href={~p"/modules"} />
   <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
 </.breadcrumbs>
-<.tabs>
+<.tabs :if={@module}>
   <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"} />
   <:item text="Students" href={~p"/modules/#{@module.id}/students"} />
   <:item
@@ -18,7 +18,7 @@
   />
 </.tabs>
 <.link
-  :if={@current_user.role != :student}
+  :if={@current_user.role != :student and @module}
   patch={~p"/modules/#{@module.id}/teaching_assistants/new"}
 >
   <.button class="float-right inline-flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
@@ -28,7 +28,7 @@
 <.table id="teaching_assistants" rows={@streams.teaching_assistants}>
   <:col :let={{_, teaching_assistant}} label="ID"><%= teaching_assistant.id %></:col>
   <:col :let={{_, teaching_assistant}} label="Email"><%= teaching_assistant.email %></:col>
-  <:action :let={{id, teaching_assistant}} :if={@current_user.role != :student}>
+  <:action :let={{id, teaching_assistant}} :if={@current_user.role != :student and @module}>
     <.link
       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
       patch={~p"/modules/#{@module.id}/students/#{teaching_assistant.id}/show"}
@@ -53,7 +53,7 @@
   </:action>
 </.table>
 <.modal
-  :if={@live_action == :new}
+  :if={@live_action == :new and @module}
   id="teaching-assistant-modal"
   show
   on_cancel={JS.patch(~p"/modules/#{@module.id}/teaching_assistants")}

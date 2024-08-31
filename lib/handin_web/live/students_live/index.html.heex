@@ -1,9 +1,9 @@
-<.breadcrumbs>
+<.breadcrumbs :if={@module}>
   <:item text="Home" href={~p"/"} />
   <:item text="Modules" href={~p"/modules"} />
   <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
 </.breadcrumbs>
-<.tabs>
+<.tabs :if={@module}>
   <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"} />
   <:item text="Students" href={~p"/modules/#{@module.id}/students"} current={true} />
   <:item text="Teaching Assistants" href={~p"/modules/#{@module.id}/teaching_assistants"} />
@@ -14,7 +14,10 @@
     href={~p"/modules/#{@module.id}/grades"}
   />
 </.tabs>
-<.link :if={@current_user.role != :student} patch={~p"/modules/#{@module.id}/students/new"}>
+<.link
+  :if={@current_user.role != :student and @module}
+  patch={~p"/modules/#{@module.id}/students/new"}
+>
   <.button class="float-right inline-flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
     Add Member
   </.button>
@@ -45,7 +48,7 @@
   </:action>
 </.table>
 <.modal
-  :if={@live_action == :new}
+  :if={@live_action == :new and @module}
   id="member-modal"
   show
   on_cancel={JS.patch(~p"/modules/#{@module.id}/students/")}

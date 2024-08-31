@@ -14,6 +14,7 @@ defmodule Handin.Modules do
   alias Handin.Modules.ModulesUsers
   alias Ecto.Multi
   alias Handin.Accounts.UserNotifier
+  alias Handin.Assignments.Assignment
 
   defmodule CloneModuleParams do
     defstruct [:module_id, :user_id, :timezone]
@@ -90,11 +91,10 @@ defmodule Handin.Modules do
     |> Repo.one()
   end
 
-  def get_assignments_count(module_id, user) do
+  def get_assignments_count(module_id, _user) do
     Module
     |> where([m], m.id == ^module_id)
     |> join(:inner, [m], a in assoc(m, :assignments), on: a.module_id == ^module_id)
-    |> maybe_filter_by_released_assignment(user)
     |> select([m, a], count(a.id))
     |> Repo.one()
   end
@@ -287,24 +287,55 @@ defmodule Handin.Modules do
 
   @spec list_module(User.t(), archive_filter()) :: list(Module.t())
   def list_module(user, archive_filter \\ :unarchived) do
-    Module
-    |> order_by([m], asc: m.inserted_at)
+    assignment_count_query =
+      from(a in Assignment,
+        where: a.module_id == parent_as(:module).id,
+        select: count(a.id)
+      )
+
+    student_count_query =
+      from(mu in ModulesUsers,
+        where: mu.module_id == parent_as(:module).id and mu.role == :student,
+        select: count(mu.id)
+      )
+
+    from(m in Module,
+      as: :module,
+      order_by: [asc: m.inserted_at],
+      select: m,
+      select_merge: %{
+        assignments_count: subquery(assignment_count_query),
+        students_count: subquery(student_count_query)
+      }
+    )
     |> filter_by_archive_status(archive_filter)
     |> maybe_filter_by_role(user.id, user.role)
     |> Repo.all()
   end
 
   defp filter_by_archive_status(query, :all), do: query
-  defp filter_by_archive_status(query, :archived), do: where(query, [m], m.archived == true)
-  defp filter_by_archive_status(query, :unarchived), do: where(query, [m], m.archived == false)
 
-  defp maybe_filter_by_role(query, _user_id, :admin) do
-    query
-  end
+  defp filter_by_archive_status(query, :archived),
+    do: where(query, [module: module], module.archived == true)
+
+  defp filter_by_archive_status(query, :unarchived),
+    do: where(query, [module: module], module.archived == false)
+
+  defp maybe_filter_by_role(query, _user_id, :admin), do: query
 
   defp maybe_filter_by_role(query, user_id, role) when role in [:lecturer, :student] do
     query
-    |> join(:inner, [m], mu in Handin.Modules.ModulesUsers, on: mu.user_id == ^user_id)
+    |> join(:inner, [module: module], mu in ModulesUsers,
+      on: mu.module_id == module.id and mu.user_id == ^user_id
+    )
+  end
+
+  @spec get_module(id :: Ecto.UUID) :: {:ok, Module.t()} | {:error, String.t()}
+  def get_module(id) do
+    case Repo.get(Module, id) do
+      nil -> {:error, "Module not found"}
+      module -> {:ok, module}
+    end
   end
 
   def get_module!(id),
@@ -339,9 +370,16 @@ defmodule Handin.Modules do
           {:ok, Module.t()} | {:error, Ecto.Changeset.t()}
   def create_module(attrs, user_id) do
     Multi.new()
+    |> Multi.one(:user, fn _ ->
+      from(u in User, where: u.id == ^user_id)
+    end)
     |> Multi.insert(:module, Module.changeset(%Module{}, attrs))
-    |> Multi.insert(:modules_users, fn %{module: module} ->
-      ModulesUsers.changeset(%ModulesUsers{}, %{module_id: module.id, user_id: user_id})
+    |> Multi.insert(:modules_users, fn %{module: module, user: user} ->
+      ModulesUsers.changeset(%ModulesUsers{}, %{
+        module_id: module.id,
+        user_id: user.id,
+        role: user.role
+      })
     end)
     |> Repo.transaction()
     |> case do
@@ -434,36 +472,28 @@ defmodule Handin.Modules do
     |> Enum.any?(&(&1.id == assignment_id))
   end
 
-  def list_assignments_for(id, user) do
-    Module
-    |> where([m], m.id == ^id)
-    |> join(:inner, [m], a in assoc(m, :assignments), on: a.module_id == ^id)
-    |> order_by([m, a], asc: a.start_date)
-    |> select([m, a], a)
-    |> maybe_filter_by_released_assignment(user)
+  @spec assignments(Module.t(), User.t(), ModulesUsers.t()) :: [Assignment.t()]
+  def assignments(%Module{id: id}, %User{} = user, %ModulesUsers{role: role}) do
+    from(a in Assignment, where: a.module_id == ^id, order_by: [asc: a.start_date])
+    |> filter_by_released_assignment(user, role)
     |> Repo.all()
-    |> Repo.preload([:programming_language])
   end
 
-  defp maybe_filter_by_released_assignment(query, user) do
-    case user.role do
-      :student ->
-        now = DateTime.utc_now() |> DateTime.shift_zone!(user.university.timezone)
+  defp filter_by_released_assignment(query, %User{} = user, :student) do
+    now = DateTime.utc_now() |> DateTime.shift_zone!(user.university.timezone)
 
-        query
-        |> where(
-          [m, a],
-          a.id in subquery(
-            CustomAssignmentDate
-            |> select([cad], cad.assignment_id)
-            |> where([cad], cad.user_id == ^user.id and cad.start_date <= ^now)
-          ) or a.start_date <= ^now
-        )
-
-      _ ->
-        query
-    end
+    query
+    |> where(
+      [a],
+      a.id in subquery(
+        CustomAssignmentDate
+        |> select([cad], cad.assignment_id)
+        |> where([cad], cad.user_id == ^user.id and cad.start_date <= ^now)
+      ) or a.start_date <= ^now
+    )
   end
+
+  defp filter_by_released_assignment(query, _user, _role), do: query
 
   @spec add_users_to_module(AddUserToModuleParams.t()) ::
           {:ok, any()} | {:error, any()}
@@ -553,6 +583,7 @@ defmodule Handin.Modules do
     end
   end
 
+  @spec get_teaching_assistants(module_id :: Ecto.UUID) :: [User.t()]
   def get_teaching_assistants(module_id) do
     from(mu in ModulesUsers,
       where: mu.module_id == ^module_id and mu.role == :teaching_assistant,
@@ -585,5 +616,27 @@ defmodule Handin.Modules do
     )
     |> Repo.one()
     |> Repo.delete()
+  end
+
+  def module_user(%Module{} = module, %User{role: :admin}) do
+    from(mu in ModulesUsers,
+      where: mu.module_id == ^module.id
+    )
+    |> Repo.one()
+    |> case do
+      nil -> {:error, "Module not found"}
+      module_user -> {:ok, module_user}
+    end
+  end
+
+  def module_user(%Module{} = module, %User{} = user) do
+    from(mu in ModulesUsers,
+      where: mu.module_id == ^module.id and mu.user_id == ^user.id
+    )
+    |> Repo.one()
+    |> case do
+      nil -> {:error, "Module user not found"}
+      module_user -> {:ok, module_user}
+    end
   end
 end

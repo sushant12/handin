@@ -1,31 +1,41 @@
 defmodule HandinWeb.AssignmentLive.Index do
   use HandinWeb, :live_view
 
-  alias Handin.{Assignments, Modules, ProgrammingLanguages, Accounts}
+  alias Handin.{Assignments, Modules, ProgrammingLanguages}
   alias Handin.Assignments.Assignment
 
   @impl true
   def mount(%{"id" => id} = _params, _session, socket) do
-    with module <- Modules.get_module!(id),
-         true <-
-           Accounts.enrolled_module?(socket.assigns.current_user, id) ||
-             socket.assigns.current_user.role in [:admin, :teaching_assistant],
-         assignments <-
-           Modules.list_assignments_for(id, socket.assigns.current_user) do
-      programming_languages =
-        ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
+    user = socket.assigns.current_user
 
+    if connected?(socket) do
+      with {:ok, module} <- Modules.get_module(id),
+           {:ok, module_user} <-
+             Modules.module_user(module, user) do
+        assignments =
+          Modules.assignments(module, user, module_user)
+
+        programming_languages =
+          ProgrammingLanguages.list_programming_languages() |> Enum.map(&{&1.name, &1.id})
+
+        {:ok,
+         socket
+         |> stream(:assignments, assignments)
+         |> assign(:module, module)
+         |> assign(:programming_languages, programming_languages)
+         |> assign(:current_page, :modules)}
+      else
+        {:error, reason} ->
+          {:ok,
+           push_navigate(socket, to: ~p"/modules")
+           |> put_flash(:error, reason)}
+      end
+    else
       {:ok,
        socket
-       |> stream(:assignments, assignments)
-       |> assign(:programming_languages, programming_languages)
-       |> assign(:module, module)
+       |> assign(:module, nil)
+       |> stream(:assignments, [])
        |> assign(:current_page, :modules)}
-    else
-      false ->
-        {:ok,
-         push_navigate(socket, to: ~p"/modules")
-         |> put_flash(:error, "You are not authorized to view this page")}
     end
   end
 

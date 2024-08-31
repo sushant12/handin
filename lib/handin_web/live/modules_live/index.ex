@@ -5,9 +5,12 @@ defmodule HandinWeb.ModulesLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    modules = Modules.list_module(socket.assigns.current_user)
-
-    {:ok, assign(socket, :current_page, :modules) |> stream(:modules, modules)}
+    if connected?(socket) do
+      modules = Modules.list_module(socket.assigns.current_user)
+      {:ok, assign(socket, :current_page, :modules) |> stream(:modules, modules)}
+    else
+      {:ok, assign(socket, :current_page, :modules) |> stream(:modules, [])}
+    end
   end
 
   @impl true
@@ -16,11 +19,17 @@ defmodule HandinWeb.ModulesLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    module = Modules.get_module!(id)
-
-    socket
-    |> assign(:page_title, "Edit Module #{module.name}")
-    |> assign(:module, module)
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, _module_user} <- Modules.module_user(module, socket.assigns.current_user) do
+      socket
+      |> assign(:page_title, "Edit Module #{module.name}")
+      |> assign(:module, module)
+    else
+      {:error, reason} ->
+        socket
+        |> put_flash(:error, reason)
+        |> redirect(to: ~p"/modules")
+    end
   end
 
   defp apply_action(socket, :new, _params) do
@@ -36,19 +45,31 @@ defmodule HandinWeb.ModulesLive.Index do
   end
 
   defp apply_action(socket, :clone, %{"id" => id}) do
-    module = Modules.get_module!(id)
-
-    socket
-    |> assign(:page_title, "Clone Module")
-    |> assign(:module, module)
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, _module_user} <- Modules.module_user(module, socket.assigns.current_user) do
+      socket
+      |> assign(:page_title, "Clone Module")
+      |> assign(:module, module)
+    else
+      {:error, msg} ->
+        socket
+        |> put_flash(:error, msg)
+        |> redirect(to: ~p"/modules")
+    end
   end
 
   defp apply_action(socket, :archive, %{"id" => id}) do
-    module = Modules.get_module!(id)
-
-    socket
-    |> assign(:page_title, "Archive Module")
-    |> assign(:module, module)
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, _module_user} <- Modules.module_user(module, socket.assigns.current_user) do
+      socket
+      |> assign(:page_title, "Archive Module")
+      |> assign(:module, module)
+    else
+      {:error, msg} ->
+        socket
+        |> put_flash(:error, msg)
+        |> redirect(to: ~p"/modules")
+    end
   end
 
   @impl true

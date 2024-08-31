@@ -69,7 +69,8 @@ defmodule Handin.MixProject do
       {:esbuild, "~> 0.8.1", runtime: Mix.env() == :dev},
       {:phoenix_live_reload, "~> 1.5.3", only: :dev},
       {:ex_doc, "~> 0.34.2", only: :dev, runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false}
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:ecto_dev_logger, "~> 0.13", only: [:dev]}
     ]
   end
 

@@ -16,7 +16,7 @@ defmodule Handin.Assignments.Assignment do
   }
 
   alias Handin.AssignmentSubmission.AssignmentSubmission
-
+  @type t :: %__MODULE__{}
   schema "assignments" do
     field :name, :string
     field :start_date, :naive_datetime
