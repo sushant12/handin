@@ -17,24 +17,12 @@ defmodule HandinWeb.Router do
     plug :accepts, ["json"]
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", HandinWeb do
-  #   pipe_through :api
-  # end
   import Phoenix.LiveDashboard.Router
-  # Enable LiveDashboard and Swoosh mailbox preview in development
-  if Application.compile_env(:handin, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
-    # import Phoenix.LiveDashboard.Router
 
+  if Application.compile_env(:handin, :dev_routes) do
     scope "/dev" do
       pipe_through :browser
 
-      # live_dashboard "/dashboard", metrics: HandinWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
@@ -68,20 +56,6 @@ defmodule HandinWeb.Router do
   end
 
   scope "/", HandinWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-    live_session :redirect_if_user_is_authenticated,
-      on_mount: [{HandinWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", UserRegistrationLive, :new
-      live "/users/log_in", UserLoginLive, :new
-      live "/users/reset_password", UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
-    end
-
-    post "/users/log_in", UserSessionController, :create
-  end
-
-  scope "/", HandinWeb do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_admin_or_lecturer,
@@ -99,14 +73,15 @@ defmodule HandinWeb.Router do
 
         live "/edit", ModulesLive.Index, :edit
         live "/assignments/new", AssignmentLive.Index, :new
-        live "/assignments/:assignment_id/edit", AssignmentLive.Index, :edit
 
         scope "/assignments/:assignment_id" do
+          live "/edit", AssignmentLive.Index, :edit
           live "/environment", AssignmentLive.Environment, :index
           live "/add_helper_files", AssignmentLive.Environment, :add_helper_files
           live "/add_solution_files", AssignmentLive.Environment, :add_solution_files
 
           live "/tests", AssignmentLive.Tests, :index
+          live "/add_test", AssignmentLive.Show, :add_assignment_test
           live "/submissions", AssignmentLive.Submission, :index
           live "/settings", AssignmentLive.Settings, :index
 
@@ -121,16 +96,12 @@ defmodule HandinWeb.Router do
           post "/download", SubmissionController, :download
         end
 
-        live "/assignments/:assignment_id/add_test",
-             AssignmentLive.Show,
-             :add_assignment_test
-
         live "/assignments/:assignment_id/:test_id/edit_test",
              AssignmentLive.Show,
              :edit_assignment_test
 
-        live "/members/new", MembersLive.Index, :new
-        live "/members/:user_id/show", MembersLive.Show, :show
+        live "/students/new", StudentsLive.Index, :new
+        live "/students/:user_id/show", StudentsLive.Show, :show
         live "/teaching_assistants/new", TeachingAssistantsLive.Index, :new
         live "/teaching_assistants/delete", TeachingAssistantsLive.Index, :delete
       end
@@ -164,10 +135,24 @@ defmodule HandinWeb.Router do
              AssignmentSubmissionLive.Show,
              :show
 
-        live "/members", MembersLive.Index, :index
+        live "/students", StudentsLive.Index, :index
         live "/teaching_assistants", TeachingAssistantsLive.Index, :index
       end
     end
+  end
+
+  scope "/", HandinWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    live_session :redirect_if_user_is_authenticated,
+      on_mount: [{HandinWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      live "/users/register", UserRegistrationLive, :new
+      live "/users/log_in", UserLoginLive, :new
+      live "/users/reset_password", UserForgotPasswordLive, :new
+      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+    end
+
+    post "/users/log_in", UserSessionController, :create
   end
 
   scope "/", HandinWeb do

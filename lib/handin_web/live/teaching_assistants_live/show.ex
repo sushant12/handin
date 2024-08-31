@@ -12,8 +12,8 @@ defmodule HandinWeb.TeachingAssistantLive.Show do
       <:item text="Home" href={~p"/"} />
       <:item text="Modules" href={~p"/modules"} />
       <:item text={@module.name} href={~p"/modules/#{@module.id}/assignments"} />
-      <:item text="Members" href={~p"/modules/#{@module.id}/members"} />
-      <:item text={@student.email} href={~p"/modules/#{@module.id}/members"} />
+      <:item text="Students" href={~p"/modules/#{@module.id}/students"} />
+      <:item text={@student.email} href={~p"/modules/#{@module.id}/students"} />
     </.breadcrumbs>
 
     <%= if @student do %>

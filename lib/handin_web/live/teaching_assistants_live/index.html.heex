@@ -5,7 +5,7 @@
 </.breadcrumbs>
 <.tabs>
   <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"} />
-  <:item text="Students" href={~p"/modules/#{@module.id}/members"} />
+  <:item text="Students" href={~p"/modules/#{@module.id}/students"} />
   <:item
     text="Teaching Assistants"
     href={~p"/modules/#{@module.id}/teaching_assistants"}
@@ -31,7 +31,7 @@
   <:action :let={{id, teaching_assistant}} :if={@current_user.role != :student}>
     <.link
       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-      patch={~p"/modules/#{@module.id}/members/#{teaching_assistant.id}/show"}
+      patch={~p"/modules/#{@module.id}/students/#{teaching_assistant.id}/show"}
     >
       Show
     </.link>

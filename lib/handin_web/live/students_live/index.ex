@@ -1,4 +1,4 @@
-defmodule HandinWeb.MembersLive.Index do
+defmodule HandinWeb.StudentsLive.Index do
   use HandinWeb, :live_view
   alias Handin.{Modules, Accounts}
 
@@ -9,9 +9,9 @@ defmodule HandinWeb.MembersLive.Index do
     students = Modules.get_students(module.id)
 
     {:ok,
-     stream(socket, :members, students)
+     stream(socket, :students, students)
      |> assign(:module, module)
-     |> assign(:current_tab, :members)
+     |> assign(:current_tab, :students)
      |> assign(:current_page, :modules)}
   end
 
@@ -27,13 +27,13 @@ defmodule HandinWeb.MembersLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing Members")
-    |> assign(:members, nil)
+    |> assign(:page_title, "Listing Students")
+    |> assign(:students, nil)
   end
 
   @impl true
-  def handle_info({HandinWeb.MembersLive.FormComponent, {:saved, users}}, socket) do
-    {:noreply, stream_insert(socket, :members, users)}
+  def handle_info({HandinWeb.StudentsLive.FormComponent, {:saved, users}}, socket) do
+    {:noreply, stream_insert(socket, :students, users)}
   end
 
   @impl true
@@ -42,7 +42,7 @@ defmodule HandinWeb.MembersLive.Index do
     {:ok, module_user} = Modules.remove_user_from_module(id, socket.assigns.module.id)
 
     {:noreply,
-     stream_delete(socket, :members, module_user.user)
-     |> put_flash(:info, "Member deleted successfully")}
+     stream_delete(socket, :students, module_user.user)
+     |> put_flash(:info, "Student deleted successfully")}
   end
 end

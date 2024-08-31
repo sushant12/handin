@@ -1,4 +1,4 @@
-defmodule HandinWeb.MembersLive.FormComponent do
+defmodule HandinWeb.StudentsLive.FormComponent do
   use HandinWeb, :live_component
   alias NimbleCSV.RFC4180, as: CSV
   alias Handin.Modules

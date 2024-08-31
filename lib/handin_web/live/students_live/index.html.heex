@@ -5,7 +5,7 @@
 </.breadcrumbs>
 <.tabs>
   <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"} />
-  <:item text="Students" href={~p"/modules/#{@module.id}/members"} current={true} />
+  <:item text="Students" href={~p"/modules/#{@module.id}/students"} current={true} />
   <:item text="Teaching Assistants" href={~p"/modules/#{@module.id}/teaching_assistants"} />
 
   <:item
@@ -14,28 +14,28 @@
     href={~p"/modules/#{@module.id}/grades"}
   />
 </.tabs>
-<.link :if={@current_user.role != :student} patch={~p"/modules/#{@module.id}/members/new"}>
+<.link :if={@current_user.role != :student} patch={~p"/modules/#{@module.id}/students/new"}>
   <.button class="float-right inline-flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
     Add Member
   </.button>
 </.link>
-<.table id="members" rows={@streams.members}>
-  <:col :let={{_, member}} label="ID"><%= member.id %></:col>
-  <:col :let={{_, member}} label="Email"><%= member.email %></:col>
-  <:col :let={{_id, member}} label="State">
-    <%= if member.confirmed_at, do: "Accepted", else: "Pending" %>
+<.table id="students" rows={@streams.students}>
+  <:col :let={{_, student}} label="ID"><%= student.id %></:col>
+  <:col :let={{_, student}} label="Email"><%= student.email %></:col>
+  <:col :let={{_id, student}} label="State">
+    <%= if student.confirmed_at, do: "Accepted", else: "Pending" %>
   </:col>
-  <:action :let={{id, member}} :if={@current_user.role != :student}>
+  <:action :let={{id, student}} :if={@current_user.role != :student}>
     <.link
       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-      patch={~p"/modules/#{@module.id}/members/#{member.id}/show"}
+      patch={~p"/modules/#{@module.id}/students/#{student.id}/show"}
     >
       Show
     </.link>
     <.link
       class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800"
       phx-click={
-        JS.push("delete", value: %{id: member.id, status: member.confirmed_at && "confirmed"})
+        JS.push("delete", value: %{id: student.id, status: student.confirmed_at && "confirmed"})
         |> hide("##{id}")
       }
       data-confirm="Are you sure?"
@@ -48,15 +48,15 @@
   :if={@live_action == :new}
   id="member-modal"
   show
-  on_cancel={JS.patch(~p"/modules/#{@module.id}/members/")}
+  on_cancel={JS.patch(~p"/modules/#{@module.id}/students/")}
 >
   <.live_component
-    module={HandinWeb.MembersLive.FormComponent}
+    module={HandinWeb.StudentsLive.FormComponent}
     id={:new}
     title={@page_title}
     action={@live_action}
     module_id={@module.id}
     current_user={@current_user}
-    patch={~p"/modules/#{@module.id}/members"}
+    patch={~p"/modules/#{@module.id}/students"}
   />
 </.modal>

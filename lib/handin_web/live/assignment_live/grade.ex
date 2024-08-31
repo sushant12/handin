@@ -13,7 +13,7 @@ defmodule HandinWeb.AssignmentLive.Grade do
     </.breadcrumbs>
     <.tabs>
       <:item text="Assignments" href={~p"/modules/#{@module.id}/assignments"} />
-      <:item text="Students" href={~p"/modules/#{@module.id}/members"} />
+      <:item text="Students" href={~p"/modules/#{@module.id}/students"} />
       <:item text="Teaching Assistants" href={~p"/modules/#{@module.id}/teaching_assistants"} />
 
       <:item text="Grades" href={~p"/modules/#{@module.id}/grades"} current={true} />
