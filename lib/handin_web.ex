@@ -43,7 +43,6 @@ defmodule HandinWeb do
         layouts: [html: HandinWeb.Layouts]
 
       import Plug.Conn
-      import HandinWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -87,7 +86,6 @@ defmodule HandinWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import HandinWeb.CoreComponents
-      import HandinWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
