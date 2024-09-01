@@ -93,7 +93,7 @@
         </.link>
       </li>
 
-      <li>
+      <li :if={@current_user.role != :student}>
         <.link
           navigate={~p"/modules/archived"}
           class={[

@@ -9,9 +9,8 @@ defmodule Handin.Assignments do
 
   alias Handin.Assignments.{
     Assignment,
+    AssignmentFile,
     AssignmentTest,
-    SupportFile,
-    SolutionFile,
     Build,
     Log,
     RunScriptResult,
@@ -76,17 +75,45 @@ defmodule Handin.Assignments do
       ** (Ecto.NoResultsError)
 
   """
+  @spec get_assignment(id :: Ecto.UUID, module_id :: Ecto.UUID) ::
+          {:ok, Assignment.t()} | {:error, String.t()}
+  def get_assignment(id, module_id) do
+    from(a in Assignment, where: a.id == ^id and a.module_id == ^module_id)
+    |> Repo.one()
+    |> Repo.preload([:assignment_files])
+    |> case do
+      nil -> {:error, "Assignment not found"}
+      assignment -> {:ok, assignment}
+    end
+  end
+
   def get_assignment!(id),
     do:
       Repo.get!(Assignment, id)
       |> Repo.preload([
         :programming_language,
         :assignment_tests,
-        :support_files,
-        :solution_files,
+        :assignment_files,
         assignment_submissions: [:user],
         builds: [:logs]
       ])
+
+  @spec get_assignment_file(id :: Ecto.UUID.t()) ::
+          {:ok, AssignmentFile.t()} | {:error, String.t()}
+  def get_assignment_file(id) do
+    from(af in AssignmentFile, where: af.id == ^id)
+    |> Repo.one()
+    |> case do
+      nil -> {:error, "Assignment file not found"}
+      assignment_file -> {:ok, assignment_file}
+    end
+  end
+
+  @spec delete_assignment_file(assignment_file :: AssignmentFile.t()) ::
+          {:ok, AssignmentFile.t()} | {:error, String.t()}
+  def delete_assignment_file(%AssignmentFile{} = assignment_file) do
+    Repo.delete(assignment_file)
+  end
 
   @doc """
   Creates a assignment.
@@ -191,12 +218,6 @@ defmodule Handin.Assignments do
       DateTime.compare(assignment.cutoff_date, now) == :gt
   end
 
-  def create_support_file(attrs \\ %{}) do
-    %SupportFile{}
-    |> SupportFile.changeset(attrs)
-    |> Repo.insert()
-  end
-
   def create_or_update_submission(
         %{user_id: user_id, assignment_id: assignment_id} = attrs \\ %{}
       ) do
@@ -209,44 +230,20 @@ defmodule Handin.Assignments do
     |> Repo.insert_or_update()
   end
 
-  def get_support_file!(id), do: Repo.get!(SupportFile, id)
-
-  @spec get_support_file_by_name!(assignment_id :: Ecto.UUID, support_file_name :: String.t()) ::
-          SupportFile.t()
-  def get_support_file_by_name!(assignment_id, support_file_name) do
-    get_assignment!(assignment_id)
-    |> Map.get(:support_files)
-    |> Enum.find(&(&1.file.file_name == support_file_name))
-  end
-
-  def get_solution_file!(id), do: Repo.get!(SolutionFile, id)
-
-  def delete_support_file(%SupportFile{} = support_file) do
-    Repo.delete(support_file)
-  end
-
-  def delete_solution_file(%SolutionFile{} = solution_file) do
-    Repo.delete(solution_file)
-  end
-
   def delete_assignment_submission_file(%AssignmentSubmissionFile{} = submission_file) do
     Repo.delete(submission_file)
   end
 
-  def change_support_file(%SupportFile{} = support_file, attrs \\ %{}) do
-    SupportFile.changeset(support_file, attrs)
-  end
-
-  def save_support_file(attrs \\ %{}) do
-    %SupportFile{}
-    |> SupportFile.changeset(attrs)
+  def save_assignment_file(attrs) do
+    %AssignmentFile{}
+    |> AssignmentFile.changeset(attrs)
     |> Repo.insert()
   end
 
-  def save_solution_file(attrs \\ %{}) do
-    %SolutionFile{}
-    |> SolutionFile.changeset(attrs)
-    |> Repo.insert()
+  def upload_assignment_file(assignment_file, attrs \\ %{}) do
+    assignment_file
+    |> AssignmentFile.file_changeset(attrs)
+    |> Repo.update!()
   end
 
   def save_assignment_submission_file!(attrs \\ %{}) do
@@ -254,18 +251,6 @@ defmodule Handin.Assignments do
     |> AssignmentSubmissionFile.changeset(attrs)
     |> Repo.insert!()
     |> Repo.preload(assignment_submission: [:user, :assignment])
-  end
-
-  def upload_support_file(support_file, attrs \\ %{}) do
-    support_file
-    |> SupportFile.file_changeset(attrs)
-    |> Repo.update!()
-  end
-
-  def upload_solution_file(solution_file, attrs \\ %{}) do
-    solution_file
-    |> SolutionFile.file_changeset(attrs)
-    |> Repo.update!()
   end
 
   def upload_assignment_submission_file(submission_file, attrs \\ %{}) do

@@ -86,13 +86,14 @@ defmodule HandinWeb.StudentsLive.FormComponent do
     csv_emails = process_csv_upload(socket)
 
     emails = [email | csv_emails] |> Enum.reject(&is_nil/1) |> Enum.uniq()
-    module = Modules.get_module!(socket.assigns.module_id)
+    {:ok, module} = Modules.get_module(socket.assigns.module_id)
 
-    params = %AddUserToModuleParams{
-      emails: emails,
-      university_id: socket.assigns.current_user.university.id,
-      module: module
-    }
+    params =
+      %AddUserToModuleParams{
+        emails: emails,
+        university_id: socket.assigns.current_user.university.id,
+        module: module
+      }
 
     case Modules.add_users_to_module(params) do
       {:ok, %{users: users}} ->

@@ -1,7 +1,7 @@
 defmodule Handin.BuildServer do
   use GenServer
   alias Handin.Assignments
-  alias Handin.{SupportFileUploader, AssignmentSubmissionFileUploader}
+  alias Handin.AssignmentSubmissionFileUploader
   alias Handin.AssignmentSubmission.AssignmentSubmissionFile
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
@@ -347,9 +347,10 @@ defmodule Handin.BuildServer do
             )
 
           _ ->
-            SupportFileUploader.url({assignment_file.file.file_name, assignment_file},
-              signed: true
-            )
+            nil
+            # SupportFileUploader.url({assignment_file.file.file_name, assignment_file},
+            #   signed: true
+            # )
         end
       end)
       |> Enum.map(fn url ->

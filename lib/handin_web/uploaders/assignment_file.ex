@@ -1,4 +1,4 @@
-defmodule Handin.SupportFileUploader do
+defmodule Handin.AssignmentFileUploader do
   use Waffle.Definition
 
   # Include ecto support (requires package waffle_ecto installed):
@@ -21,8 +21,8 @@ defmodule Handin.SupportFileUploader do
   # Whitelist file extensions:
   # def validate({file, _}) do
   #   file_extension = file.file_name |> Path.extname() |> String.downcase()
-
-  #   case Enum.member?(~w(.jpg .jpeg .gif .png .csv), file_extension) do
+  #
+  #   case Enum.member?(~w(.jpg .jpeg .gif .png), file_extension) do
   #     true -> :ok
   #     false -> {:error, "invalid file type"}
   #   end
@@ -34,14 +34,13 @@ defmodule Handin.SupportFileUploader do
   # end
 
   # Override the persisted filenames:
-  # def filename(version, {file, _id}) do
-  #   file_name = Path.basename(file.file_name, Path.extname(file.file_name))
-  #   "#{file_name}-#{version}"
+  # def filename(version, _) do
+  #   version
   # end
 
   # Override the storage directory:
-  def storage_dir(_version, {_file, support_file}) do
-    "uploads/assignment/#{support_file.id}/"
+  def storage_dir(_version, {file, assignment_file}) do
+    "uploads/assignments/#{assignment_file.assignment_id}/#{file.file_name}"
   end
 
   # Provide a default URL if there hasn't been a file uploaded

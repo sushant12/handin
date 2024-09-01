@@ -4,29 +4,20 @@ defmodule HandinWeb.TeachingAssistantsLive.Index do
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    if connected?(socket) do
-      with {:ok, module} <- Modules.get_module(id),
-           {:ok, _module_user} <- Modules.module_user(module, socket.assigns.current_user) do
-        teaching_assistants = Modules.get_teaching_assistants(module.id)
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, _module_user} <- Modules.module_user(module, socket.assigns.current_user) do
+      teaching_assistants = Modules.get_teaching_assistants(module.id)
 
-        {:ok,
-         stream(socket, :teaching_assistants, teaching_assistants)
-         |> assign(:module, module)
-         |> assign(:current_tab, :teaching_assistants)
-         |> assign(:current_page, :modules)}
-      else
-        {:error, reason} ->
-          {:ok,
-           push_navigate(socket, to: ~p"/modules")
-           |> put_flash(:error, reason)}
-      end
-    else
       {:ok,
-       socket
-       |> assign(:module, nil)
-       |> stream(:teaching_assistants, [])
+       stream(socket, :teaching_assistants, teaching_assistants)
+       |> assign(:module, module)
        |> assign(:current_tab, :teaching_assistants)
        |> assign(:current_page, :modules)}
+    else
+      {:error, reason} ->
+        {:ok,
+         push_navigate(socket, to: ~p"/modules")
+         |> put_flash(:error, reason)}
     end
   end
 

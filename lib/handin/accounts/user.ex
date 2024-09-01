@@ -18,6 +18,8 @@ defmodule Handin.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+    field :temporary_password, :string, virtual: true, redact: true
+    field :invited, :boolean, default: false, virtual: true
 
     field :role, Ecto.Enum,
       default: :student,

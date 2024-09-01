@@ -3,9 +3,8 @@ defmodule Handin.Assignments.AssignmentTest do
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
-  alias Handin.Assignments
+  # alias Handin.Assignments
   alias Handin.Assignments.{Assignment, Log, TestResult, AssignmentTest}
-  alias Handin.SupportFileUploader
 
   schema "assignment_tests" do
     field :name, :string
@@ -80,22 +79,23 @@ defmodule Handin.Assignments.AssignmentTest do
         nil ->
           changeset
 
-        expected_output_file ->
-          url =
-            SupportFileUploader.url(
-              {expected_output_file,
-               Assignments.get_support_file_by_name!(
-                 get_field(changeset, :assignment_id),
-                 expected_output_file
-               )},
-              signed: true
-            )
+        _expected_output_file ->
+          nil
+          # url =
+          #   SupportFileUploader.url(
+          #     {expected_output_file,
+          #      Assignments.get_support_file_by_name!(
+          #        get_field(changeset, :assignment_id),
+          #        expected_output_file
+          #      )},
+          #     signed: true
+          #   )
 
-          {:ok, %Finch.Response{status: 200, body: body}} =
-            Finch.build(:get, url)
-            |> Finch.request(Handin.Finch)
+          # {:ok, %Finch.Response{status: 200, body: body}} =
+          #   Finch.build(:get, url)
+          #   |> Finch.request(Handin.Finch)
 
-          put_change(changeset, :expected_output_file_content, String.trim(body))
+          # put_change(changeset, :expected_output_file_content, String.trim(body))
       end
     end
   end

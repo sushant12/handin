@@ -15,161 +15,54 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
         phx-change="validate"
         phx-submit="save"
       >
-        <%= case @live_action do %>
-          <% :add_solution_files -> %>
-            <div>
-              <.live_file_input
-                upload={@uploads.solution_file}
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              />
-              <%= for entry <- @uploads.solution_file.entries do %>
-                <article class="upload-entry">
-                  <figure class="flex">
-                    <svg
-                      width="1.25rem"
-                      height="1.25rem"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                      </g>
-                      <g id="SVGRepo_iconCarrier">
-                        <path
-                          d="M9 17H15M9 13H15M9 9H10M13 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.0799 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.0799 21 8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V9M13 3L19 9M13 3V7.4C13 7.96005 13 8.24008 13.109 8.45399C13.2049 8.64215 13.3578 8.79513 13.546 8.89101C13.7599 9 14.0399 9 14.6 9H19"
-                          stroke="#707070"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                        </path>
-                      </g>
-                    </svg>
-                    <figcaption><%= entry.client_name %></figcaption>&nbsp;
-                  </figure>
-                </article>
-                <.error :for={err <- upload_errors(@uploads.solution_file, entry)} class="!mt-0">
-                  <%= error_to_string(err) %>
-                </.error>
-              <% end %>
-              <.error :for={err <- upload_errors(@uploads.solution_file)}>
-                <%= error_to_string(err) %>
-              </.error>
-            </div>
-          <% :add_helper_files -> %>
-            <div>
-              <.live_file_input
-                upload={@uploads.support_file}
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              />
-              <%= for entry <- @uploads.support_file.entries do %>
-                <article class="upload-entry">
-                  <figure class="flex">
-                    <svg
-                      width="1.25rem"
-                      height="1.25rem"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                      </g>
-                      <g id="SVGRepo_iconCarrier">
-                        <path
-                          d="M9 17H15M9 13H15M9 9H10M13 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.0799 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.0799 21 8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V9M13 3L19 9M13 3V7.4C13 7.96005 13 8.24008 13.109 8.45399C13.2049 8.64215 13.3578 8.79513 13.546 8.89101C13.7599 9 14.0399 9 14.6 9H19"
-                          stroke="#707070"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                        </path>
-                      </g>
-                    </svg>
-                    <figcaption><%= entry.client_name %></figcaption>&nbsp;
-                  </figure>
-                  <.error :for={err <- upload_errors(@uploads.support_file, entry)} class="!mt-0">
-                    <%= error_to_string(err) %>
-                  </.error>
-                </article>
-              <% end %>
-              <.error :for={err <- upload_errors(@uploads.support_file)}>
-                <%= error_to_string(err) %>
-              </.error>
-            </div>
-          <% :upload_submissions -> %>
-            <div>
-              <.live_file_input
-                upload={@uploads.assignment_submission}
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              />
-              <%= for entry <- @uploads.assignment_submission.entries do %>
-                <article class="upload-entry">
-                  <figure class="flex">
-                    <svg
-                      width="1.25rem"
-                      height="1.25rem"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                      </g>
-                      <g id="SVGRepo_iconCarrier">
-                        <path
-                          d="M9 17H15M9 13H15M9 9H10M13 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.0799 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.0799 21 8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V9M13 3L19 9M13 3V7.4C13 7.96005 13 8.24008 13.109 8.45399C13.2049 8.64215 13.3578 8.79513 13.546 8.89101C13.7599 9 14.0399 9 14.6 9H19"
-                          stroke="#707070"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        >
-                        </path>
-                      </g>
-                    </svg>
-                    <figcaption><%= entry.client_name %></figcaption>&nbsp;
-                    <button
-                      type="button"
-                      phx-click="cancel-assignment-submission-upload"
-                      phx-value-ref={entry.ref}
-                      phx-target={@myself}
-                      aria-label="cancel"
-                    >
-                      <svg
-                        width="1.25rem"
-                        height="1.25rem"
-                        viewBox="0 0 1024 1024"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="#ff0000"
-                        stroke="#ff0000"
-                      >
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                        </g>
-                        <g id="SVGRepo_iconCarrier">
-                          <path
-                            fill="#dd3636"
-                            d="M160 256H96a32 32 0 0 1 0-64h256V95.936a32 32 0 0 1 32-32h256a32 32 0 0 1 32 32V192h256a32 32 0 1 1 0 64h-64v672a32 32 0 0 1-32 32H192a32 32 0 0 1-32-32V256zm448-64v-64H416v64h192zM224 896h576V256H224v640zm192-128a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32zm192 0a32 32 0 0 1-32-32V416a32 32 0 0 1 64 0v320a32 32 0 0 1-32 32z"
-                          >
-                          </path>
-                        </g>
-                      </svg>
-                    </button>
-                  </figure>
-                </article>
-                <.error
-                  :for={err <- upload_errors(@uploads.assignment_submission, entry)}
-                  class="!mt-0"
+        <div>
+          <.live_file_input
+            upload={@uploads.assignment_file}
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          />
+          <%= for entry <- @uploads.assignment_file.entries do %>
+            <article class="upload-entry">
+              <figure class="flex">
+                <svg
+                  width="1.25rem"
+                  height="1.25rem"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <%= error_to_string(err) %>
-                </.error>
-              <% end %>
-              <.error :for={err <- upload_errors(@uploads.assignment_submission)}>
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      d="M9 17H15M9 13H15M9 9H10M13 3H8.2C7.0799 3 6.51984 3 6.09202 3.21799C5.71569 3.40973 5.40973 3.71569 5.21799 4.09202C5 4.51984 5 5.0799 5 6.2V17.8C5 18.9201 5 19.4802 5.21799 19.908C5.40973 20.2843 5.71569 20.5903 6.09202 20.782C6.51984 21 7.0799 21 8.2 21H15.8C16.9201 21 17.4802 21 17.908 20.782C18.2843 20.5903 18.5903 20.2843 18.782 19.908C19 19.4802 19 18.9201 19 17.8V9M13 3L19 9M13 3V7.4C13 7.96005 13 8.24008 13.109 8.45399C13.2049 8.64215 13.3578 8.79513 13.546 8.89101C13.7599 9 14.0399 9 14.6 9H19"
+                      stroke="#707070"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                    </path>
+                  </g>
+                </svg>
+                <figcaption><%= entry.client_name %></figcaption>&nbsp;
+              </figure>
+              <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                <div
+                  class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full"
+                  value={entry.progress}
+                  style={"width: #{entry.progress}%"}
+                >
+                  <%= entry.progress %>%
+                </div>
+              </div>
+              <.error :for={err <- upload_errors(@uploads.assignment_file, entry)} class="!mt-0">
                 <%= error_to_string(err) %>
               </.error>
-            </div>
-        <% end %>
+            </article>
+          <% end %>
+          <.error :for={err <- upload_errors(@uploads.assignment_file)}>
+            <%= error_to_string(err) %>
+          </.error>
+        </div>
         <:actions>
           <.button
             class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
@@ -199,11 +92,10 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
      |> assign(assigns)
      |> assign_form(changeset)
      |> assign(:uploaded_files, [])
-     |> allow_upload(:support_file, accept: :any, max_entries: 20, max_file_size: two_hundred_mb)
-     |> allow_upload(:solution_file, accept: :any, max_entries: 20, max_file_size: two_hundred_mb)
-     |> allow_upload(:assignment_submission,
+     |> allow_upload(:assignment_file,
        accept: :any,
-       max_file_size: 1_500_000
+       max_entries: 20,
+       max_file_size: two_hundred_mb
      )}
   end
 
@@ -212,16 +104,8 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
     {:noreply, socket}
   end
 
-  def handle_event("cancel-support-file-upload", %{"ref" => ref}, socket) do
-    {:noreply, socket |> cancel_upload(:support_file, ref)}
-  end
-
-  def handle_event("cancel-solution-file-upload", %{"ref" => ref}, socket) do
-    {:noreply, socket |> cancel_upload(:solution_file, ref)}
-  end
-
-  def handle_event("cancel-assignment-submission-upload", %{"ref" => ref}, socket) do
-    {:noreply, socket |> cancel_upload(:assignment_submission, ref)}
+  def handle_event("cancel_assignment_file_upload", %{"ref" => ref}, socket) do
+    {:noreply, socket |> cancel_upload(:assignment_file, ref)}
   end
 
   def handle_event("save", _params, socket) do
@@ -242,52 +126,33 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
   end
 
   defp consume_entries(socket, assignment) do
-    consume_uploaded_entries(socket, :support_file, fn meta, entry ->
+    consume_uploaded_entries(socket, :assignment_file, fn meta, entry ->
       Handin.Repo.transaction(fn ->
-        {:ok, support_file} =
-          Assignments.save_support_file(%{"assignment_id" => assignment.id})
-
-        Assignments.upload_support_file(support_file, %{
-          file: %Plug.Upload{
-            content_type: entry.client_type,
-            filename: entry.client_name,
-            path: meta.path
-          }
-        })
+        handle_file_upload(socket, assignment, meta, entry)
       end)
     end)
+  end
 
-    consume_uploaded_entries(socket, :solution_file, fn meta, entry ->
-      Handin.Repo.transaction(fn ->
-        {:ok, solution_file} =
-          Assignments.save_solution_file(%{"assignment_id" => assignment.id})
+  defp handle_file_upload(socket, assignment, meta, entry) do
+    file_type =
+      case socket.assigns.live_action do
+        :add_solution_files -> :solution
+        :add_helper_files -> :test_resource
+      end
 
-        Assignments.upload_solution_file(solution_file, %{
-          file: %Plug.Upload{
-            content_type: entry.client_type,
-            filename: entry.client_name,
-            path: meta.path
-          }
-        })
-      end)
-    end)
+    {:ok, assignment_file} =
+      Assignments.save_assignment_file(%{
+        "assignment_id" => assignment.id,
+        "file_type" => file_type
+      })
 
-    consume_uploaded_entries(socket, :assignment_submission, fn meta, entry ->
-      Handin.Repo.transaction(fn ->
-        assignment_submission_file =
-          Assignments.save_assignment_submission_file!(%{
-            "assignment_submission_id" => socket.assigns.assignment_submission.id
-          })
-
-        Assignments.upload_assignment_submission_file(assignment_submission_file, %{
-          file: %Plug.Upload{
-            content_type: entry.client_type,
-            filename: entry.client_name,
-            path: meta.path
-          }
-        })
-      end)
-    end)
+    Assignments.upload_assignment_file(assignment_file, %{
+      file: %Plug.Upload{
+        content_type: entry.client_type,
+        filename: entry.client_name,
+        path: meta.path
+      }
+    })
   end
 
   defp assign_form(socket, changeset) do

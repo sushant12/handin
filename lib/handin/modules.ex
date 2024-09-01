@@ -145,8 +145,9 @@ defmodule Handin.Modules do
       multi
       |> clone_assignment(assignment, cloned_module.id, timezone)
       |> clone_assignment_tests(assignment)
-      |> clone_support_files(assignment)
-      |> clone_solution_files(assignment)
+
+      # |> clone_support_files(assignment)
+      # |> clone_solution_files(assignment)
     end)
   end
 
@@ -205,85 +206,85 @@ defmodule Handin.Modules do
     end)
   end
 
-  defp clone_support_files(multi, assignment) do
-    assignment_id = assignment.id
+  # defp clone_support_files(multi, assignment) do
+  #   assignment_id = assignment.id
 
-    Enum.reduce(assignment.support_files, multi, fn support_file, multi ->
-      support_file_id = support_file.id
+  #   Enum.reduce(assignment.support_files, multi, fn support_file, multi ->
+  #     support_file_id = support_file.id
 
-      multi
-      |> Multi.insert({:cloned_support_file, support_file.id}, fn %{
-                                                                    {:cloned_assignment,
-                                                                     ^assignment_id} =>
-                                                                      cloned_assignment
-                                                                  } ->
-        Handin.Assignments.SupportFile.clone_changeset(
-          %Handin.Assignments.SupportFile{},
-          %{
-            "file" => %{
-              "file_name" => support_file.file.file_name,
-              "updated_at" => NaiveDateTime.utc_now()
-            },
-            "assignment_id" => cloned_assignment.id
-          }
-        )
-      end)
-      |> Multi.run({:clone_s3_file, support_file.file}, fn _,
-                                                           %{
-                                                             {:cloned_support_file,
-                                                              ^support_file_id} =>
-                                                               cloned_support_file
-                                                           } ->
-        clone_s3_file(support_file, cloned_support_file)
-      end)
-    end)
-  end
+  #     multi
+  #     |> Multi.insert({:cloned_support_file, support_file.id}, fn %{
+  #                                                                   {:cloned_assignment,
+  #                                                                    ^assignment_id} =>
+  #                                                                     cloned_assignment
+  #                                                                 } ->
+  #       Handin.Assignments.SupportFile.clone_changeset(
+  #         %Handin.Assignments.SupportFile{},
+  #         %{
+  #           "file" => %{
+  #             "file_name" => support_file.file.file_name,
+  #             "updated_at" => NaiveDateTime.utc_now()
+  #           },
+  #           "assignment_id" => cloned_assignment.id
+  #         }
+  #       )
+  #     end)
+  #     |> Multi.run({:clone_s3_file, support_file.file}, fn _,
+  #                                                          %{
+  #                                                            {:cloned_support_file,
+  #                                                             ^support_file_id} =>
+  #                                                              cloned_support_file
+  #                                                          } ->
+  #       clone_s3_file(support_file, cloned_support_file)
+  #     end)
+  #   end)
+  # end
 
-  defp clone_solution_files(multi, assignment) do
-    Enum.reduce(assignment.solution_files, multi, fn solution_file, multi ->
-      assignment_id = assignment.id
-      solution_file_id = solution_file.id
+  # defp clone_solution_files(multi, assignment) do
+  #   Enum.reduce(assignment.solution_files, multi, fn solution_file, multi ->
+  #     assignment_id = assignment.id
+  #     solution_file_id = solution_file.id
 
-      multi
-      |> Multi.insert({:cloned_solution_file, solution_file.id}, fn %{
-                                                                      {:cloned_assignment,
-                                                                       ^assignment_id} =>
-                                                                        cloned_assignment
-                                                                    } ->
-        Handin.Assignments.SolutionFile.clone_changeset(
-          %Handin.Assignments.SolutionFile{},
-          %{
-            "file" => %{
-              "file_name" => solution_file.file.file_name,
-              "updated_at" => NaiveDateTime.utc_now()
-            },
-            "assignment_id" => cloned_assignment.id
-          }
-        )
-      end)
-      |> Multi.run({:clone_s3_file, solution_file.file}, fn _,
-                                                            %{
-                                                              {:cloned_solution_file,
-                                                               ^solution_file_id} =>
-                                                                cloned_solution_file
-                                                            } ->
-        clone_s3_file(solution_file, cloned_solution_file)
-      end)
-    end)
-  end
+  #     multi
+  #     |> Multi.insert({:cloned_solution_file, solution_file.id}, fn %{
+  #                                                                     {:cloned_assignment,
+  #                                                                      ^assignment_id} =>
+  #                                                                       cloned_assignment
+  #                                                                   } ->
+  #       Handin.Assignments.SolutionFile.clone_changeset(
+  #         %Handin.Assignments.SolutionFile{},
+  #         %{
+  #           "file" => %{
+  #             "file_name" => solution_file.file.file_name,
+  #             "updated_at" => NaiveDateTime.utc_now()
+  #           },
+  #           "assignment_id" => cloned_assignment.id
+  #         }
+  #       )
+  #     end)
+  #     |> Multi.run({:clone_s3_file, solution_file.file}, fn _,
+  #                                                           %{
+  #                                                             {:cloned_solution_file,
+  #                                                              ^solution_file_id} =>
+  #                                                               cloned_solution_file
+  #                                                           } ->
+  #       clone_s3_file(solution_file, cloned_solution_file)
+  #     end)
+  #   end)
+  # end
 
-  defp clone_s3_file(original_file, cloned_file) do
-    case ExAws.S3.put_object_copy(
-           "handin-dev",
-           "/uploads/assignment/#{cloned_file.id}/#{cloned_file.file.file_name}",
-           "handin-dev",
-           "/uploads/assignment/#{original_file.id}/#{original_file.file.file_name}"
-         )
-         |> ExAws.request() do
-      {:ok, _} -> {:ok, cloned_file}
-      {:error, _} -> {:error, "Failed to clone file"}
-    end
-  end
+  # defp clone_s3_file(original_file, cloned_file) do
+  #   case ExAws.S3.put_object_copy(
+  #          "handin-dev",
+  #          "/uploads/assignment/#{cloned_file.id}/#{cloned_file.file.file_name}",
+  #          "handin-dev",
+  #          "/uploads/assignment/#{original_file.id}/#{original_file.file.file_name}"
+  #        )
+  #        |> ExAws.request() do
+  #     {:ok, _} -> {:ok, cloned_file}
+  #     {:error, _} -> {:error, "Failed to clone file"}
+  #   end
+  # end
 
   @spec list_module(User.t(), archive_filter()) :: list(Module.t())
   def list_module(user, archive_filter \\ :unarchived) do
@@ -510,10 +511,22 @@ defmodule Handin.Modules do
     |> Multi.run(:module_users, fn _repo, %{users: users} ->
       process_module_users(users, module.id)
     end)
-    |> Multi.run(:emails, fn _repo, %{users: users} ->
-      process_emails(users, module.name)
-    end)
     |> Repo.transaction()
+    |> case do
+      {:ok, %{module_users: module_users, users: users}} ->
+        UserNotifier.send_temporary_password_emails(users)
+        enrolled_users = filter_users_in_module(users, module_users)
+        UserNotifier.send_module_enrollment_emails(enrolled_users, module.name)
+        {:ok, %{users: users}}
+
+      {:error, :module_users, reason, _} ->
+        {:error, reason}
+    end
+  end
+
+  defp filter_users_in_module(users, module_users) do
+    user_ids_in_module = MapSet.new(module_users, & &1.user_id)
+    Enum.filter(users, fn user -> MapSet.member?(user_ids_in_module, user.id) end)
   end
 
   defp process_users(emails, university_id) do
@@ -527,17 +540,9 @@ defmodule Handin.Modules do
 
   defp process_module_users(users, module_id) do
     Enum.reduce_while(users, {:ok, []}, fn user, {:ok, acc} ->
-      case add_user_to_module(user.id, module_id) do
+      case ensure_module_user(user.id, module_id) do
+        {:ok, nil} -> {:cont, {:ok, acc}}
         {:ok, module_user} -> {:cont, {:ok, [module_user | acc]}}
-        {:error, reason} -> {:halt, {:error, reason}}
-      end
-    end)
-  end
-
-  defp process_emails(users, module_name) do
-    Enum.reduce_while(users, {:ok, []}, fn user, {:ok, acc} ->
-      case send_emails(user, module_name) do
-        :ok -> {:cont, {:ok, [user.email | acc]}}
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
@@ -550,19 +555,35 @@ defmodule Handin.Modules do
     end
   end
 
+  defp ensure_module_user(user_id, module_id) do
+    if module_user_exists?(module_id, user_id) do
+      {:ok, nil}
+    else
+      add_user_to_module(user_id, module_id)
+    end
+  end
+
   defp create_user(email, university_id) do
-    temp_password = generate_temp_password()
+    temporary_password = generate_temp_password()
 
     user_params = %{
       email: email,
-      password: temp_password,
-      university: university_id,
+      password: temporary_password,
+      university_id: university_id,
       role: :student
     }
 
     case Accounts.register_user(user_params) do
-      {:ok, user} -> {:ok, Map.put(user, :temp_password, temp_password)}
-      error -> error
+      {:ok, user} ->
+        user =
+          user
+          |> Map.put(:temporary_password, temporary_password)
+          |> Map.put(:invited, true)
+
+        {:ok, user}
+
+      error ->
+        error
     end
   end
 
@@ -575,20 +596,13 @@ defmodule Handin.Modules do
     |> Repo.insert()
   end
 
-  defp send_emails(user, module_name) do
-    with {:ok, _} <-
-           UserNotifier.deliver_temporary_password_email(user.email, user.temp_password),
-         {:ok, _} <- UserNotifier.deliver_module_addition(user.email, module_name) do
-      :ok
-    end
-  end
-
   @spec get_teaching_assistants(module_id :: Ecto.UUID) :: [User.t()]
   def get_teaching_assistants(module_id) do
     from(mu in ModulesUsers,
       where: mu.module_id == ^module_id and mu.role == :teaching_assistant,
       join: u in assoc(mu, :user),
-      select: u
+      select: u,
+      order_by: [asc: u.email]
     )
     |> Repo.all()
   end
@@ -616,6 +630,14 @@ defmodule Handin.Modules do
     )
     |> Repo.one()
     |> Repo.delete()
+  end
+
+  @spec module_user_exists?(module_id :: Ecto.UUID, user_id :: Ecto.UUID) :: boolean()
+  def module_user_exists?(module_id, user_id) do
+    from(mu in ModulesUsers,
+      where: mu.module_id == ^module_id and mu.user_id == ^user_id
+    )
+    |> Repo.exists?()
   end
 
   def module_user(%Module{} = module, %User{role: :admin}) do

@@ -1,6 +1,6 @@
 defmodule HandinWeb.AssignmentLive.Detail do
   use HandinWeb, :live_view
-  alias Handin.{Modules, Accounts, Assignments}
+  alias Handin.{Modules, Assignments}
 
   @impl true
   def render(assigns) do
@@ -88,18 +88,19 @@ defmodule HandinWeb.AssignmentLive.Detail do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    with true <-
-           Accounts.enrolled_module?(socket.assigns.current_user, id) ||
-             socket.assigns.current_user.role in [:admin, :teaching_assistant],
-         true <- Modules.assignment_exists?(id, assignment_id) do
-      module = Modules.get_module!(id)
-      assignment = Assignments.get_assignment!(assignment_id)
+    user = socket.assigns.current_user
 
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, _module_user} <-
+           Modules.module_user(module, user),
+         {:ok, assignment} <- Assignments.get_assignment(assignment_id, module.id) do
       custom_assignment_date =
-        Handin.Assignments.get_custom_assignment_date_by_user_and_assignment(
-          socket.assigns.current_user.id,
-          assignment_id
-        )
+        if user.role == :student do
+          Assignments.get_custom_assignment_date_by_user_and_assignment(
+            user.id,
+            assignment.id
+          )
+        end
 
       {:ok,
        socket
@@ -109,10 +110,10 @@ defmodule HandinWeb.AssignmentLive.Detail do
        |> assign(:assignment, assignment)
        |> assign(:custom_assignment_date, custom_assignment_date)}
     else
-      false ->
+      {:error, reason} ->
         {:ok,
          push_navigate(socket, to: ~p"/modules/#{id}/assignments")
-         |> put_flash(:error, "You are not authorized to view this page")}
+         |> put_flash(:error, reason)}
     end
   end
 end

@@ -45,6 +45,13 @@ defmodule HandinWeb.AssignmentLive.Environment do
       </div>
       <div class="w-1/2">
         <.label for="Run Script">Run Script</.label>
+        <div
+          class=" p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
+          role="alert"
+        >
+          <span class="font-medium">Info alert!</span>
+          This is a bash script that will run before your tests. Use this to setup environment variables, install dependencies, and any other setup you need to do.
+        </div>
         <LiveMonacoEditor.code_editor
           style="min-height: 450px; width: 100%;"
           value={@assignment.run_script}
@@ -63,7 +70,14 @@ defmodule HandinWeb.AssignmentLive.Environment do
         Save
       </.button>
     </.simple_form>
-    <.header class="mb-4 mt-10">Test Case Files</.header>
+    <.header class="mb-4 mt-10">Test Resource Files</.header>
+    <div
+      class=" w-1/2 p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
+      role="alert"
+    >
+      <span class="font-medium">Info alert!</span>
+      Test resource files are additional files that can be used during the testing of assignments. These files can include sample input data, configuration files, or any other resources needed to run the tests effectively.
+    </div>
     <div class="w-1/2">
       <.link
         class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 mb-4"
@@ -71,12 +85,15 @@ defmodule HandinWeb.AssignmentLive.Environment do
       >
         Add
       </.link>
-      <.table id="helper-files" rows={@assignment.support_files}>
-        <:col :let={file} label="name"><%= file.file.file_name %></:col>
-        <:action :let={file}>
+      <.table
+        id="helper-files"
+        rows={Enum.filter(@assignment.assignment_files, &(&1.file_type == :test_resource))}
+      >
+        <:col :let={assignment_file} label="name"><%= assignment_file.file.file_name %></:col>
+        <:action :let={assignment_file}>
           <.link
             class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-            phx-click={JS.push("delete-file", value: %{support_file_id: file.id})}
+            phx-click={JS.push("delete_file", value: %{assignment_file_id: assignment_file.id})}
             data-confirm="Are you sure?"
           >
             Delete
@@ -85,19 +102,29 @@ defmodule HandinWeb.AssignmentLive.Environment do
       </.table>
     </div>
     <.header class="mb-4 mt-10">Solution Files</.header>
+    <div
+      class=" w-1/2 p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400"
+      role="alert"
+    >
+      <span class="font-medium">Info alert!</span>
+      This is optional. You can add solution files to your assignment. These files will be used to see if your tests are working. Students wont have access to these files.
+    </div>
     <div class="w-1/2">
       <.link
         class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 mb-4"
         patch={~p"/modules/#{@module.id}/assignments/#{@assignment.id}/add_solution_files"}
       >
-        Add Solution Files
+        Add
       </.link>
-      <.table id="solution-files" rows={@assignment.solution_files}>
-        <:col :let={file} label="name"><%= file.file.file_name %></:col>
-        <:action :let={file}>
+      <.table
+        id="solution-files"
+        rows={Enum.filter(@assignment.assignment_files, &(&1.file_type == :solution))}
+      >
+        <:col :let={assignment_file} label="name"><%= assignment_file.file.file_name %></:col>
+        <:action :let={assignment_file}>
           <.link
             class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-            phx-click={JS.push("delete-file", value: %{solution_file_id: file.id})}
+            phx-click={JS.push("delete_file", value: %{assignment_file_id: assignment_file.id})}
             data-confirm="Are you sure?"
           >
             Delete
@@ -125,10 +152,12 @@ defmodule HandinWeb.AssignmentLive.Environment do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    if Modules.assignment_exists?(id, assignment_id) do
-      assignment = Assignments.get_assignment!(assignment_id)
-      module = Modules.get_module!(id)
+    user = socket.assigns.current_user
 
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, _module_user} <-
+           Modules.module_user(module, user),
+         {:ok, assignment} <- Assignments.get_assignment(assignment_id, module.id) do
       {:ok,
        socket
        |> assign(current_page: :modules)
@@ -143,9 +172,10 @@ defmodule HandinWeb.AssignmentLive.Environment do
        |> LiveMonacoEditor.set_value(assignment.name)
        |> assign_form(Assignments.change_assignment(assignment))}
     else
-      {:ok,
-       push_navigate(socket, to: ~p"/modules/#{id}/assignments")
-       |> put_flash(:error, "You are not authorized to view this page")}
+      {:error, reason} ->
+        {:ok,
+         push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+         |> put_flash(:error, reason)}
     end
   end
 
@@ -156,7 +186,7 @@ defmodule HandinWeb.AssignmentLive.Environment do
 
   defp apply_action(socket, :add_helper_files, _) do
     socket
-    |> assign(:page_title, "Add Helper Files")
+    |> assign(:page_title, "Add Test Resources")
   end
 
   defp apply_action(socket, :add_solution_files, _) do
@@ -198,22 +228,23 @@ defmodule HandinWeb.AssignmentLive.Environment do
      )}
   end
 
-  def handle_event("delete-file", %{"support_file_id" => id}, socket) do
-    id
-    |> Assignments.get_support_file!()
-    |> Assignments.delete_support_file()
+  def handle_event("delete_file", %{"assignment_file_id" => id}, socket) do
+    assignment_id = socket.assigns.assignment.id
+    module_id = socket.assigns.module.id
 
-    assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
-    {:noreply, socket |> assign(:assignment, assignment)}
-  end
-
-  def handle_event("delete-file", %{"solution_file_id" => id}, socket) do
-    id
-    |> Assignments.get_solution_file!()
-    |> Assignments.delete_solution_file()
-
-    assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
-    {:noreply, socket |> assign(:assignment, assignment)}
+    with {:ok, assignment_file} <- Assignments.get_assignment_file(id),
+         {:ok, _} <- Assignments.delete_assignment_file(assignment_file),
+         {:ok, assignment} <- Assignments.get_assignment(assignment_id, module_id) do
+      {:noreply,
+       socket
+       |> put_flash(:info, "File deleted successfully")
+       |> assign(:assignment, assignment)}
+    else
+      {:error, reason} ->
+        {:noreply,
+         socket
+         |> put_flash(:error, reason)}
+    end
   end
 
   @impl true

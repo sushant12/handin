@@ -2,6 +2,24 @@ defmodule Handin.Accounts.UserNotifier do
   import Swoosh.Email
 
   alias Handin.Mailer
+  alias Handin.Accounts.User
+
+  @spec send_temporary_password_emails(list(User.t())) :: :ok
+  def send_temporary_password_emails(users) when is_list(users) do
+    users
+    |> Enum.each(fn user ->
+      if user.temporary_password do
+        deliver_temporary_password_email(user.email, user.temporary_password)
+      end
+    end)
+  end
+
+  def send_module_enrollment_emails(users, module_name) when is_list(users) do
+    users
+    |> Enum.each(fn user ->
+      deliver_module_enrollment_email(user.email, module_name)
+    end)
+  end
 
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do
@@ -29,7 +47,7 @@ defmodule Handin.Accounts.UserNotifier do
     """)
   end
 
-  def deliver_module_addition(email, module_name) do
+  def deliver_module_enrollment_email(email, module_name) do
     deliver(email, "You've been added to module: #{module_name}", """
 
     Hello #{email},
