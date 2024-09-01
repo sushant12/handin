@@ -53,8 +53,6 @@ defmodule Handin.Assignments.AssignmentTest do
     |> validate_required(@required_attrs)
     |> maybe_validate_custom_test()
     |> maybe_validate_expected_output_type()
-    |> maybe_validate_file_name(attrs)
-    |> maybe_parse_and_save_expected_output_file_content
     |> maybe_validate_points_on_pass()
     |> maybe_validate_points_on_fail()
   end
@@ -67,37 +65,6 @@ defmodule Handin.Assignments.AssignmentTest do
   def output_file_changeset(assignment_test, attrs) do
     assignment_test
     |> cast(attrs, @attrs)
-    |> maybe_validate_file_name(attrs)
-    |> maybe_parse_and_save_expected_output_file_content()
-  end
-
-  defp maybe_parse_and_save_expected_output_file_content(changeset) do
-    if changeset.errors[:expected_output_file] do
-      changeset
-    else
-      case get_change(changeset, :expected_output_file) do
-        nil ->
-          changeset
-
-        _expected_output_file ->
-          nil
-          # url =
-          #   SupportFileUploader.url(
-          #     {expected_output_file,
-          #      Assignments.get_support_file_by_name!(
-          #        get_field(changeset, :assignment_id),
-          #        expected_output_file
-          #      )},
-          #     signed: true
-          #   )
-
-          # {:ok, %Finch.Response{status: 200, body: body}} =
-          #   Finch.build(:get, url)
-          #   |> Finch.request(Handin.Finch)
-
-          # put_change(changeset, :expected_output_file_content, String.trim(body))
-      end
-    end
   end
 
   defp maybe_validate_expected_output_type(changeset) do
@@ -112,23 +79,6 @@ defmodule Handin.Assignments.AssignmentTest do
 
       _ ->
         changeset
-    end
-  end
-
-  defp maybe_validate_file_name(changeset, _attrs) do
-    case get_change(changeset, :expected_output_file) do
-      nil ->
-        changeset
-
-      file_name ->
-        changeset
-        |> get_field(:assignment)
-        |> Map.get(:support_files)
-        |> Enum.find(&(&1.file.file_name == file_name))
-        |> case do
-          nil -> add_error(changeset, :expected_output_file, "File does not exist")
-          _ -> changeset
-        end
     end
   end
 

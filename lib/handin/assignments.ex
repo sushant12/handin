@@ -80,7 +80,7 @@ defmodule Handin.Assignments do
   def get_assignment(id, module_id) do
     from(a in Assignment, where: a.id == ^id and a.module_id == ^module_id)
     |> Repo.one()
-    |> Repo.preload([:assignment_files])
+    |> Repo.preload([:assignment_files, :programming_language])
     |> case do
       nil -> {:error, "Assignment not found"}
       assignment -> {:ok, assignment}
@@ -157,7 +157,6 @@ defmodule Handin.Assignments do
 
   def update_assignment_test(%AssignmentTest{} = assignment_test, attrs) do
     assignment_test
-    |> Repo.preload(assignment: [:support_files])
     |> AssignmentTest.changeset(attrs)
     |> Repo.update()
   end
@@ -675,4 +674,21 @@ defmodule Handin.Assignments do
 
   def delete_custom_assignment_date!(%CustomAssignmentDate{} = custom_assignment_date),
     do: Repo.delete!(custom_assignment_date)
+
+  @spec list_tests(id :: Ecto.UUID.t()) :: [AssignmentTest.t()]
+  def list_tests(id) do
+    from(at in AssignmentTest, where: at.assignment_id == ^id, order_by: [asc: at.inserted_at])
+    |> Repo.all()
+  end
+
+  @spec get_test(assignment_id :: Ecto.UUID.t(), test_id :: Ecto.UUID.t()) ::
+          {:ok, AssignmentTest.t()} | {:error, String.t()}
+  def get_test(assignment_id, test_id) do
+    from(at in AssignmentTest, where: at.assignment_id == ^assignment_id and at.id == ^test_id)
+    |> Repo.one()
+    |> case do
+      nil -> {:error, "Test not found"}
+      test -> {:ok, test}
+    end
+  end
 end

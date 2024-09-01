@@ -103,7 +103,7 @@ defmodule Handin.AssignmentTests do
   """
   def change_assignment_test(%AssignmentTest{} = assignment_test, attrs \\ %{}) do
     assignment_test
-    |> Repo.preload(assignment: [:support_files])
+    |> Repo.preload(assignment: [:assignment_files])
     |> AssignmentTest.changeset(attrs)
   end
 

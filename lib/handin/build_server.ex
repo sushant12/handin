@@ -2,6 +2,8 @@ defmodule Handin.BuildServer do
   use GenServer
   alias Handin.Assignments
   alias Handin.AssignmentSubmissionFileUploader
+  alias Handin.AssignmentFileUploader
+  alias Handin.Assignments.AssignmentFile
   alias Handin.AssignmentSubmission.AssignmentSubmissionFile
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
@@ -10,19 +12,15 @@ defmodule Handin.BuildServer do
     GenServer.start_link(__MODULE__, state, name: name_for(state))
   end
 
-  def name_for(%{type: "assignment_tests", assignment_id: assignment_id}) do
-    {:global, "build:assignment_tests:#{assignment_id}"}
-  end
-
-  def name_for(%{type: type, assignment_submission_id: assignment_submission_id}) do
-    {:global, "build:#{type}:#{assignment_submission_id}"}
+  def name_for(%{assignment_id: assignment_id, user_id: user_id, role: role}) do
+    {:global, "assignment:#{assignment_id}:module_user:#{user_id}:role:#{role}"}
   end
 
   @impl true
   def init(state) do
+    {:ok, build} = create_new_build(state.assignment_id, state.user_id)
     assignment = Assignments.get_assignment!(state.assignment_id)
-    {:ok, build} = create_new_build(assignment, state.user_id)
-    state = Map.merge(state, %{assignment: assignment, build: build})
+    state = Map.merge(state, %{assignment: assignment, build: build, machine_id: nil})
     {:ok, state, {:continue, :create_machine}}
   end
 
@@ -33,9 +31,9 @@ defmodule Handin.BuildServer do
         state = %{state | machine_id: machine_id, build: build}
         {:noreply, state, {:continue, :process_build}}
 
-      :error ->
+      {:error, reason} ->
         Assignments.update_build(state.build, %{status: :failed})
-        {:stop, "Failed To Create Container", state}
+        {:stop, reason, state}
     end
   end
 
@@ -51,62 +49,6 @@ defmodule Handin.BuildServer do
     end
 
     {:stop, :normal, state}
-  end
-
-  defp create_new_build(assignment, user_id) do
-    Assignments.new_build(%{
-      assignment_id: assignment.id,
-      status: :running,
-      user_id: user_id
-    })
-  end
-
-  defp create_and_start_machine(state) do
-    with {:ok, machine} <- create_machine(state),
-         true <- machine_started?(machine),
-         {:ok, build} <- update_build_with_machine_id(state.build, machine["id"]) do
-      {:ok, machine["id"], build}
-    else
-      _ -> :error
-    end
-  end
-
-  defp create_machine(state) do
-    @machine_api.create(Jason.encode!(build_machine_config(state)))
-  end
-
-  defp build_machine_config(state) do
-    %{
-      config: %{
-        init: %{exec: ["/bin/sleep", "inf"]},
-        auto_destroy: true,
-        image: state.image,
-        files: build_all_scripts(state)
-      }
-    }
-  end
-
-  defp build_all_scripts(state) do
-    build_main_script(state.assignment) ++
-      build_file_download_script(state.assignment, state.type, state.user_id) ++
-      build_upload_script(state.assignment, state) ++
-      build_check_script(state.assignment) ++
-      build_tests_scripts(state.assignment)
-  end
-
-  defp machine_started?(machine) do
-    case @machine_api.status(machine["id"]) do
-      {:ok, %{"state" => state}} when state in ["created", "starting"] ->
-        :timer.sleep(1000)
-        machine_started?(machine)
-
-      _ ->
-        true
-    end
-  end
-
-  defp update_build_with_machine_id(build, machine_id) do
-    Assignments.update_build(build, %{machine_id: machine_id})
   end
 
   defp download_files(state) do
@@ -161,7 +103,7 @@ defmodule Handin.BuildServer do
   end
 
   defp handle_successful_test(state, assignment_test, response) do
-    :timer.sleep(3000)
+    Process.sleep(3000)
 
     case Jason.decode(response["stdout"]) do
       {:ok, decoded_response} ->
@@ -199,6 +141,76 @@ defmodule Handin.BuildServer do
       },
       state
     )
+  end
+
+  defp create_new_build(assignment_id, user_id) do
+    Assignments.new_build(%{
+      assignment_id: assignment_id,
+      status: :running,
+      user_id: user_id
+    })
+  end
+
+  defp create_and_start_machine(state) do
+    with {:ok, machine} <- create_machine(state),
+         {:ok, build} <- update_build_with_machine_id(state.build, machine["id"]),
+         {:ok, true} <- machine_started?(machine) do
+      {:ok, machine["id"], build}
+    else
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp create_machine(state) do
+    state
+    |> build_machine_config()
+    |> Jason.encode!()
+    |> @machine_api.create()
+  end
+
+  defp build_machine_config(state) do
+    %{
+      config: %{
+        init: %{exec: ["/bin/sleep", "inf"]},
+        auto_destroy: true,
+        image: state.image,
+        files: build_all_scripts(state)
+      }
+    }
+  end
+
+  defp build_all_scripts(state) do
+    build_main_script(state.assignment) ++
+      build_file_download_script(state.assignment, state.type, state.user_id) ++
+      build_upload_script(state.assignment, state) ++
+      build_check_script(state.assignment) ++
+      build_tests_scripts(state.assignment)
+  end
+
+  defp machine_started?(machine, attempts \\ 0) do
+    max_attempts = 5
+    # 2 seconds
+    interval = 2000
+
+    if attempts >= max_attempts do
+      {:error, :timeout}
+    else
+      case @machine_api.status(machine["id"]) do
+        {:ok, %{"state" => state}} when state in ["created", "starting"] ->
+          Process.sleep(interval)
+          machine_started?(machine, attempts + 1)
+
+        {:ok, %{"state" => "started"}} ->
+          {:ok, true}
+
+        {:error, reason} ->
+          {:error, reason}
+      end
+    end
+  end
+
+  defp update_build_with_machine_id(build, machine_id) do
+    Assignments.update_build(build, %{machine_id: machine_id})
   end
 
   defp save_run_script_results(state, script_state) do
@@ -258,9 +270,7 @@ defmodule Handin.BuildServer do
 
   defp broadcast_build_completed(state) do
     channel =
-      if state.type == "assignment_tests",
-        do: "build:#{state.type}:#{state.assignment_id}",
-        else: "build:#{state.type}:#{state.assignment_submission_id}"
+      "assignment:#{state.assignment_id}:module_user:#{state.user_id}:role:#{state.role}"
 
     HandinWeb.Endpoint.broadcast!(channel, "build_completed", state.build.id)
   end
@@ -292,16 +302,10 @@ defmodule Handin.BuildServer do
     Assignments.log(log_map)
 
     channel =
-      if state.type == "assignment_tests",
-        do: "build:#{state.type}:#{state.assignment_id}",
-        else: "build:#{state.type}:#{state.assignment_submission_id}"
+      "assignment:#{state.assignment_id}:module_user:#{state.user_id}:role:#{state.role}"
 
     HandinWeb.Endpoint.broadcast!(channel, "test_result", build.id)
   end
-
-  # The following functions (build_check_script, build_file_download_script, build_main_script, build_upload_script, build_tests_scripts)
-  # remain unchanged as they are helper functions for creating scripts.
-  # Their implementations are kept as is to maintain the existing functionality.
 
   defp build_check_script(assignment) do
     assignment.assignment_tests
@@ -326,45 +330,49 @@ defmodule Handin.BuildServer do
 
   defp build_file_download_script(assignment, type, user_id) do
     template = """
-    #!bin/bash
+    #!/bin/bash
+    set -e
+    download_file() {
+      local url="$1"
+      local filename="$2"
+      curl -sSL -o "$filename" "$url" || echo "Failed to download $filename"
+    }
     """
 
-    assignment_files =
-      if type == "assignment_tests" do
-        assignment.support_files ++ assignment.solution_files
-      else
-        assignment.support_files ++ Assignments.get_submission_files(assignment.id, user_id)
-      end
+    assignment_files = get_assignment_files(assignment, type, user_id)
 
-    urls =
+    download_commands =
       assignment_files
-      |> Enum.map(fn assignment_file ->
-        case assignment_file do
-          %AssignmentSubmissionFile{} = assignment_file ->
-            AssignmentSubmissionFileUploader.url(
-              {assignment_file.file.file_name, assignment_file},
-              signed: true
-            )
-
-          _ ->
-            nil
-            # SupportFileUploader.url({assignment_file.file.file_name, assignment_file},
-            #   signed: true
-            # )
-        end
-      end)
-      |> Enum.map(fn url ->
-        """
-        curl -O "#{url}"
-        """
-      end)
+      |> Enum.map_join("\n", &generate_download_command/1)
 
     [
       %{
         "guest_path" => "/files.sh",
-        "raw_value" => Base.encode64(template <> Enum.join(urls, "\n"))
+        "raw_value" => Base.encode64(template <> download_commands)
       }
     ]
+  end
+
+  defp get_assignment_files(assignment, type, user_id) do
+    if type == "assignment_tests" do
+      assignment.assignment_files
+    else
+      Enum.filter(assignment.assignment_files, &(&1.file_type == :test_resource)) ++
+        Assignments.get_submission_files(assignment.id, user_id)
+    end
+  end
+
+  defp generate_download_command(assignment_file) do
+    url = get_file_url(assignment_file)
+    ~s(download_file "#{url}" "#{assignment_file.file.file_name}")
+  end
+
+  defp get_file_url(%AssignmentSubmissionFile{} = file) do
+    AssignmentSubmissionFileUploader.url({file.file.file_name, file}, signed: true)
+  end
+
+  defp get_file_url(%AssignmentFile{} = file) do
+    AssignmentFileUploader.url({file.file.file_name, file}, signed: true)
   end
 
   defp build_main_script(assignment) do
@@ -391,29 +399,16 @@ defmodule Handin.BuildServer do
     curls =
       assignment.assignment_tests
       |> Enum.map(fn assignment_test ->
-        if state.type == "assignment_tests" do
-          {:ok, presigned_url} =
-            ExAws.S3.presigned_url(
-              config,
-              :put,
-              "handin-dev",
-              "uploads/assignment/solution/#{assignment_test.id}.out",
-              expires_in: 6000
-            )
+        {:ok, presigned_url} =
+          ExAws.S3.presigned_url(
+            config,
+            :put,
+            "handin-dev",
+            "uploads/assignments/#{assignment.id}/users/#{state.user_id}/submission/#{assignment_test.id}.out",
+            expires_in: 6000
+          )
 
-          "curl --request PUT --upload-file \"#{assignment_test.id}.out\" \"#{presigned_url}\""
-        else
-          {:ok, presigned_url} =
-            ExAws.S3.presigned_url(
-              config,
-              :put,
-              "handin-dev",
-              "uploads/user/#{state.user_id}/assignment/#{assignment.id}/submission/solution/#{assignment_test.id}.out",
-              expires_in: 600
-            )
-
-          "curl --request PUT --upload-file \"#{assignment_test.id}.out\" \"#{presigned_url}\""
-        end
+        "curl --request PUT --upload-file \"#{assignment_test.id}.out\" \"#{presigned_url}\""
       end)
 
     template = template <> Enum.join(curls, "\n")
@@ -446,32 +441,37 @@ defmodule Handin.BuildServer do
 
   defp get_test_template(%{expected_output_type: :string} = assignment_test) do
     """
-    #!/bin/bash
+    #!/bin/sh
+    set -e
+    escape_json() {
+      printf '%s' "$1" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed 's/\n/\\n/g'
+    }
     output=$(#{assignment_test.command})
     echo "$output" > #{assignment_test.id}.out
     expected_output=#{assignment_test.expected_output_text}
     if [ "$output" = "$expected_output" ]; then
-      state="pass"
+      printf '{"state":"pass","output":"%s"}' "$(escape_json "$output")"
     else
-      state="fail"
+      printf '{"state":"fail","output":"%s","expected":"%s"}' "$(escape_json "$output")" "$(escape_json "$expected_output")"
     fi
-    JSON_FMT='{"state": "%s"}'
-    printf "$JSON_FMT" "$state"
     """
   end
 
   defp get_test_template(assignment_test) do
     """
-    #!/bin/bash
+    #!/bin/sh
+    set -e
+    escape_json() {
+      printf '%s' "$1" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed 's/\n/\\n/g'
+    }
     output=$(#{assignment_test.command})
     echo "$output" > #{assignment_test.id}.out
     if diff -wi #{assignment_test.id}.out #{assignment_test.expected_output_file} >/dev/null; then
-      state="pass"
+      printf '{"state":"pass","output":"%s"}' "$(escape_json "$output")"
     else
-      state="fail"
+      expected=$(cat #{assignment_test.expected_output_file})
+      printf '{"state":"fail","output":"%s","expected":"%s"}' "$(escape_json "$output")" "$(escape_json "$expected")"
     fi
-    JSON_FMT='{"state": "%s"}'
-    printf "$JSON_FMT" "$state"
     """
   end
 end

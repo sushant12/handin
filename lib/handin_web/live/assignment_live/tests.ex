@@ -41,7 +41,11 @@ defmodule HandinWeb.AssignmentLive.Tests do
       <div class="bg-gray-50 dark:bg-gray-800 p-4 w-64 h-auto overflow-y-auto p-4">
         <div class="assignment-test-files">
           <ul>
-            <li :for={support_file <- @assignment.support_files} class="py-1 flex items-center">
+            <li
+              :for={assignment_file <- @assignment.assignment_files}
+              :if={assignment_file.file_type == :test_resource}
+              class="py-1 flex items-center"
+            >
               <span>
                 <svg
                   class="w-4 h-4 mr-2"
@@ -56,12 +60,13 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   />
                 </svg>
               </span>
-              <span class="truncate" title={support_file.file.file_name}>
-                <%= support_file.file.file_name %>
+              <span class="truncate" title={assignment_file.file.file_name}>
+                <%= assignment_file.file.file_name %>
               </span>
             </li>
             <li
-              :for={solution_file <- @assignment.solution_files}
+              :for={assignment_file <- @assignment.assignment_files}
+              :if={assignment_file.file_type == :solution}
               class="py-1 flex items-center text text-gray-300"
             >
               <span>
@@ -79,8 +84,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 </svg>
               </span>
 
-              <span class="truncate" title={solution_file.file.file_name}>
-                <%= solution_file.file.file_name %>
+              <span class="truncate" title={assignment_file.file.file_name}>
+                <%= assignment_file.file.file_name %>
               </span>
             </li>
           </ul>
@@ -88,7 +93,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
         <div class="border-t border-gray-300 mt-4 pt-2">
           <.link
             class="block w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 text-center mr-3 md:mr-0 "
-            phx-click="add-new-test"
+            phx-click="add_test"
           >
             Add Tests
           </.link>
@@ -100,11 +105,11 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 :for={test <- @assignment_tests}
                 class={[
                   "py-1 relative flex justify-between items-center hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded",
-                  test.id == @assignment_test.id && "bg-gray-300"
+                  test.id == @selected_assignment_test.id && "bg-gray-300"
                 ]}
               >
                 <.link
-                  phx-click="select-test"
+                  phx-click="select_test"
                   phx-value-id={test.id}
                   class="truncate"
                   title={test.name}
@@ -113,7 +118,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 </.link>
 
                 <span class="delete-icon">
-                  <.button phx-click="delete-test" phx-value-id={test.id}>
+                  <.button phx-click="delete_test" phx-value-id={test.id}>
                     <svg
                       class="w-[21px] h-[21px] text-gray-800 dark:text-white"
                       aria-hidden="true"
@@ -138,7 +143,12 @@ defmodule HandinWeb.AssignmentLive.Tests do
       </div>
       <div class="ml-8 w-1/2">
         <div class="rounded shadow-md px-4 mb-5 pb-5">
-          <.simple_form :if={@assignment_test} for={@form} phx-change="validate" phx-submit="save">
+          <.simple_form
+            :if={@selected_assignment_test}
+            for={@form}
+            phx-change="validate"
+            phx-submit="save"
+          >
             <.input field={@form[:name]} type="text" label="Name" />
             <.input field={@form[:enable_custom_test]} type="checkbox" label="Enable Custom Test" />
             <%= if @assignment.enable_total_marks do %>
@@ -150,7 +160,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               <LiveMonacoEditor.code_editor
                 style="min-height: 450px;"
                 class="mt-3 w-full"
-                value={@assignment_test.custom_test}
+                value={@selected_assignment_test.custom_test}
                 opts={
                   Map.merge(
                     LiveMonacoEditor.default_opts(),
@@ -167,13 +177,17 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 label="Match Type"
                 options={[:file, :string]}
               />
-
               <.input
                 :if={@form[:expected_output_type].value in ["file", :file]}
                 field={@form[:expected_output_file]}
-                type="text"
-                label="File Name"
+                type="select"
+                label="File"
+                options={
+                  Enum.filter(@assignment.assignment_files, &(&1.file_type == :test_resource))
+                  |> Enum.map(&{&1.file.file_name, &1.file.file_name})
+                }
               />
+
               <.input
                 :if={@form[:expected_output_type].value in [:string, "string"]}
                 field={@form[:expected_output_text]}
@@ -189,24 +203,6 @@ defmodule HandinWeb.AssignmentLive.Tests do
               Save
             </.button>
           </.simple_form>
-          <div
-            :if={
-              @assignment_test &&
-                !Phoenix.HTML.Form.normalize_value("checkbox", @form[:enable_custom_test].value)
-            }
-            class="mt-5"
-          >
-            <span class="text-black-500">pseudocode: </span>
-            if <span class="text-blue-500"><%= @assignment_test.command %></span>
-            ==
-            <span class="text-blue-500">
-              <%= if @assignment_test.expected_output_type == :file,
-                do: "cat(#{@assignment_test.expected_output_file})",
-                else: @assignment_test.expected_output_text %>
-            </span>
-            then <span class="text-green-500"> true </span>
-            else <span class="text-red-600">false</span>
-          </div>
         </div>
         <div class="flex">
           <button
@@ -305,101 +301,111 @@ defmodule HandinWeb.AssignmentLive.Tests do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    if Modules.assignment_exists?(id, assignment_id) do
-      assignment = Assignments.get_assignment!(assignment_id)
-      assignment_test = Enum.at(assignment.assignment_tests, 0)
-      module = Modules.get_module!(id)
+    user = socket.assigns.current_user
 
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, module_user} <-
+           Modules.module_user(module, user),
+         {:ok, assignment} <- Assignments.get_assignment(assignment_id, module.id) do
       if connected?(socket) do
-        HandinWeb.Endpoint.subscribe("build:assignment_tests:#{assignment_id}")
+        HandinWeb.Endpoint.subscribe(
+          "assignment:#{assignment_id}:module_user:#{user.id}:role:#{module_user.role}"
+        )
       end
+
+      assignment_tests = Assignments.list_tests(assignment_id)
+      selected_assignment_test = List.first(assignment_tests)
 
       {:ok,
        socket
        |> assign(current_page: :modules)
        |> assign(:module, module)
+       |> assign(:module_user, module_user)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
        |> assign(:assignment, assignment)
-       |> assign(:assignment_test, assignment_test)
-       |> assign(
-         :assignment_tests,
-         assignment.assignment_tests
-       )
+       |> assign(:selected_assignment_test, selected_assignment_test)
+       |> assign(:assignment_tests, assignment_tests)
        |> assign(
          :logs,
-         Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
+         Assignments.build_recent_test_results(assignment_id, user.id)
        )
        |> assign(
          :build,
-         GenServer.whereis({:global, "build:assignment_tests:#{assignment.id}"})
+         GenServer.whereis(
+           {:global,
+            "assignment:#{assignment_id}:module_user:#{user.id}:role:#{module_user.role}"}
+         )
        )
-       |> assign(:custom_test, assignment_test && assignment_test.custom_test)
+       |> assign(:custom_test, selected_assignment_test && selected_assignment_test.custom_test)
        |> assign_form(
          AssignmentTests.change_assignment_test(
-           assignment_test || %AssignmentTest{assignment_id: assignment.id}
+           selected_assignment_test || %AssignmentTest{assignment_id: assignment.id}
          )
        )}
-    else
-      {:ok,
-       push_navigate(socket, to: ~p"/modules/#{id}/assignments")
-       |> put_flash(:error, "You are not authorized to view this page")}
     end
   end
 
   @impl true
-  def handle_event("add-new-test", _, socket) do
-    {:ok, assignment_test} =
-      %{
-        name: "New Test",
-        assignment_id: socket.assigns.assignment.id
-      }
-      |> AssignmentTests.create_assignment_test()
+  def handle_event("add_test", _, socket) do
+    case AssignmentTests.create_assignment_test(%{
+           name: "New Test",
+           assignment_id: socket.assigns.assignment.id
+         }) do
+      {:ok, assignment_test} ->
+        {:noreply,
+         socket
+         |> assign(:selected_assignment_test, assignment_test)
+         |> assign_form(AssignmentTests.change_assignment_test(assignment_test))
+         |> assign(
+           :assignment_tests,
+           socket.assigns.assignment_tests ++ [assignment_test]
+         )}
 
-    {:noreply,
-     socket
-     |> assign(:assignment_test, assignment_test)
-     |> assign_form(AssignmentTests.change_assignment_test(assignment_test))
-     |> assign(
-       :assignment_tests,
-       socket.assigns.assignment_tests ++ [assignment_test]
-     )}
+      {:error, %Ecto.Changeset{}} ->
+        {:noreply, put_flash(socket, :error, "Failed to add test")}
+    end
   end
 
-  def handle_event("select-test", %{"id" => id}, socket) do
-    assignment_test = AssignmentTests.get_assignment_test!(id)
+  def handle_event("select_test", %{"id" => id}, socket) do
+    assignment_id = socket.assigns.assignment.id
+    {:ok, assignment_test} = Assignments.get_test(assignment_id, id)
 
     {:noreply,
-     assign(socket, :assignment_test, assignment_test)
+     assign(socket, :selected_assignment_test, assignment_test)
      |> assign(:custom_test, assignment_test.custom_test)
      |> assign_form(AssignmentTests.change_assignment_test(assignment_test))}
   end
 
-  def handle_event("delete-test", %{"id" => id}, socket) do
-    assignment_test = AssignmentTests.get_assignment_test!(id)
-    {:ok, _} = AssignmentTests.delete_assignment_test(assignment_test)
+  def handle_event("delete_test", %{"id" => id}, socket) do
+    assignment_id = socket.assigns.assignment.id
 
-    assignment = Assignments.get_assignment!(socket.assigns.assignment.id)
-    assignment_test = Enum.at(assignment.assignment_tests, 0)
+    with {:ok, assignment_test} <- Assignments.get_test(assignment_id, id),
+         {:ok, _} <- AssignmentTests.delete_assignment_test(assignment_test) do
+      assignment_tests = Assignments.list_tests(assignment_id)
+      assignment_test = List.first(assignment_tests)
 
-    if assignment_test do
-      {:noreply,
-       assign(
-         socket,
-         :assignment_tests,
-         assignment.assignment_tests
-       )
-       |> assign(:assignment_test, assignment_test)
-       |> assign_form(AssignmentTests.change_assignment_test(assignment_test))}
+      socket =
+        assign(socket, :assignment_tests, assignment_tests)
+        |> put_flash(:info, "Test deleted successfully")
+        |> assign(:assignment_test, assignment_test)
+
+      socket =
+        if assignment_test do
+          assign_form(socket, AssignmentTests.change_assignment_test(assignment_test))
+        else
+          socket
+        end
+
+      {:noreply, socket}
     else
-      {:noreply,
-       assign(socket, :assignment_tests, assignment.assignment_tests)
-       |> assign(:assignment_test, nil)}
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to delete test")}
     end
   end
 
   def handle_event("validate", %{"assignment_test" => assignment_test_params}, socket) do
     changeset =
-      socket.assigns.assignment_test
+      socket.assigns.selected_assignment_test
       |> AssignmentTests.change_assignment_test(assignment_test_params)
       |> Map.put(:action, :validate)
 
@@ -415,6 +421,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
   end
 
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
+    user = socket.assigns.current_user
+    module_user = socket.assigns.module_user
+    image = socket.assigns.assignment.programming_language.docker_file_url
+
     DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
       id: Handin.BuildServer,
       start:
@@ -423,8 +433,9 @@ defmodule HandinWeb.AssignmentLive.Tests do
            %{
              assignment_id: assignment_id,
              type: "assignment_tests",
-             image: socket.assigns.assignment.programming_language.docker_file_url,
-             user_id: socket.assigns.current_user.id
+             role: module_user.role,
+             image: image,
+             user_id: user.id
            }
          ]},
       restart: :temporary
@@ -436,7 +447,12 @@ defmodule HandinWeb.AssignmentLive.Tests do
        :logs,
        Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
      )
-     |> assign(:build, GenServer.whereis({:global, "build:assignment_tests:#{assignment_id}"}))}
+     |> assign(
+       :build,
+       GenServer.whereis(
+         {:global, "assignment:#{assignment_id}:module_user:#{user.id}:role:#{module_user.role}"}
+       )
+     )}
   end
 
   def handle_event("code-editor-lost-focus", %{"value" => custom_test}, socket) do
@@ -473,20 +489,22 @@ defmodule HandinWeb.AssignmentLive.Tests do
     assign(socket, :form, to_form(changeset))
   end
 
-  defp save_assignment_test(socket, :edit, assignment_test_params) do
+  defp save_assignment_test(socket, :edit, params) do
+    selected_assignment_test = socket.assigns.selected_assignment_test
+
     case Assignments.update_assignment_test(
-           socket.assigns.assignment_test,
-           assignment_test_params
+           selected_assignment_test,
+           params
          ) do
       {:ok, assignment_test} ->
-        assignment =
-          socket.assigns.assignment |> Handin.Repo.preload(:assignment_tests, force: true)
+        assignment_id = socket.assigns.assignment.id
+        assignment_tests = Assignments.list_tests(assignment_id)
 
         {:noreply,
          socket
          |> assign_form(Assignments.change_assignment_test(assignment_test))
-         |> assign(:assignment_test, assignment_test)
-         |> assign(:assignment_tests, assignment.assignment_tests)
+         |> assign(:selected_assignment_test, assignment_test)
+         |> assign(:assignment_tests, assignment_tests)
          |> put_flash(:info, "Test saved successfully")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
