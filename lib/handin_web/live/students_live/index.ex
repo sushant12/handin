@@ -7,13 +7,14 @@ defmodule HandinWeb.StudentsLive.Index do
     user = socket.assigns.current_user
 
     with {:ok, module} <- Modules.get_module(id),
-         {:ok, _module_user} <- Modules.module_user(module, user) do
+         {:ok, module_user} <- Modules.module_user(module, user) do
       students = Modules.get_students(module.id)
 
       {:ok,
        stream(socket, :students, students)
        |> assign(:module, module)
        |> assign(:current_tab, :students)
+       |> assign(:module_user, module_user)
        |> assign(:current_page, :modules)}
     else
       {:error, reason} ->

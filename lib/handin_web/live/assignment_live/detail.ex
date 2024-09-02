@@ -15,7 +15,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
         current={true}
       />
     </.breadcrumbs>
-    <%= if @current_user.role != :student do %>
+    <%= if @module_user.role != :student do %>
       <.tabs>
         <:item
           text="Details"
@@ -37,7 +37,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
         />
       </.tabs>
     <% end %>
-    <%= if @current_user.role == :student do %>
+    <%= if @module_user.role == :student do %>
       <.tabs>
         <:item
           text="Details"
@@ -91,7 +91,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
     user = socket.assigns.current_user
 
     with {:ok, module} <- Modules.get_module(id),
-         {:ok, _module_user} <-
+         {:ok, module_user} <-
            Modules.module_user(module, user),
          {:ok, assignment} <- Assignments.get_assignment(assignment_id, module.id) do
       custom_assignment_date =
@@ -108,6 +108,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
        |> assign(:module, module)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
        |> assign(:assignment, assignment)
+       |> assign(:module_user, module_user)
        |> assign(:custom_assignment_date, custom_assignment_date)}
     else
       {:error, reason} ->

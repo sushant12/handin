@@ -155,7 +155,7 @@ defmodule HandinWeb.AssignmentLive.Environment do
     user = socket.assigns.current_user
 
     with {:ok, module} <- Modules.get_module(id),
-         {:ok, _module_user} <-
+         {:ok, module_user} <-
            Modules.module_user(module, user),
          {:ok, assignment} <- Assignments.get_assignment(assignment_id, module.id) do
       {:ok,
@@ -163,6 +163,7 @@ defmodule HandinWeb.AssignmentLive.Environment do
        |> assign(current_page: :modules)
        |> assign(:module, module)
        |> assign(:assignment, assignment)
+       |> assign(:module_user, module_user)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
        |> assign(:run_script, assignment.run_script)
        |> assign(

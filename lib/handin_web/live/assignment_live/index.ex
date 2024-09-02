@@ -22,6 +22,7 @@ defmodule HandinWeb.AssignmentLive.Index do
        |> stream(:assignments, assignments)
        |> assign(:module, module)
        |> assign(:programming_languages, programming_languages)
+       |> assign(:module_user, module_user)
        |> assign(:current_page, :modules)}
     else
       {:error, reason} ->

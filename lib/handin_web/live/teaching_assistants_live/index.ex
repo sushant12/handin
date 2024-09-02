@@ -5,13 +5,14 @@ defmodule HandinWeb.TeachingAssistantsLive.Index do
   @impl true
   def mount(%{"id" => id}, _session, socket) do
     with {:ok, module} <- Modules.get_module(id),
-         {:ok, _module_user} <- Modules.module_user(module, socket.assigns.current_user) do
+         {:ok, module_user} <- Modules.module_user(module, socket.assigns.current_user) do
       teaching_assistants = Modules.get_teaching_assistants(module.id)
 
       {:ok,
        stream(socket, :teaching_assistants, teaching_assistants)
        |> assign(:module, module)
        |> assign(:current_tab, :teaching_assistants)
+       |> assign(:module_user, module_user)
        |> assign(:current_page, :modules)}
     else
       {:error, reason} ->
