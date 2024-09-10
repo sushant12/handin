@@ -33,25 +33,13 @@ defmodule HandinWeb.Router do
 
     live_session :require_authenticated_admin,
       on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}, {HandinWeb.Auth, :admin}] do
-      live "/universities", UniversityLive.Index, :index
-      live "/universities/new", UniversityLive.Index, :new
-      live "/universities/:id/edit", UniversityLive.Index, :edit
+      resources "/universities", UniversityController
 
-      live "/universities/:id", UniversityLive.Show, :show
-      live "/universities/:id/show/edit", UniversityLive.Show, :edit
+      resources "/programming_languages", ProgrammingLanguageController
 
-      live "/programming_languages", ProgrammingLanguageLive.Index, :index
-      live "/programming_languages/new", ProgrammingLanguageLive.Index, :new
-      live "/programming_languages/:id/edit", ProgrammingLanguageLive.Index, :edit
+      resources "/users", UserController
 
-      live "/programming_languages/:id", ProgrammingLanguageLive.Show, :show
-      live "/programming_languages/:id/show/edit", ProgrammingLanguageLive.Show, :edit
-
-      live "/users", UserListLive.Index, :index
-      live "/users/:user_id/edit", UserListLive.Index, :edit
-
-      live "/builds", BuildLive.Index, :index
-      live "/builds/:build_id/edit", BuildLive.Index, :edit
+      resources "/builds", BuildController
     end
   end
 

@@ -4,6 +4,12 @@ defmodule Handin.Accounts do
   """
 
   import Ecto.Query, warn: false
+
+  use Torch.Pagination,
+    repo: Handin.Repo,
+    model: Handin.Accounts.User,
+    name: :users
+
   alias Handin.Repo
   alias Handin.Accounts.{User, UserToken, UserNotifier}
 
@@ -60,7 +66,7 @@ defmodule Handin.Accounts do
 
   """
   @spec get_user!(Ecto.UUID) :: User.t()
-  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(:modules)
+  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload([:modules, :university])
 
   def get_user(id), do: Repo.get(User, id) |> Repo.preload(builds: [:assignment])
 
@@ -406,5 +412,9 @@ defmodule Handin.Accounts do
       )
 
     valid
+  end
+
+  def change_user(%User{} = user, attrs \\ %{}) do
+    User.edit_changeset(user, attrs)
   end
 end

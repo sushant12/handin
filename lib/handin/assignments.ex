@@ -691,4 +691,9 @@ defmodule Handin.Assignments do
       test -> {:ok, test}
     end
   end
+
+  def change_build(%Build{} = build, attrs \\ %{}) do
+    build
+    |> Build.update_changeset(attrs)
+  end
 end

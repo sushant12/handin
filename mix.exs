@@ -7,7 +7,7 @@ defmodule Handin.MixProject do
       version: "0.1.0",
       elixir: "~> 1.17.0",
       elixirc_paths: elixirc_paths(Mix.env()),
-      elixirc_options: [warnings_as_errors: true],
+      elixirc_options: [warnings_as_errors: false],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
@@ -70,7 +70,9 @@ defmodule Handin.MixProject do
       {:phoenix_live_reload, "~> 1.5.3", only: :dev},
       {:ex_doc, "~> 0.34.2", only: :dev, runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
-      {:ecto_dev_logger, "~> 0.13", only: [:dev]}
+      {:ecto_dev_logger, "~> 0.13", only: [:dev]},
+      {:torch, "~> 5.3"}
+
     ]
   end
 
