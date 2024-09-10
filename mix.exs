@@ -72,7 +72,6 @@ defmodule Handin.MixProject do
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:ecto_dev_logger, "~> 0.13", only: [:dev]},
       {:torch, "~> 5.3"}
-
     ]
   end
 

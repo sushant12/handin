@@ -3,8 +3,16 @@ defmodule HandinWeb.Admin.UniversityControllerTest do
 
   alias Handin.Universities
 
-  @create_attrs %{name: "some name", student_email_regex: "some student_email_regex", timezone: "some timezone"}
-  @update_attrs %{name: "some updated name", student_email_regex: "some updated student_email_regex", timezone: "some updated timezone"}
+  @create_attrs %{
+    name: "some name",
+    student_email_regex: "some student_email_regex",
+    timezone: "some timezone"
+  }
+  @update_attrs %{
+    name: "some updated name",
+    student_email_regex: "some updated student_email_regex",
+    timezone: "some updated timezone"
+  }
   @invalid_attrs %{name: nil, student_email_regex: nil, timezone: nil}
 
   def fixture(:university) do
@@ -14,14 +22,14 @@ defmodule HandinWeb.Admin.UniversityControllerTest do
 
   describe "index" do
     test "lists all universities", %{conn: conn} do
-      conn = get conn, ~p"/admin/universities"
+      conn = get(conn, ~p"/admin/universities")
       assert html_response(conn, 200) =~ "Universities"
     end
   end
 
   describe "new university" do
     test "renders form", %{conn: conn} do
-      conn = get conn, ~p"/admin/universities/new"
+      conn = get(conn, ~p"/admin/universities/new")
       assert html_response(conn, 200) =~ "New University"
     end
   end
@@ -33,7 +41,7 @@ defmodule HandinWeb.Admin.UniversityControllerTest do
       assert %{id: id} = redirected_params(conn)
       assert redirected_to(conn) == "/admin/universities/#{id}"
 
-      conn = get conn, ~p"/admin/universities/#{id}"
+      conn = get(conn, ~p"/admin/universities/#{id}")
       assert html_response(conn, 200) =~ "University Details"
     end
 
@@ -47,7 +55,7 @@ defmodule HandinWeb.Admin.UniversityControllerTest do
     setup [:create_university]
 
     test "renders form for editing chosen university", %{conn: conn, university: university} do
-      conn = get conn, ~p"/admin/universities/#{university}/edit"
+      conn = get(conn, ~p"/admin/universities/#{university}/edit")
       assert html_response(conn, 200) =~ "Edit University"
     end
   end
@@ -59,7 +67,7 @@ defmodule HandinWeb.Admin.UniversityControllerTest do
       conn = put conn, ~p"/admin/universities/#{university}", university: @update_attrs
       assert redirected_to(conn) == ~p"/admin/universities/#{university}"
 
-      conn = get conn, ~p"/admin/universities/#{university}" 
+      conn = get(conn, ~p"/admin/universities/#{university}")
       assert html_response(conn, 200) =~ "some updated name"
     end
 
@@ -73,10 +81,11 @@ defmodule HandinWeb.Admin.UniversityControllerTest do
     setup [:create_university]
 
     test "deletes chosen university", %{conn: conn, university: university} do
-      conn = delete conn, ~p"/admin/universities/#{university}"
+      conn = delete(conn, ~p"/admin/universities/#{university}")
       assert redirected_to(conn) == "/admin/universities"
+
       assert_error_sent 404, fn ->
-        get conn, ~p"/admin/universities/#{university}"
+        get(conn, ~p"/admin/universities/#{university}")
       end
     end
   end

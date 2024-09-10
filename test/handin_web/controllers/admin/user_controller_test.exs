@@ -3,9 +3,27 @@ defmodule HandinWeb.Admin.UserControllerTest do
 
   alias Handin.Accounts
 
-  @create_attrs %{role: :student, email: "some email", hashed_password: "some hashed_password", confirmed_at: ~N[2024-09-09 05:50:00], university_id: "7488a646-e31f-11e4-aace-600308960662"}
-  @update_attrs %{role: :admin, email: "some updated email", hashed_password: "some updated hashed_password", confirmed_at: ~N[2024-09-10 05:50:00], university_id: "7488a646-e31f-11e4-aace-600308960668"}
-  @invalid_attrs %{role: nil, email: nil, hashed_password: nil, confirmed_at: nil, university_id: nil}
+  @create_attrs %{
+    role: :student,
+    email: "some email",
+    hashed_password: "some hashed_password",
+    confirmed_at: ~N[2024-09-09 05:50:00],
+    university_id: "7488a646-e31f-11e4-aace-600308960662"
+  }
+  @update_attrs %{
+    role: :admin,
+    email: "some updated email",
+    hashed_password: "some updated hashed_password",
+    confirmed_at: ~N[2024-09-10 05:50:00],
+    university_id: "7488a646-e31f-11e4-aace-600308960668"
+  }
+  @invalid_attrs %{
+    role: nil,
+    email: nil,
+    hashed_password: nil,
+    confirmed_at: nil,
+    university_id: nil
+  }
 
   def fixture(:user) do
     {:ok, user} = Accounts.create_user(@create_attrs)
@@ -14,14 +32,14 @@ defmodule HandinWeb.Admin.UserControllerTest do
 
   describe "index" do
     test "lists all users", %{conn: conn} do
-      conn = get conn, ~p"/admin/users"
+      conn = get(conn, ~p"/admin/users")
       assert html_response(conn, 200) =~ "Users"
     end
   end
 
   describe "new user" do
     test "renders form", %{conn: conn} do
-      conn = get conn, ~p"/admin/users/new"
+      conn = get(conn, ~p"/admin/users/new")
       assert html_response(conn, 200) =~ "New User"
     end
   end
@@ -33,7 +51,7 @@ defmodule HandinWeb.Admin.UserControllerTest do
       assert %{id: id} = redirected_params(conn)
       assert redirected_to(conn) == "/admin/users/#{id}"
 
-      conn = get conn, ~p"/admin/users/#{id}"
+      conn = get(conn, ~p"/admin/users/#{id}")
       assert html_response(conn, 200) =~ "User Details"
     end
 
@@ -47,7 +65,7 @@ defmodule HandinWeb.Admin.UserControllerTest do
     setup [:create_user]
 
     test "renders form for editing chosen user", %{conn: conn, user: user} do
-      conn = get conn, ~p"/admin/users/#{user}/edit"
+      conn = get(conn, ~p"/admin/users/#{user}/edit")
       assert html_response(conn, 200) =~ "Edit User"
     end
   end
@@ -59,7 +77,7 @@ defmodule HandinWeb.Admin.UserControllerTest do
       conn = put conn, ~p"/admin/users/#{user}", user: @update_attrs
       assert redirected_to(conn) == ~p"/admin/users/#{user}"
 
-      conn = get conn, ~p"/admin/users/#{user}" 
+      conn = get(conn, ~p"/admin/users/#{user}")
       assert html_response(conn, 200) =~ "some updated email"
     end
 
@@ -73,10 +91,11 @@ defmodule HandinWeb.Admin.UserControllerTest do
     setup [:create_user]
 
     test "deletes chosen user", %{conn: conn, user: user} do
-      conn = delete conn, ~p"/admin/users/#{user}"
+      conn = delete(conn, ~p"/admin/users/#{user}")
       assert redirected_to(conn) == "/admin/users"
+
       assert_error_sent 404, fn ->
-        get conn, ~p"/admin/users/#{user}"
+        get(conn, ~p"/admin/users/#{user}")
       end
     end
   end

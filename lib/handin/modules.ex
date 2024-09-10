@@ -4,6 +4,12 @@ defmodule Handin.Modules do
   """
 
   import Ecto.Query, warn: false
+
+  use Torch.Pagination,
+    repo: Handin.Repo,
+    model: Handin.Modules.Module,
+    name: :modules
+
   alias Handin.Assignments.CustomAssignmentDate
   alias Handin.Repo
   alias Handin.Accounts
@@ -313,6 +319,8 @@ defmodule Handin.Modules do
     |> maybe_filter_by_role(user.id, user.role)
     |> Repo.all()
   end
+
+  def list_all_modules(), do: Repo.all(Module)
 
   defp filter_by_archive_status(query, :all), do: query
 

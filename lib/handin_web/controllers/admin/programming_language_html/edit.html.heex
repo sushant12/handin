@@ -1,6 +1,8 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-    <.link href={~p"/admin/programming_languages"} class="torch-button"><%= Torch.I18n.message("Cancel") %></.link>
+    <.link href={~p"/admin/programming_languages"} class="torch-button">
+      <%= Torch.I18n.message("Cancel") %>
+    </.link>
   </div>
 </section>
 
@@ -9,6 +11,9 @@
     <div class="header">
       <h3>Edit Programming language</h3>
     </div>
-    <.programming_language_form changeset={@changeset} action={~p"/admin/programming_languages/#{@programming_language}"} />
+    <.programming_language_form
+      changeset={@changeset}
+      action={~p"/admin/programming_languages/#{@programming_language}"}
+    />
   </div>
 </section>

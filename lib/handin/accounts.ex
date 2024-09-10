@@ -373,6 +373,10 @@ defmodule Handin.Accounts do
     Repo.all(User)
   end
 
+  def list_users(role) when is_atom(role) do
+    Repo.all(from(u in User, where: u.role == ^role))
+  end
+
   def list_users(params) do
     case Flop.validate_and_run(User, params, for: User) do
       {:ok, {users, meta}} ->

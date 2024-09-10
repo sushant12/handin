@@ -1,7 +1,14 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-    <.link href={~p"/admin/programming_languages/#{@programming_language}/edit"} class="torch-button"><%= Torch.I18n.message("Edit") %></.link>
-    <.link href={~p"/admin/programming_languages"} class="torch-button"><%= Torch.I18n.message("Back") %></.link>
+    <.link
+      href={~p"/admin/programming_languages/#{@programming_language}/edit"}
+      class="torch-button"
+    >
+      <%= Torch.I18n.message("Edit") %>
+    </.link>
+    <.link href={~p"/admin/programming_languages"} class="torch-button">
+      <%= Torch.I18n.message("Back") %>
+    </.link>
   </div>
 </section>
 
@@ -11,17 +18,15 @@
       <h3>Programming language Details</h3>
     </header>
     <section class="torch-show-details">
-      
-        <div class="torch-show-attribute">
-          <div class="torch-show-label">Name:</div>
-          <div class="torch-show-data"><%= @programming_language.name %></div>
-        </div>
-      
-        <div class="torch-show-attribute">
-          <div class="torch-show-label">Docker file url:</div>
-          <div class="torch-show-data"><%= @programming_language.docker_file_url %></div>
-        </div>
-      
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Name:</div>
+        <div class="torch-show-data"><%= @programming_language.name %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Docker file url:</div>
+        <div class="torch-show-data"><%= @programming_language.docker_file_url %></div>
+      </div>
     </section>
   </div>
 </section>

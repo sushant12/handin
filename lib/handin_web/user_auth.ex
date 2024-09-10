@@ -85,7 +85,7 @@ defmodule HandinWeb.UserAuth do
     conn
     |> renew_session()
     |> delete_resp_cookie(@remember_me_cookie)
-    |> redirect(to: ~p"/")
+    |> redirect(to: ~p"/users/log_in")
   end
 
   @doc """
@@ -218,6 +218,19 @@ defmodule HandinWeb.UserAuth do
       |> halt()
     end
   end
+
+  def authenticate_admin(conn, _opts) do
+    if admin?(conn.assigns.current_user) do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You are not authorized to view this page")
+      |> redirect(to: ~p"/")
+      |> halt()
+    end
+  end
+
+  defp admin?(user), do: user && user.role == :admin
 
   defp put_token_in_session(conn, token) do
     conn

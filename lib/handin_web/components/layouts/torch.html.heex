@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <%= PhoenixHTMLHelpers.Tag.csrf_meta_tag() %>
-    <title>Torch Admin</title>
+    <title>Handin Admin</title>
     <!-- Uncomment to just use the bare bones torch styles rather than the theme -->
     <!--<link phx-track-static rel="stylesheet" href={Phoenix.VerifiedRoutes.static_path(@conn, "/torch/base.css")}>-->
     <link
@@ -17,28 +17,35 @@
 
   <body class={Torch.Helpers.body_classes(@conn)}>
     <header>
-      <%!-- <section id="torch-account-info">
+      <section id="torch-account-info">
         <div class="torch-container">
-          <a href="/">user@example.com</a>
-          <a href="/">Logout</a>
+          <.link href={~p"/users/log_out"} method="delete">
+            Logout
+          </.link>
         </div>
-      </section> --%>
+      </section>
 
       <section id="torch-nav">
         <div class="torch-container">
           <div>
-            <a href="/">
-              <img src="https://flowbite.com/docs/images/logo.svg" alt="Flowbite Logo" />
+            <.link navigate={~p"/"} class="flex items-center pl-2.5 mb-5">
+              <img
+                src="https://flowbite.com/docs/images/logo.svg"
+                alt="Flowbite Logo"
+                class="h-6 mr-3 sm:h-7"
+              />
               <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">
                 Handin
               </span>
-            </a>
+            </.link>
           </div>
           <nav class="torch-nav">
             <a href="/admin/users">Users</a>
             <a href="/admin/universities">Universitites</a>
             <a href="/admin/builds">Builds</a>
             <a href="/admin/programming_languages">Languages</a>
+            <a href="/admin/modules">Modules</a>
+            <a href="/admin/assignments">Assignments</a>
           </nav>
         </div>
       </section>

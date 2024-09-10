@@ -3,8 +3,18 @@ defmodule HandinWeb.Admin.BuildControllerTest do
 
   alias Handin.Assignments
 
-  @create_attrs %{status: :running, machine_id: "some machine_id", assignment_id: "7488a646-e31f-11e4-aace-600308960662", user_id: "7488a646-e31f-11e4-aace-600308960662"}
-  @update_attrs %{status: :failed, machine_id: "some updated machine_id", assignment_id: "7488a646-e31f-11e4-aace-600308960668", user_id: "7488a646-e31f-11e4-aace-600308960668"}
+  @create_attrs %{
+    status: :running,
+    machine_id: "some machine_id",
+    assignment_id: "7488a646-e31f-11e4-aace-600308960662",
+    user_id: "7488a646-e31f-11e4-aace-600308960662"
+  }
+  @update_attrs %{
+    status: :failed,
+    machine_id: "some updated machine_id",
+    assignment_id: "7488a646-e31f-11e4-aace-600308960668",
+    user_id: "7488a646-e31f-11e4-aace-600308960668"
+  }
   @invalid_attrs %{status: nil, machine_id: nil, assignment_id: nil, user_id: nil}
 
   def fixture(:build) do
@@ -14,14 +24,14 @@ defmodule HandinWeb.Admin.BuildControllerTest do
 
   describe "index" do
     test "lists all builds", %{conn: conn} do
-      conn = get conn, ~p"/admin/builds"
+      conn = get(conn, ~p"/admin/builds")
       assert html_response(conn, 200) =~ "Builds"
     end
   end
 
   describe "new build" do
     test "renders form", %{conn: conn} do
-      conn = get conn, ~p"/admin/builds/new"
+      conn = get(conn, ~p"/admin/builds/new")
       assert html_response(conn, 200) =~ "New Build"
     end
   end
@@ -33,7 +43,7 @@ defmodule HandinWeb.Admin.BuildControllerTest do
       assert %{id: id} = redirected_params(conn)
       assert redirected_to(conn) == "/admin/builds/#{id}"
 
-      conn = get conn, ~p"/admin/builds/#{id}"
+      conn = get(conn, ~p"/admin/builds/#{id}")
       assert html_response(conn, 200) =~ "Build Details"
     end
 
@@ -47,7 +57,7 @@ defmodule HandinWeb.Admin.BuildControllerTest do
     setup [:create_build]
 
     test "renders form for editing chosen build", %{conn: conn, build: build} do
-      conn = get conn, ~p"/admin/builds/#{build}/edit"
+      conn = get(conn, ~p"/admin/builds/#{build}/edit")
       assert html_response(conn, 200) =~ "Edit Build"
     end
   end
@@ -59,7 +69,7 @@ defmodule HandinWeb.Admin.BuildControllerTest do
       conn = put conn, ~p"/admin/builds/#{build}", build: @update_attrs
       assert redirected_to(conn) == ~p"/admin/builds/#{build}"
 
-      conn = get conn, ~p"/admin/builds/#{build}" 
+      conn = get(conn, ~p"/admin/builds/#{build}")
       assert html_response(conn, 200) =~ "some updated machine_id"
     end
 
@@ -73,10 +83,11 @@ defmodule HandinWeb.Admin.BuildControllerTest do
     setup [:create_build]
 
     test "deletes chosen build", %{conn: conn, build: build} do
-      conn = delete conn, ~p"/admin/builds/#{build}"
+      conn = delete(conn, ~p"/admin/builds/#{build}")
       assert redirected_to(conn) == "/admin/builds"
+
       assert_error_sent 404, fn ->
-        get conn, ~p"/admin/builds/#{build}"
+        get(conn, ~p"/admin/builds/#{build}")
       end
     end
   end

@@ -28,19 +28,21 @@ defmodule HandinWeb.Router do
   end
 
   scope "/admin", HandinWeb.Admin, as: :admin do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :require_authenticated_user, :authenticate_admin]
+
     live_dashboard "/live_dashboard", metrics: HandinWeb.Telemetry
 
-    live_session :require_authenticated_admin,
-      on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}, {HandinWeb.Auth, :admin}] do
-      resources "/universities", UniversityController
+    resources "/universities", UniversityController
 
-      resources "/programming_languages", ProgrammingLanguageController
+    resources "/programming_languages", ProgrammingLanguageController
 
-      resources "/users", UserController
+    resources "/users", UserController
 
-      resources "/builds", BuildController
-    end
+    resources "/builds", BuildController
+
+    resources "/assignments", AssignmentController
+
+    resources "/modules", ModuleController
   end
 
   scope "/", HandinWeb do

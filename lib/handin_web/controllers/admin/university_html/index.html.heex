@@ -8,72 +8,81 @@
     <section id="torch-filters">
       <h3>Find Universities</h3>
       <%= form_tag @conn.request_path, method: :get, id: "torch-filters-form" do %>
-        
-          <div class="field">
-            <label>Name</label>
-            <%= filter_select(:university, :name, @conn.params) %>
-            <%= filter_string_input(:university, :name, @conn.params) %>
-          </div>
-        
-          <div class="field">
-            <label>Student email regex</label>
-            <%= filter_select(:university, :student_email_regex, @conn.params) %>
-            <%= filter_string_input(:university, :student_email_regex, @conn.params) %>
-          </div>
-        
-          <div class="field">
-            <label>Timezone</label>
-            <%= filter_select(:university, :timezone, @conn.params) %>
-            <%= filter_string_input(:university, :timezone, @conn.params) %>
-          </div>
-        
-        
-        
-        
-        <button type="submit" class="torch-button">Search</button>
-        <%= link "Clear Filters", to: ~p"/admin/universities" %>
-      <% end %>
+        <div class="field">
+          <label>Name</label>
+          <%= filter_select(:university, :name, @conn.params) %>
+          <%= filter_string_input(:university, :name, @conn.params) %>
+        </div>
 
+        <div class="field">
+          <label>Student email regex</label>
+          <%= filter_select(:university, :student_email_regex, @conn.params) %>
+          <%= filter_string_input(:university, :student_email_regex, @conn.params) %>
+        </div>
+
+        <div class="field">
+          <label>Timezone</label>
+          <%= filter_select(:university, :timezone, @conn.params) %>
+          <%= filter_string_input(:university, :timezone, @conn.params) %>
+        </div>
+
+        <button type="submit" class="torch-button">Search</button>
+        <%= link("Clear Filters", to: ~p"/admin/universities") %>
+      <% end %>
     </section>
 
     <section id="torch-table">
-    <%= if length(@universities) > 0 do %>
-      <table>
-        <thead>
-          <tr>
-            
-              <th><%= table_link(@conn, "Name", :name) %></th>
-            
-              <th><%= table_link(@conn, "Student email regex", :student_email_regex) %></th>
-            
-              <th><%= table_link(@conn, "Timezone", :timezone) %></th>
-            
-            <th><span>Actions</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for university <- @universities do %>
+      <%= if length(@universities) > 0 do %>
+        <table>
+          <thead>
             <tr>
-              
-                <td><%= university.name %></td>
-              
-                <td><%= university.student_email_regex %></td>
-              
-                <td><%= university.timezone %></td>
-              
-              <td class="torch-actions">
-                <span><.link href={~p"/admin/universities/#{university}"}><%= Torch.I18n.message("Show") %></.link></span>
-                <span><.link href={~p"/admin/universities/#{university}/edit"}><%= Torch.I18n.message("Edit") %></.link></span>
-                <span><.link href={~p"/admin/universities/#{university}"} method="delete" data-confirm={Torch.I18n.message("Are you sure?")}><%= Torch.I18n.message("Delete") %></.link></span>
-              </td>
+              <th><%= table_link(@conn, "Name", :name) %></th>
+
+              <th><%= table_link(@conn, "Student email regex", :student_email_regex) %></th>
+
+              <th><%= table_link(@conn, "Timezone", :timezone) %></th>
+
+              <th><span>Actions</span></th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
-      <%= Torch.PaginationView.pagination(@conn) %>
-    <% else %>
-      <p class="torch-no-data">No Universities match your search.</p>
-    <% end %>
+          </thead>
+          <tbody>
+            <%= for university <- @universities do %>
+              <tr>
+                <td><%= university.name %></td>
+
+                <td><%= university.student_email_regex %></td>
+
+                <td><%= university.timezone %></td>
+
+                <td class="torch-actions">
+                  <span>
+                    <.link href={~p"/admin/universities/#{university}"}>
+                      <%= Torch.I18n.message("Show") %>
+                    </.link>
+                  </span>
+                  <span>
+                    <.link href={~p"/admin/universities/#{university}/edit"}>
+                      <%= Torch.I18n.message("Edit") %>
+                    </.link>
+                  </span>
+                  <span>
+                    <.link
+                      href={~p"/admin/universities/#{university}"}
+                      method="delete"
+                      data-confirm={Torch.I18n.message("Are you sure?")}
+                    >
+                      <%= Torch.I18n.message("Delete") %>
+                    </.link>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <%= Torch.PaginationView.pagination(@conn) %>
+      <% else %>
+        <p class="torch-no-data">No Universities match your search.</p>
+      <% end %>
     </section>
   </div>
 </section>

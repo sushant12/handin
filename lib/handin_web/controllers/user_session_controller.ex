@@ -47,7 +47,7 @@ defmodule HandinWeb.UserSessionController do
   end
 
   defp put_user_return_to(conn, %User{role: :admin}),
-    do: put_session(conn, :user_return_to, ~p"/")
+    do: put_session(conn, :user_return_to, ~p"/admin/users")
 
   defp put_user_return_to(conn, _user), do: put_session(conn, :user_return_to, ~p"/modules")
 end
