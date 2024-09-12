@@ -20,6 +20,7 @@ defmodule Handin.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :temporary_password, :string, virtual: true, redact: true
     field :invited, :boolean, default: false, virtual: true
+    field :invited_at, :naive_datetime
 
     field :role, Ecto.Enum,
       default: :student,
@@ -62,7 +63,7 @@ defmodule Handin.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :university_id, :role])
+    |> cast(attrs, [:email, :password, :university_id, :role, :invited_at])
     |> maybe_validate_role()
     |> validate_required([:university_id])
     |> validate_email(opts)

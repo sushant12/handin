@@ -578,7 +578,8 @@ defmodule Handin.Modules do
       email: email,
       password: temporary_password,
       university_id: university_id,
-      role: :student
+      role: :student,
+      invited_at: NaiveDateTime.utc_now()
     }
 
     case Accounts.register_user(user_params) do

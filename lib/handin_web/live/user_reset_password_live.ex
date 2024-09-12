@@ -70,8 +70,8 @@ defmodule HandinWeb.UserResetPasswordLive do
     """
   end
 
-  def mount(params, _session, socket) do
-    socket = assign_user_and_token(socket, params)
+  def mount(params, session, socket) do
+    socket = assign_user_and_token(socket, params, session)
 
     form_source =
       case socket.assigns do
@@ -105,13 +105,30 @@ defmodule HandinWeb.UserResetPasswordLive do
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 
-  defp assign_user_and_token(socket, %{"token" => token}) do
-    if user = Accounts.get_user_by_reset_password_token(token) do
-      assign(socket, user: user, token: token)
-    else
-      socket
-      |> put_flash(:error, "Reset password link is invalid or it has expired.")
-      |> redirect(to: ~p"/")
+  defp assign_user_and_token(socket, params, session) do
+    user =
+      cond do
+        user_id = session["user_id"] ->
+          Accounts.get_user!(user_id)
+
+        token = params["token"] ->
+          Accounts.get_user_by_reset_password_token(token)
+
+        true ->
+          nil
+      end
+
+    cond do
+      user && user.invited_at ->
+        assign(socket, user: user)
+
+      user && params["token"] ->
+        assign(socket, user: user, token: params["token"])
+
+      true ->
+        socket
+        |> put_flash(:error, "Reset password link is invalid or it has expired.")
+        |> redirect(to: ~p"/")
     end
   end
 
