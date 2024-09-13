@@ -28,31 +28,23 @@ defmodule HandinWeb.Router do
   end
 
   scope "/admin", HandinWeb.Admin, as: :admin do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :require_authenticated_user, :authenticate_admin]
+
     live_dashboard "/live_dashboard", metrics: HandinWeb.Telemetry
 
-    live_session :require_authenticated_admin,
-      on_mount: [{HandinWeb.UserAuth, :ensure_authenticated}, {HandinWeb.Auth, :admin}] do
-      live "/universities", UniversityLive.Index, :index
-      live "/universities/new", UniversityLive.Index, :new
-      live "/universities/:id/edit", UniversityLive.Index, :edit
+    resources "/universities", UniversityController
 
-      live "/universities/:id", UniversityLive.Show, :show
-      live "/universities/:id/show/edit", UniversityLive.Show, :edit
+    resources "/programming_languages", ProgrammingLanguageController
 
-      live "/programming_languages", ProgrammingLanguageLive.Index, :index
-      live "/programming_languages/new", ProgrammingLanguageLive.Index, :new
-      live "/programming_languages/:id/edit", ProgrammingLanguageLive.Index, :edit
+    resources "/users", UserController
 
-      live "/programming_languages/:id", ProgrammingLanguageLive.Show, :show
-      live "/programming_languages/:id/show/edit", ProgrammingLanguageLive.Show, :edit
+    resources "/builds", BuildController
 
-      live "/users", UserListLive.Index, :index
-      live "/users/:user_id/edit", UserListLive.Index, :edit
+    resources "/assignments", AssignmentController
 
-      live "/builds", BuildLive.Index, :index
-      live "/builds/:build_id/edit", BuildLive.Index, :edit
-    end
+    resources "/assignments/:assignment_id/assignment_tests", AssignmentTestController
+
+    resources "/modules", ModuleController
   end
 
   scope "/", HandinWeb do

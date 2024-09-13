@@ -4,6 +4,12 @@ defmodule Handin.Accounts do
   """
 
   import Ecto.Query, warn: false
+
+  use Torch.Pagination,
+    repo: Handin.Repo,
+    model: Handin.Accounts.User,
+    name: :users
+
   alias Handin.Repo
   alias Handin.Accounts.{User, UserToken, UserNotifier}
 
@@ -60,7 +66,7 @@ defmodule Handin.Accounts do
 
   """
   @spec get_user!(Ecto.UUID) :: User.t()
-  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload(:modules)
+  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload([:modules, :university])
 
   def get_user(id), do: Repo.get(User, id) |> Repo.preload(builds: [:assignment])
 
@@ -348,6 +354,7 @@ defmodule Handin.Accounts do
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
+    |> Ecto.Multi.update(:confirm_user, User.confirm_changeset(user))
     |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
@@ -365,6 +372,10 @@ defmodule Handin.Accounts do
 
   def list_users() do
     Repo.all(User)
+  end
+
+  def list_users(role) when is_atom(role) do
+    Repo.all(from(u in User, where: u.role == ^role))
   end
 
   def list_users(params) do
@@ -406,5 +417,9 @@ defmodule Handin.Accounts do
       )
 
     valid
+  end
+
+  def change_user(%User{} = user, attrs \\ %{}) do
+    User.edit_changeset(user, attrs)
   end
 end

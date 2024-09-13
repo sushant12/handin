@@ -1,0 +1,40 @@
+<.form :let={f} for={@changeset} action={@action} id="torch-form" enctype="multipart/form-data">
+  <fieldset class="torch-panel">
+    <legend>
+      <span>Details</span>
+    </legend>
+    <%= if @changeset.action do %>
+      <p class="torch-form-error">Oops, something went wrong! Please check the errors below.</p>
+    <% end %>
+    <.torch_input label="Name" field={f[:name]} type="string" />
+    <.torch_input label="Start date" field={f[:start_date]} type="datetime-local" />
+    <.torch_input label="Due date" field={f[:due_date]} type="datetime-local" />
+    <.torch_input label="Enable cutoff date" field={f[:enable_cutoff_date]} type="checkbox" />
+    <.torch_input label="Cutoff date" field={f[:cutoff_date]} type="datetime-local" />
+    <.torch_input
+      label="Module"
+      field={f[:module_id]}
+      type="select"
+      options={Modules.list_all_modules() |> Enum.map(&{&1.name, &1.id})}
+    />
+    <.torch_input label="Run script" field={f[:run_script]} type="string" />
+    <.torch_input label="Enable max attempts" field={f[:enable_max_attempts]} type="checkbox" />
+    <.torch_input label="Max attempts" field={f[:max_attempts]} type="number" />
+    <.torch_input label="Enable total marks" field={f[:enable_total_marks]} type="checkbox" />
+    <.torch_input label="Total marks" field={f[:total_marks]} type="number" />
+    <.torch_input
+      label="Enable penalty per day"
+      field={f[:enable_penalty_per_day]}
+      type="checkbox"
+    />
+    <.torch_input label="Penalty per day" field={f[:penalty_per_day]} type="number" />
+    <.torch_input label="Enable attempt marks" field={f[:enable_attempt_marks]} type="checkbox" />
+    <.torch_input label="Attempt marks" field={f[:attempt_marks]} type="number" />
+    <.torch_input label="Enable test output" field={f[:enable_test_output]} type="checkbox" />
+    <div class="torch-submit-form">
+      <button type="submit" class="torch-submit-button">
+        <%= Torch.I18n.message("Submit") %>
+      </button>
+    </div>
+  </fieldset>
+</.form>

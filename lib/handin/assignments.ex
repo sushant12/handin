@@ -2,6 +2,11 @@ defmodule Handin.Assignments do
   @moduledoc """
   The Assignments context.
   """
+  use Torch.Pagination,
+    repo: Handin.Repo,
+    model: Handin.Assignments.Assignment,
+    name: :assignments
+
   alias Handin.Assignments
   use Timex
   import Ecto.Query, warn: false
@@ -690,5 +695,10 @@ defmodule Handin.Assignments do
       nil -> {:error, "Test not found"}
       test -> {:ok, test}
     end
+  end
+
+  def change_build(%Build{} = build, attrs \\ %{}) do
+    build
+    |> Build.update_changeset(attrs)
   end
 end

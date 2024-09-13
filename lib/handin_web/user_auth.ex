@@ -26,17 +26,25 @@ defmodule HandinWeb.UserAuth do
   if you are not using LiveView.
   """
   def log_in_user(conn, user, params \\ %{}) do
-    if user.confirmed_at do
-      token = Accounts.generate_user_session_token(user)
-      user_return_to = get_session(conn, :user_return_to)
+    cond do
+      user.confirmed_at ->
+        token = Accounts.generate_user_session_token(user)
+        user_return_to = get_session(conn, :user_return_to)
 
-      conn
-      |> renew_session()
-      |> put_token_in_session(token)
-      |> maybe_write_remember_me_cookie(token, params)
-      |> redirect(to: user_return_to || signed_in_path(conn))
-    else
-      redirect(conn, to: ~p"/users/log_in")
+        conn
+        |> renew_session()
+        |> put_token_in_session(token)
+        |> maybe_write_remember_me_cookie(token, params)
+        |> redirect(to: user_return_to || signed_in_path(conn))
+
+      user.invited_at ->
+        conn
+        |> put_flash(:info, "Welcome! Please change your password .")
+        |> put_session(:user_id, user.id)
+        |> redirect(to: ~p"/users/reset_password/#{user.id}")
+
+      true ->
+        redirect(conn, to: ~p"/users/log_in")
     end
   end
 
@@ -85,7 +93,7 @@ defmodule HandinWeb.UserAuth do
     conn
     |> renew_session()
     |> delete_resp_cookie(@remember_me_cookie)
-    |> redirect(to: ~p"/")
+    |> redirect(to: ~p"/users/log_in")
   end
 
   @doc """
@@ -218,6 +226,19 @@ defmodule HandinWeb.UserAuth do
       |> halt()
     end
   end
+
+  def authenticate_admin(conn, _opts) do
+    if admin?(conn.assigns.current_user) do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You are not authorized to view this page")
+      |> redirect(to: ~p"/")
+      |> halt()
+    end
+  end
+
+  defp admin?(user), do: user && user.role == :admin
 
   defp put_token_in_session(conn, token) do
     conn

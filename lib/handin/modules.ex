@@ -4,6 +4,12 @@ defmodule Handin.Modules do
   """
 
   import Ecto.Query, warn: false
+
+  use Torch.Pagination,
+    repo: Handin.Repo,
+    model: Handin.Modules.Module,
+    name: :modules
+
   alias Handin.Assignments.CustomAssignmentDate
   alias Handin.Repo
   alias Handin.Accounts
@@ -314,6 +320,8 @@ defmodule Handin.Modules do
     |> Repo.all()
   end
 
+  def list_all_modules(), do: Repo.all(Module)
+
   defp filter_by_archive_status(query, :all), do: query
 
   defp filter_by_archive_status(query, :archived),
@@ -570,7 +578,8 @@ defmodule Handin.Modules do
       email: email,
       password: temporary_password,
       university_id: university_id,
-      role: :student
+      role: :student,
+      invited_at: NaiveDateTime.utc_now()
     }
 
     case Accounts.register_user(user_params) do

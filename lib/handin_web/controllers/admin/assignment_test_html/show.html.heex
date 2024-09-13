@@ -1,0 +1,82 @@
+<section id="torch-toolbar">
+  <div class="torch-container">
+    <.link
+      href={~p"/admin/assignments/#{@assignment_id}/assignment_tests/#{@assignment_test}/edit"}
+      class="torch-button"
+    >
+      <%= Torch.I18n.message("Edit") %>
+    </.link>
+    <.link href={~p"/admin/assignments/#{@assignment_id}"} class="torch-button">
+      <%= Torch.I18n.message("Back") %>
+    </.link>
+  </div>
+</section>
+
+<section id="torch-header-and-content">
+  <div class="torch-container">
+    <header class="header">
+      <h3>Assignment test Details</h3>
+    </header>
+    <section class="torch-show-details">
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Name:</div>
+        <div class="torch-show-data"><%= @assignment_test.name %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Points on pass:</div>
+        <div class="torch-show-data"><%= @assignment_test.points_on_pass %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Points on fail:</div>
+        <div class="torch-show-data"><%= @assignment_test.points_on_fail %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Command:</div>
+        <div class="torch-show-data"><%= @assignment_test.command %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Expected output type:</div>
+        <div class="torch-show-data"><%= @assignment_test.expected_output_type %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Expected output text:</div>
+        <div class="torch-show-data"><%= @assignment_test.expected_output_text %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Expected output file:</div>
+        <div class="torch-show-data"><%= @assignment_test.expected_output_file %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Expected output file content:</div>
+        <div class="torch-show-data"><%= @assignment_test.expected_output_file_content %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">TTL:</div>
+        <div class="torch-show-data"><%= @assignment_test.ttl %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Enable custom test:</div>
+        <div class="torch-show-data"><%= @assignment_test.enable_custom_test %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Custom test:</div>
+        <div class="torch-show-data"><%= @assignment_test.custom_test %></div>
+      </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Assignment:</div>
+        <div class="torch-show-data"><%= @assignment_test.assignment.name %></div>
+      </div>
+    </section>
+  </div>
+</section>

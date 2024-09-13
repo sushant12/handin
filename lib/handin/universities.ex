@@ -4,6 +4,12 @@ defmodule Handin.Universities do
   """
 
   import Ecto.Query, warn: false
+
+  use Torch.Pagination,
+    repo: Handin.Repo,
+    model: Handin.Universities.University,
+    name: :universities
+
   alias Handin.Repo
 
   alias Handin.Universities.University

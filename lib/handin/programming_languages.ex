@@ -4,6 +4,12 @@ defmodule Handin.ProgrammingLanguages do
   """
 
   import Ecto.Query, warn: false
+
+  use Torch.Pagination,
+    repo: Handin.Repo,
+    model: Handin.ProgrammingLanguages.ProgrammingLanguage,
+    name: :programming_languages
+
   alias Handin.Repo
 
   alias Handin.ProgrammingLanguages.ProgrammingLanguage
