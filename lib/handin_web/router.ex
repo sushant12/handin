@@ -42,6 +42,8 @@ defmodule HandinWeb.Router do
 
     resources "/assignments", AssignmentController
 
+    resources "/assignments/:assignment_id/assignment_tests", AssignmentTestController
+
     resources "/modules", ModuleController
   end
 

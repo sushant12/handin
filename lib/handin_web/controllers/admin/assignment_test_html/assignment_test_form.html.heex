@@ -1,0 +1,36 @@
+<.form :let={f} for={@changeset} action={@action} id="torch-form" enctype="multipart/form-data">
+  <fieldset class="torch-panel">
+    <legend>
+      <span>Details</span>
+    </legend>
+    <%= if @changeset.action do %>
+      <p class="torch-form-error">Oops, something went wrong! Please check the errors below.</p>
+    <% end %>
+    <.torch_input label="Name" field={f[:name]} type="string" />
+    <.torch_input label="Points on pass" field={f[:points_on_pass]} type="number" />
+    <.torch_input label="Points on fail" field={f[:points_on_fail]} type="number" />
+    <.torch_input label="Command" field={f[:command]} type="string" />
+    <.torch_input
+      field={f[:expected_output_type]}
+      type="select"
+      label="Expected output type"
+      options={Ecto.Enum.values(Handin.Assignments.AssignmentTest, :expected_output_type)}
+    />
+    <.torch_input label="Expected output text" field={f[:expected_output_text]} type="string" />
+    <.torch_input label="Expected output file" field={f[:expected_output_file]} type="string" />
+    <.torch_input
+      label="Expected output file content"
+      field={f[:expected_output_file_content]}
+      type="string"
+    />
+    <.torch_input label="TTL" field={f[:ttl]} type="number" />
+    <.torch_input label="Enable custom test" field={f[:enable_custom_test]} type="checkbox" />
+    <.torch_input label="Custom test" field={f[:custom_test]} type="string" />
+    <.input field={f[:assignment_id]} type="hidden" value={@assignment_id} />
+    <div class="torch-submit-form">
+      <button type="submit" class="torch-submit-button">
+        <%= Torch.I18n.message("Submit") %>
+      </button>
+    </div>
+  </fieldset>
+</.form>

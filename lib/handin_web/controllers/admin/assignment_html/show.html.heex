@@ -9,7 +9,7 @@
   </div>
 </section>
 
-<section id="torch-header-and-content">
+<section id="torch-header-and-content" style="margin-bottom: 20px;">
   <div class="torch-container">
     <header class="header">
       <h3>Assignment Details</h3>
@@ -91,4 +91,108 @@
       </div>
     </section>
   </div>
+  <section id="torch-toolbar" style="margin-top: 20px;">
+    <div class="torch-container">
+      <.link
+        href={~p"/admin/assignments/#{@assignment}/assignment_tests/new"}
+        class="torch-button"
+      >
+        New Assignment test
+      </.link>
+    </div>
+  </section>
+  <section id="torch-index-content">
+    <div class="torch-container">
+      <section id="torch-table">
+        <%= if length(@assignment.assignment_tests) > 0 do %>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+
+                <th>Points on pass</th>
+
+                <th>Points on fail</th>
+
+                <th>Command</th>
+
+                <th>Expected output type</th>
+
+                <th>Expected output text</th>
+
+                <th>Expected output file</th>
+
+                <th>Expected output file content</th>
+
+                <th>TTL</th>
+
+                <th>Enable custom test</th>
+
+                <th>Custom test</th>
+
+                <th><span>Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for assignment_test <- @assignment.assignment_tests do %>
+                <tr>
+                  <td><%= assignment_test.name %></td>
+
+                  <td><%= assignment_test.points_on_pass %></td>
+
+                  <td><%= assignment_test.points_on_fail %></td>
+
+                  <td><%= assignment_test.command %></td>
+
+                  <td><%= assignment_test.expected_output_type %></td>
+
+                  <td><%= assignment_test.expected_output_text %></td>
+
+                  <td><%= assignment_test.expected_output_file %></td>
+
+                  <td><%= assignment_test.expected_output_file_content %></td>
+
+                  <td><%= assignment_test.ttl %></td>
+
+                  <td><%= assignment_test.enable_custom_test %></td>
+
+                  <td><%= assignment_test.custom_test %></td>
+
+                  <td class="torch-actions">
+                    <span>
+                      <.link href={
+                        ~p"/admin/assignments/#{@assignment}/assignment_tests/#{assignment_test}"
+                      }>
+                        <%= Torch.I18n.message("Show") %>
+                      </.link>
+                    </span>
+                    <span>
+                      <.link href={
+                        ~p"/admin/assignments/#{@assignment}/assignment_tests/#{assignment_test}/edit"
+                      }>
+                        <%= Torch.I18n.message("Edit") %>
+                      </.link>
+                    </span>
+                    <span>
+                      <.link
+                        href={
+                          ~p"/admin/assignments/#{@assignment}/assignment_tests/#{assignment_test}"
+                        }
+                        method="delete"
+                        data-confirm={Torch.I18n.message("Are you sure?")}
+                      >
+                        <%= Torch.I18n.message("Delete") %>
+                      </.link>
+                    </span>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p class="torch-no-data">No Assignment tests yet.</p>
+        <% end %>
+      </section>
+    </div>
+  </section>
 </section>

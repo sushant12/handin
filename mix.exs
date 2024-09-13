@@ -7,7 +7,7 @@ defmodule Handin.MixProject do
       version: "0.1.0",
       elixir: "~> 1.17.0",
       elixirc_paths: elixirc_paths(Mix.env()),
-      elixirc_options: [warnings_as_errors: false],
+      elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
