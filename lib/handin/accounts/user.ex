@@ -24,7 +24,7 @@ defmodule Handin.Accounts.User do
 
     field :role, Ecto.Enum,
       default: :student,
-      values: [:student, :admin, :lecturer, :teaching_assistant]
+      values: [:student, :admin, :lecturer]
 
     belongs_to :university, University
 
