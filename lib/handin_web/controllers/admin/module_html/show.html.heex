@@ -41,4 +41,64 @@
       </div>
     </section>
   </div>
+  <section id="torch-toolbar" style="margin-top: 20px;">
+    <div class="torch-container">
+      <.link href={~p"/admin/modules/#{@module}/modules_users/new"} class="torch-button">
+        New Modules users
+      </.link>
+    </div>
+  </section>
+  <section id="torch-index-content">
+    <div class="torch-container">
+      <section id="torch-table">
+        <%= if length(@modules_users) > 0 do %>
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Role</th>
+
+                <th><span>Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for modules_users <- @modules_users do %>
+                <tr>
+                  <td><%= modules_users.user.email %></td>
+
+                  <td><%= modules_users.role %></td>
+
+                  <td class="torch-actions">
+                    <span>
+                      <.link href={~p"/admin/modules/#{@module}/modules_users/#{modules_users}"}>
+                        <%= Torch.I18n.message("Show") %>
+                      </.link>
+                    </span>
+                    <span>
+                      <.link href={
+                        ~p"/admin/modules/#{@module}/modules_users/#{modules_users}/edit"
+                      }>
+                        <%= Torch.I18n.message("Edit") %>
+                      </.link>
+                    </span>
+                    <span>
+                      <.link
+                        href={~p"/admin/modules/#{@module}/modules_users/#{modules_users}"}
+                        method="delete"
+                        data-confirm={Torch.I18n.message("Are you sure?")}
+                      >
+                        <%= Torch.I18n.message("Delete") %>
+                      </.link>
+                    </span>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <p class="torch-no-data">No Modules users match your search.</p>
+        <% end %>
+      </section>
+    </div>
+  </section>
 </section>

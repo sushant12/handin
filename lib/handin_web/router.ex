@@ -49,6 +49,8 @@ defmodule HandinWeb.Router do
     resources "/assignments/:assignment_id/assignment_tests", AssignmentTestController
 
     resources "/modules", ModuleController
+
+    resources "/modules/:module_id/modules_users", ModulesUsersController
   end
 
   scope "/", HandinWeb do

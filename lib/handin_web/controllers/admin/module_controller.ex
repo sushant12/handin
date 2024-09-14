@@ -38,7 +38,10 @@ defmodule HandinWeb.Admin.ModuleController do
 
   def show(conn, %{"id" => id}) do
     module = Modules.get_module!(id)
-    render(conn, :show, module: module)
+
+    modules_users = Modules.list_modules_users_for_module(id)
+
+    render(conn, :show, module: module, modules_users: modules_users)
   end
 
   def edit(conn, %{"id" => id}) do
