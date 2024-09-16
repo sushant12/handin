@@ -17,6 +17,10 @@ defmodule HandinWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :check_archived_module do
+    plug HandinWeb.Plugs.CheckArchivedModule
+  end
+
   import Phoenix.LiveDashboard.Router
 
   if Application.compile_env(:handin, :dev_routes) do
@@ -45,6 +49,8 @@ defmodule HandinWeb.Router do
     resources "/assignments/:assignment_id/assignment_tests", AssignmentTestController
 
     resources "/modules", ModuleController
+
+    resources "/modules/:module_id/modules_users", ModulesUsersController
   end
 
   scope "/", HandinWeb do
@@ -59,6 +65,8 @@ defmodule HandinWeb.Router do
       live "/modules/archived", ArchivedModulesLive.Index, :index
 
       scope "/modules/:id" do
+        pipe_through :check_archived_module
+
         live "/clone", ModulesLive.Index, :clone
         live "/archive", ModulesLive.Index, :archive
         live "/unarchive", ArchivedModulesLive.Index, :unarchive
@@ -111,6 +119,8 @@ defmodule HandinWeb.Router do
       live "/modules", ModulesLive.Index, :index
 
       scope "/modules/:id" do
+        pipe_through :check_archived_module
+
         live "/assignments", AssignmentLive.Index, :index
         live "/grades", AssignmentLive.Grade, :index
 

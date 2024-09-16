@@ -55,6 +55,9 @@ defmodule HandinWeb.Admin.AssignmentController do
   def update(conn, %{"id" => id, "assignment" => assignment_params}) do
     assignment = Assignments.get_assignment!(id)
 
+    assignment_params =
+      Map.put(assignment_params, "timezone", conn.assigns.current_user.university.timezone)
+
     case Assignments.update_assignment(assignment, assignment_params) do
       {:ok, assignment} ->
         conn

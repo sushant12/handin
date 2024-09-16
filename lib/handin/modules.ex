@@ -529,6 +529,9 @@ defmodule Handin.Modules do
 
       {:error, :module_users, reason, _} ->
         {:error, reason}
+
+      {:error, :users, reason, _} ->
+        {:error, reason}
     end
   end
 
@@ -669,5 +672,35 @@ defmodule Handin.Modules do
       nil -> {:error, "Module user not found"}
       module_user -> {:ok, module_user}
     end
+  end
+
+  def list_modules_users_for_module(module_id) do
+    from(mu in ModulesUsers,
+      where: mu.module_id == ^module_id,
+      preload: [:user]
+    )
+    |> Repo.all()
+  end
+
+  def change_modules_users(%ModulesUsers{} = module_user, attrs \\ %{}) do
+    ModulesUsers.changeset(module_user, attrs)
+  end
+
+  def get_modules_users!(id) do
+    from(mu in ModulesUsers,
+      where: mu.id == ^id,
+      preload: [:module, :user]
+    )
+    |> Repo.one!()
+  end
+
+  def update_modules_users(%ModulesUsers{} = module_user, attrs) do
+    module_user
+    |> change_modules_users(attrs)
+    |> Repo.update()
+  end
+
+  def delete_modules_users(%ModulesUsers{} = module_user) do
+    Repo.delete(module_user)
   end
 end
