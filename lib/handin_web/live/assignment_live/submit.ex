@@ -192,7 +192,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
       on_cancel={JS.patch(~p"/modules/#{@module.id}/assignments/#{@assignment.id}/submit")}
     >
       <.live_component
-        module={HandinWeb.AssignmentLive.FileUploadComponent}
+        module={HandinWeb.AssignmentSubmissionsLive.AssignmentUploadComponent}
         title={@page_title}
         id={@assignment.id}
         live_action={@live_action}
@@ -284,7 +284,8 @@ defmodule HandinWeb.AssignmentLive.Submit do
                assignment_submission_id: socket.assigns.assignment_submission.id,
                type: "assignment_submission",
                image: socket.assigns.assignment.programming_language.docker_file_url,
-               user_id: socket.assigns.current_user.id
+               user_id: socket.assigns.current_user.id,
+               role: socket.assigns.current_user.role
              }
            ]},
         restart: :temporary
@@ -299,7 +300,8 @@ defmodule HandinWeb.AssignmentLive.Submit do
        |> assign(
          :build,
          GenServer.whereis(
-           {:global, "build:assignment_submission:#{socket.assigns.assignment_submission.id}"}
+           {:global,
+            "assignment:#{assignment_id}:module_user:#{socket.assigns.current_user.id}:role:#{socket.assigns.current_user.role}"}
          )
        )}
     else
@@ -333,7 +335,8 @@ defmodule HandinWeb.AssignmentLive.Submit do
          |> assign(
            :build,
            GenServer.whereis(
-             {:global, "build:assignment_submission:#{socket.assigns.assignment_submission.id}"}
+             {:global,
+              "assignment:#{socket.assigns.assignment.id}:module_user:#{socket.assigns.current_user.id}:role:#{socket.assigns.current_user.role}"}
            )
          )}
 
@@ -352,7 +355,10 @@ defmodule HandinWeb.AssignmentLive.Submit do
     end
   end
 
-  def handle_info({HandinWeb.AssignmentLive.FileUploadComponent, {:saved, assignment}}, socket) do
+  def handle_info(
+        {HandinWeb.AssignmentSubmissionsLive.AssignmentUploadComponent, {:saved, assignment}},
+        socket
+      ) do
     assignment_submission =
       Assignments.get_submission(assignment.id, socket.assigns.current_user.id)
 
