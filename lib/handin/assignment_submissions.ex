@@ -1,9 +1,15 @@
 defmodule Handin.AssignmentSubmissions do
   import Ecto.Query, warn: false
 
+  use Torch.Pagination,
+    repo: Handin.Repo,
+    model: Handin.AssignmentSubmissions.AssignmentSubmission,
+    name: :assignment_submissions
+
   alias Handin.Assignments.Assignment
   alias Handin.Repo
-  alias Handin.AssignmentSubmission.AssignmentSubmissionFile
+  alias Handin.AssignmentSubmissions.AssignmentSubmission
+  alias Handin.AssignmentSubmissions.AssignmentSubmissionFile
 
   def get_assignment_submission_file!(assignment_submission_id) do
     Repo.get!(AssignmentSubmissionFile, assignment_submission_id)
@@ -75,4 +81,29 @@ defmodule Handin.AssignmentSubmissions do
 
   defp get_total_points(nil), do: 0
   defp get_total_points(assignment_submission), do: assignment_submission.total_points
+
+  def change_assignment_submission(assignment_submission) do
+    AssignmentSubmission.changeset(assignment_submission, %{})
+  end
+
+  def create_assignment_submission(attrs) do
+    %AssignmentSubmission{}
+    |> AssignmentSubmission.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def get_assignment_submission!(id),
+    do: Repo.get!(AssignmentSubmission, id) |> Repo.preload([:user, :assignment])
+
+  def update_assignment_submission(assignment_submission, attrs) do
+    assignment_submission
+    |> AssignmentSubmission.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_assignment_submission(assignment_submission) do
+    Repo.delete(assignment_submission)
+  end
+
+  def delete_assignment_submission!(id), do: Repo.get!(AssignmentSubmission, id) |> Repo.delete()
 end

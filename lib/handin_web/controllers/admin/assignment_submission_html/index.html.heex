@@ -1,0 +1,95 @@
+<section id="torch-index-content">
+  <div class="torch-container">
+    <section id="torch-filters">
+      <h3>Find Assignment submissions</h3>
+      <%= form_tag @conn.request_path, method: :get, id: "torch-filters-form" do %>
+        <div class="field">
+          <label>Submitted at</label>
+          <%= filter_date_input(:assignment_submission, :submitted_at, @conn.params) %>
+        </div>
+
+        <div class="field">
+          <label>Retries</label>
+          <%= number_filter_select(:assignment_submission, :retries, @conn.params) %>
+          <%= filter_number_input(:assignment_submission, :retries, @conn.params) %>
+        </div>
+
+        <%!-- torch not supporting association filter --%>
+        <%!-- <div class="field">
+          <label>Assignment</label>
+          <%= filter_assoc_select(
+            :assignment_submission,
+            :assignment_id,
+            Handin.Assignments.list_assignments() |> Enum.map(&{&1.name, &1.id}),
+            @conn.params
+          ) %>
+        </div> --%>
+
+        <button type="submit" class="torch-button">Search</button>
+        <%= link("Clear Filters", to: ~p"/admin/assignment_submissions") %>
+      <% end %>
+    </section>
+
+    <section id="torch-table">
+      <%= if length(@assignment_submissions) > 0 do %>
+        <table>
+          <thead>
+            <tr>
+              <th><%= table_link(@conn, "Submitted at", :submitted_at) %></th>
+
+              <th><%= table_link(@conn, "Retries", :retries) %></th>
+
+              <th><%= table_link(@conn, "Total points", :total_points) %></th>
+
+              <th><%= table_link(@conn, "User", :user_id) %></th>
+
+              <th><%= table_link(@conn, "Assignment", :assignment_id) %></th>
+
+              <th><span>Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for assignment_submission <- @assignment_submissions do %>
+              <tr>
+                <td><%= assignment_submission.submitted_at %></td>
+
+                <td><%= assignment_submission.retries %></td>
+
+                <td><%= assignment_submission.total_points %></td>
+
+                <td><%= assignment_submission.user.email %></td>
+
+                <td><%= assignment_submission.assignment.name %></td>
+
+                <td class="torch-actions">
+                  <span>
+                    <.link href={~p"/admin/assignment_submissions/#{assignment_submission}"}>
+                      <%= Torch.I18n.message("Show") %>
+                    </.link>
+                  </span>
+                  <span>
+                    <.link href={~p"/admin/assignment_submissions/#{assignment_submission}/edit"}>
+                      <%= Torch.I18n.message("Edit") %>
+                    </.link>
+                  </span>
+                  <span>
+                    <.link
+                      href={~p"/admin/assignment_submissions/#{assignment_submission}"}
+                      method="delete"
+                      data-confirm={Torch.I18n.message("Are you sure?")}
+                    >
+                      <%= Torch.I18n.message("Delete") %>
+                    </.link>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <%= Torch.PaginationView.pagination(@conn) %>
+      <% else %>
+        <p class="torch-no-data">No Assignment submissions match your search.</p>
+      <% end %>
+    </section>
+  </div>
+</section>

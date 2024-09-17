@@ -48,6 +48,8 @@ defmodule HandinWeb.Router do
 
     resources "/assignments/:assignment_id/assignment_tests", AssignmentTestController
 
+    resources "/assignment_submissions", AssignmentSubmissionController
+
     resources "/modules", ModuleController
 
     resources "/modules/:module_id/modules_users", ModulesUsersController
@@ -134,7 +136,7 @@ defmodule HandinWeb.Router do
              :upload_submissions
 
         live "/assignments/:assignment_id/submission/:submission_id",
-             AssignmentSubmissionLive.Show,
+             AssignmentSubmissionsLive.Show,
              :show
 
         live "/students", StudentsLive.Index, :index

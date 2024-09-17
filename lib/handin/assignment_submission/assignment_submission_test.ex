@@ -1,6 +1,6 @@
-defmodule Handin.AssignmentSubmission.AssignmentSubmissionTest do
+defmodule Handin.AssignmentSubmissions.AssignmentSubmissionTest do
   alias Handin.Assignments.AssignmentTest
-  alias Handin.AssignmentSubmission.AssignmentSubmission
+  alias Handin.AssignmentSubmissions.AssignmentSubmission
   use Handin.Schema
 
   import Ecto.Changeset

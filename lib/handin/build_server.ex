@@ -4,7 +4,7 @@ defmodule Handin.BuildServer do
   alias Handin.AssignmentSubmissionFileUploader
   alias Handin.AssignmentFileUploader
   alias Handin.Assignments.AssignmentFile
-  alias Handin.AssignmentSubmission.AssignmentSubmissionFile
+  alias Handin.AssignmentSubmissions.AssignmentSubmissionFile
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
 

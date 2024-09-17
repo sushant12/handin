@@ -23,7 +23,7 @@ defmodule Handin.Assignments do
     CustomAssignmentDate
   }
 
-  alias Handin.AssignmentSubmission.{AssignmentSubmission, AssignmentSubmissionFile}
+  alias Handin.AssignmentSubmissions.{AssignmentSubmission, AssignmentSubmissionFile}
 
   # def s3_links(assignment_id) do
   #   assignment_submissions =
@@ -507,7 +507,7 @@ defmodule Handin.Assignments do
     total_points = if total_points_after_penalty < 0, do: 0, else: total_points_after_penalty
 
     submission
-    |> Handin.AssignmentSubmission.AssignmentSubmission.changeset(%{
+    |> Handin.AssignmentSubmissions.AssignmentSubmission.changeset(%{
       total_points: total_points
     })
     |> Repo.update()

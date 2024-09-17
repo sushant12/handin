@@ -44,7 +44,7 @@ defmodule Handin.FakeMachineApi do
   end
 
   def status(_machine_id) do
-    {:ok, ""}
+    {:ok, %{"state" => "started"}}
   end
 
   def exec(_machine_id, _cmd) do

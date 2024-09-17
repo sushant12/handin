@@ -1,4 +1,4 @@
-defmodule HandinWeb.AssignmentSubmissionLive.Show do
+defmodule HandinWeb.AssignmentSubmissionsLive.Show do
   use HandinWeb, :live_view
 
   alias Handin.Modules

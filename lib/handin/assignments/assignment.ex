@@ -14,7 +14,7 @@ defmodule Handin.Assignments.Assignment do
     AssignmentFile
   }
 
-  alias Handin.AssignmentSubmission.AssignmentSubmission
+  alias Handin.AssignmentSubmissions.AssignmentSubmission
   @type t :: %__MODULE__{}
   schema "assignments" do
     field :name, :string

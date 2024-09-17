@@ -1,5 +1,5 @@
-defmodule Handin.AssignmentSubmission.AssignmentSubmission do
-  alias Handin.AssignmentSubmission.AssignmentSubmissionFile
+defmodule Handin.AssignmentSubmissions.AssignmentSubmission do
+  alias Handin.AssignmentSubmissions.AssignmentSubmissionFile
   alias Handin.Accounts.User
   alias Handin.Assignments.{Assignment}
 

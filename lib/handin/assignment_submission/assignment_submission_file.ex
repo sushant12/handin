@@ -1,8 +1,8 @@
-defmodule Handin.AssignmentSubmission.AssignmentSubmissionFile do
+defmodule Handin.AssignmentSubmissions.AssignmentSubmissionFile do
   use Handin.Schema
   use Waffle.Ecto.Schema
 
-  alias Handin.AssignmentSubmission.AssignmentSubmission
+  alias Handin.AssignmentSubmissions.AssignmentSubmission
 
   import Ecto.Changeset
   @type t :: %__MODULE__{}
