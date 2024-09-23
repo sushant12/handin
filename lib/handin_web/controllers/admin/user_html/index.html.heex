@@ -26,8 +26,6 @@
 
               <th><%= table_link(@conn, "Role", :role) %></th>
 
-              <th>University</th>
-
               <th><span>Actions</span></th>
             </tr>
           </thead>
@@ -37,8 +35,6 @@
                 <td><%= user.email %></td>
 
                 <td><%= user.role %></td>
-
-                <td><%= user.university.name %></td>
 
                 <td class="torch-actions">
                   <span>

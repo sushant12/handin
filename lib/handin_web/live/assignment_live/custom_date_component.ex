@@ -89,7 +89,7 @@ defmodule HandinWeb.AssignmentLive.CustomDateComponent do
         Map.put(
           custom_assignment_date_params,
           "timezone",
-          socket.assigns.current_user.university.timezone
+          Handin.get_timezone()
         )
       )
       |> Map.put(:action, :validate)
@@ -102,7 +102,7 @@ defmodule HandinWeb.AssignmentLive.CustomDateComponent do
       socket,
       socket.assigns.action,
       custom_assignment_date_params
-      |> Map.put("timezone", socket.assigns.current_user.university.timezone)
+      |> Map.put("timezone", Handin.get_timezone())
       |> Map.put("assignment_id", socket.assigns.assignment.id)
     )
   end

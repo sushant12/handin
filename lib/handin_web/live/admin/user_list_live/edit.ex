@@ -1,6 +1,6 @@
 defmodule HandinWeb.Admin.UserListLive.Edit do
   use HandinWeb, :live_component
-  alias Handin.{Accounts, Universities}
+  alias Handin.Accounts
 
   @impl true
   def render(assigns) do
@@ -23,12 +23,6 @@ defmodule HandinWeb.Admin.UserListLive.Edit do
           type="select"
           label="Role"
           options={[:admin, :lecturer, :student]}
-        />
-        <.input
-          field={@form[:university_id]}
-          type="select"
-          label="University"
-          options={Universities.list_universities() |> Enum.map(&{&1.name, &1.id})}
         />
         <.input field={@form[:confirmed_at]} type="datetime-local" label="Confirmed At" />
         <:actions>

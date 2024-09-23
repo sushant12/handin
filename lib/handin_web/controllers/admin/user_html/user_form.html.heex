@@ -14,12 +14,6 @@
       label="Role"
       options={Ecto.Enum.values(Handin.Accounts.User, :role)}
     />
-    <.torch_input
-      label="University"
-      field={f[:university_id]}
-      type="select"
-      options={Universities.list_universities() |> Enum.map(&{&1.name, &1.id})}
-    />
     <div class="torch-submit-form">
       <button type="submit" class="torch-submit-button">
         <%= Torch.I18n.message("Submit") %>

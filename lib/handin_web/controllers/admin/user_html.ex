@@ -4,8 +4,6 @@ defmodule HandinWeb.Admin.UserHTML do
   import Phoenix.HTML.Form
   use PhoenixHTMLHelpers
 
-  alias Handin.Universities
-
   import Torch.TableView
   import Torch.FilterView
   import Torch.Component

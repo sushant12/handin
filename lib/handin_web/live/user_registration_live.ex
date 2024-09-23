@@ -1,7 +1,7 @@
 defmodule HandinWeb.UserRegistrationLive do
   use HandinWeb, :live_view
 
-  alias Handin.{Accounts, Modules, Universities}
+  alias Handin.Accounts
   alias Handin.Accounts.User
 
   def render(assigns) do
@@ -39,21 +39,10 @@ defmodule HandinWeb.UserRegistrationLive do
             </.error>
             <div>
               <.input
-                field={@form[:university_id]}
-                type="select"
-                prompt="Select your university"
-                options={@universities}
-                label="University"
-                required
-              />
-            </div>
-
-            <div>
-              <.input
                 field={@form[:role]}
                 type="select"
                 prompt="Select your role"
-                options={[:student, :lecturer]}
+                options={[Student: "student", Lecturer: "lecturer"]}
                 label="Role"
                 required
               />
@@ -99,17 +88,12 @@ defmodule HandinWeb.UserRegistrationLive do
   end
 
   def mount(_params, _session, socket) do
-    universities =
-      Universities.list_universities()
-      |> Enum.map(&{&1.name, &1.id})
-
     changeset =
       Accounts.change_user_registration(%User{})
 
     socket =
       socket
       |> assign(trigger_submit: false, check_errors: false)
-      |> assign(:universities, universities)
       |> assign_form(changeset)
 
     {:ok, socket, temporary_assigns: [form: nil]}
@@ -118,20 +102,14 @@ defmodule HandinWeb.UserRegistrationLive do
   def handle_event("save", %{"user" => user_params}, socket) do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
-        {:ok, _} =
-          Accounts.deliver_user_confirmation_instructions(
-            user,
-            &url(~p"/users/confirm/#{&1}")
-          )
-
-        Modules.check_and_add_new_user_modules_invitations(user)
-
-        changeset = Accounts.change_user_registration(user)
+        Accounts.deliver_user_confirmation_instructions(
+          user,
+          &url(~p"/users/confirm/#{&1}")
+        )
 
         {:noreply,
          socket
          |> assign(trigger_submit: true)
-         |> assign_form(changeset)
          |> put_flash(:info, "User created successfully")}
 
       {:error, %Ecto.Changeset{} = changeset} ->

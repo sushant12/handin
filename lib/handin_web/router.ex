@@ -36,8 +36,6 @@ defmodule HandinWeb.Router do
 
     live_dashboard "/live_dashboard", metrics: HandinWeb.Telemetry
 
-    resources "/universities", UniversityController
-
     resources "/programming_languages", ProgrammingLanguageController
 
     resources "/users", UserController
@@ -58,10 +56,10 @@ defmodule HandinWeb.Router do
   scope "/", HandinWeb do
     pipe_through [:browser, :require_authenticated_user]
 
-    live_session :require_authenticated_admin_or_lecturer,
+    live_session :require_authenticated_lecturer_or_ta,
       on_mount: [
         {HandinWeb.UserAuth, :ensure_authenticated},
-        {HandinWeb.Auth, :admin_or_lecturer}
+        {HandinWeb.Auth, :lecturer_or_ta}
       ] do
       live "/modules/new", ModulesLive.Index, :new
       live "/modules/archived", ArchivedModulesLive.Index, :index
@@ -103,6 +101,8 @@ defmodule HandinWeb.Router do
              :edit_assignment_test
 
         live "/students/new", StudentsLive.Index, :new
+        live "/students/bulk_add", StudentsLive.Index, :bulk_add
+
         live "/students/:user_id/show", StudentsLive.Show, :show
         live "/teaching_assistants/new", TeachingAssistantsLive.Index, :new
         live "/teaching_assistants/delete", TeachingAssistantsLive.Index, :delete

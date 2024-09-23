@@ -24,40 +24,38 @@ defmodule HandinWeb.TeachingAssistantLive.Show do
             <span class="text-gray-700 font-medium mr-2">Email:</span>
             <span class="text-gray-900"><%= @student.email %></span>
           </div>
-          <%= if @student.university_id do %>
-            <div class="flex items-center mb-5">
-              <span class="text-gray-700 font-medium">Confirmed At:</span>
-              <span class="text-gray-900 mx-2">
-                <%= @student.confirmed_at || "Not confirmed yet" %>
-              </span>
-              <button
-                :if={!@student.confirmed_at}
-                class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-                phx-click="confirm_student"
-                phx-value-user_id={@student.id}
-                data-confirm="Do you want to confirm the student?"
-              >
-                Confirm Now
-              </button>
-            </div>
+          <div class="flex items-center mb-5">
+            <span class="text-gray-700 font-medium">Confirmed At:</span>
+            <span class="text-gray-900 mx-2">
+              <%= @student.confirmed_at || "Not confirmed yet" %>
+            </span>
+            <button
+              :if={!@student.confirmed_at}
+              class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              phx-click="confirm_student"
+              phx-value-user_id={@student.id}
+              data-confirm="Do you want to confirm the student?"
+            >
+              Confirm Now
+            </button>
+          </div>
 
-            <h3 class="text-lg font-medium mb-2">Builds</h3>
-            <div class="divide-y">
-              <div :for={build <- @student.builds} class="text-gray-700 flex p-4">
-                <div>Machine ID: <%= build.machine_id %></div>
-                <div class="whitespace-nowrap ml-4">
-                  Status:
-                  <span class={[
-                    build.status == :running && "text-blue-500",
-                    build.status == :completed && "text-green-500",
-                    build.status == :failed && "text-red-500"
-                  ]}>
-                    <%= build.status %>
-                  </span>
-                </div>
+          <h3 class="text-lg font-medium mb-2">Builds</h3>
+          <div class="divide-y">
+            <div :for={build <- @student.builds} class="text-gray-700 flex p-4">
+              <div>Machine ID: <%= build.machine_id %></div>
+              <div class="whitespace-nowrap ml-4">
+                Status:
+                <span class={[
+                  build.status == :running && "text-blue-500",
+                  build.status == :completed && "text-green-500",
+                  build.status == :failed && "text-red-500"
+                ]}>
+                  <%= build.status %>
+                </span>
               </div>
             </div>
-          <% end %>
+          </div>
         </div>
       </div>
     <% end %>

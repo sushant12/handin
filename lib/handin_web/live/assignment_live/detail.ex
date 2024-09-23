@@ -55,11 +55,11 @@ defmodule HandinWeb.AssignmentLive.Detail do
     <.list>
       <:item title="Start Date">
         <%= ((@custom_assignment_date && @custom_assignment_date.start_date) || @assignment.start_date)
-        |> Handin.DisplayHelper.format_date(@current_user.university.timezone) %>
+        |> Handin.DisplayHelper.format_date(Handin.get_timezone()) %>
       </:item>
       <:item title="Due Date">
         <%= ((@custom_assignment_date && @custom_assignment_date.due_date) || @assignment.due_date)
-        |> Handin.DisplayHelper.format_date(@current_user.university.timezone) %>
+        |> Handin.DisplayHelper.format_date(Handin.get_timezone()) %>
       </:item>
       <:item
         :if={
@@ -71,7 +71,7 @@ defmodule HandinWeb.AssignmentLive.Detail do
       >
         <%= ((@custom_assignment_date && @custom_assignment_date.cutoff_date) ||
                @assignment.cutoff_date)
-        |> Handin.DisplayHelper.format_date(@current_user.university.timezone) %>
+        |> Handin.DisplayHelper.format_date(Handin.get_timezone()) %>
       </:item>
       <:item :if={@assignment.enable_total_marks} title="Total marks">
         <%= @assignment.total_marks %>

@@ -1,28 +1,12 @@
 alias Handin.Repo
 now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 
-university =
-  %Handin.Universities.University{
-    name: "University Of Limerick",
-    student_email_regex: "^\\d+@studentmail\.ul\.ie$",
-    timezone: "Europe/Dublin"
-  }
-  |> Repo.insert!()
-
-%Handin.Universities.University{
-  name: "University College Cork",
-  student_email_regex: "^\\d+@studentmail\.ucc\.ie$",
-  timezone: "Europe/Dublin"
-}
-|> Repo.insert!()
-
 admin =
   %Handin.Accounts.User{
     email: "admin@handin.org",
     hashed_password: Bcrypt.hash_pwd_salt("admin"),
     confirmed_at: now,
-    role: :admin,
-    university_id: university.id
+    role: :admin
   }
   |> Repo.insert!()
 
@@ -30,8 +14,7 @@ admin =
   email: "paddy@ul.ie",
   hashed_password: Bcrypt.hash_pwd_salt("paddy"),
   confirmed_at: now,
-  role: :lecturer,
-  university_id: university.id
+  role: :lecturer
 }
 |> Repo.insert!()
 
@@ -85,8 +68,7 @@ end)
       email: "#{i}@studentmail.ul.ie",
       hashed_password: Bcrypt.hash_pwd_salt("password"),
       confirmed_at: now,
-      role: :student,
-      university_id: university.id
+      role: :student
     }
     |> Repo.insert!()
 

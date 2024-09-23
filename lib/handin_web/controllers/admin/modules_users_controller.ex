@@ -22,7 +22,6 @@ defmodule HandinWeb.Admin.ModulesUsersController do
     params =
       %AddUserToModuleParams{
         emails: [email],
-        university_id: conn.assigns.current_user.university.id,
         module: module
       }
 

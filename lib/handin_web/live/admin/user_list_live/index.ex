@@ -20,10 +20,6 @@ defmodule HandinWeb.Admin.UserListLive.Index do
       <:col :let={{_id, user}} field={:role} label="Role">
         <%= user.role %>
       </:col>
-      <:col :let={{_id, user}} label="University">
-        <%= user.university.name %>
-      </:col>
-
       <:action :let={{id, user}}>
         <.link
           class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"

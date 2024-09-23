@@ -129,13 +129,13 @@ defmodule HandinWeb.AssignmentLive.Settings do
       <:col :let={{_id, custom_assignment_date}} label="Start Date">
         <%= Handin.DisplayHelper.format_date(
           custom_assignment_date.start_date,
-          @current_user.university.timezone
+          Handin.get_timezone()
         ) %>
       </:col>
       <:col :let={{_id, custom_assignment_date}} label="Due Date">
         <%= Handin.DisplayHelper.format_date(
           custom_assignment_date.due_date,
-          @current_user.university.timezone
+          Handin.get_timezone()
         ) %>
       </:col>
       <:col :let={{_id, custom_assignment_date}} label="Cutoff Date">
@@ -143,7 +143,7 @@ defmodule HandinWeb.AssignmentLive.Settings do
           do:
             Handin.DisplayHelper.format_date(
               custom_assignment_date.cutoff_date,
-              @current_user.university.timezone
+              Handin.get_timezone()
             ) %>
       </:col>
       <:action :let={{id, custom_assignment_date}}>

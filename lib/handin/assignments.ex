@@ -427,7 +427,7 @@ defmodule Handin.Assignments do
     |> where([as], as.assignment_id == ^assignment_id)
     |> where([as], as.user_id == ^user_id)
     |> order_by([as], desc: as.inserted_at)
-    |> preload([:assignment_submission_files, :assignment, user: [:university]])
+    |> preload([:assignment_submission_files, :assignment])
     |> limit(1)
     |> Repo.one()
   end
@@ -484,13 +484,13 @@ defmodule Handin.Assignments do
       user_id: user_id
     })
     |> Repo.insert!()
-    |> Repo.preload([:assignment_submission_files, :assignment, user: [:university]])
+    |> Repo.preload([:assignment_submission_files, :assignment])
   end
 
   def evaluate_marks(submission_id, build_id) do
     submission =
       Repo.get(AssignmentSubmission, submission_id)
-      |> Repo.preload([:assignment, user: [:university]])
+      |> Repo.preload([:assignment])
 
     build =
       Repo.get(Build, build_id)
@@ -539,14 +539,13 @@ defmodule Handin.Assignments do
     if custom_date do
       if assignment.enable_penalty_per_day &&
            Timex.after?(
-             DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone),
+             DateTime.shift_zone!(submission.submitted_at, Handin.get_timezone()),
              custom_date.due_date
            ) do
         days_after_due_date =
           Interval.new(
             from: custom_date.due_date,
-            until:
-              DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone)
+            until: DateTime.shift_zone!(submission.submitted_at, Handin.get_timezone())
           )
           |> Interval.duration(:days)
 
@@ -558,14 +557,13 @@ defmodule Handin.Assignments do
     else
       if assignment.enable_penalty_per_day &&
            Timex.after?(
-             DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone),
+             DateTime.shift_zone!(submission.submitted_at, Handin.get_timezone()),
              assignment.due_date
            ) do
         days_after_due_date =
           Interval.new(
             from: assignment.due_date,
-            until:
-              DateTime.shift_zone!(submission.submitted_at, submission.user.university.timezone)
+            until: DateTime.shift_zone!(submission.submitted_at, Handin.get_timezone())
           )
           |> Interval.duration(:days)
 
@@ -611,7 +609,7 @@ defmodule Handin.Assignments do
         Timex.compare(
           DateTime.shift_zone!(
             DateTime.utc_now(),
-            assignment_submission.user.university.timezone
+            Handin.get_timezone()
           ),
           custom_date.cutoff_date
         ) < 0
@@ -624,7 +622,7 @@ defmodule Handin.Assignments do
         Timex.compare(
           DateTime.shift_zone!(
             DateTime.utc_now(),
-            assignment_submission.user.university.timezone
+            Handin.get_timezone()
           ),
           assignment_submission.assignment.cutoff_date
         ) < 0

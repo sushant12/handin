@@ -33,11 +33,10 @@ defmodule Handin.Modules do
   end
 
   defmodule AddUserToModuleParams do
-    defstruct [:module, :university_id, :emails]
+    defstruct [:module, :emails]
 
     @type t :: %__MODULE__{
             module: Module.t(),
-            university_id: Ecto.UUID.t(),
             emails: list(String.t())
           }
   end
@@ -489,7 +488,7 @@ defmodule Handin.Modules do
   end
 
   defp filter_by_released_assignment(query, %User{} = user, :student) do
-    now = DateTime.utc_now() |> DateTime.shift_zone!(user.university.timezone)
+    now = DateTime.utc_now() |> DateTime.shift_zone!(Handin.get_timezone())
 
     query
     |> where(
@@ -508,13 +507,12 @@ defmodule Handin.Modules do
           {:ok, any()} | {:error, any()}
   def add_users_to_module(%AddUserToModuleParams{
         emails: emails,
-        university_id: university_id,
         module: module
       })
-      when is_list(emails) and not is_nil(university_id) do
+      when is_list(emails) do
     Multi.new()
     |> Multi.run(:users, fn _repo, _changes ->
-      process_users(emails, university_id)
+      process_users(emails)
     end)
     |> Multi.run(:module_users, fn _repo, %{users: users} ->
       process_module_users(users, module.id)
@@ -540,9 +538,9 @@ defmodule Handin.Modules do
     Enum.filter(users, fn user -> MapSet.member?(user_ids_in_module, user.id) end)
   end
 
-  defp process_users(emails, university_id) do
+  defp process_users(emails) do
     Enum.reduce_while(emails, {:ok, []}, fn email, {:ok, acc} ->
-      case ensure_user(email, university_id) do
+      case ensure_user(email) do
         {:ok, user} -> {:cont, {:ok, [user | acc]}}
         {:error, reason} -> {:halt, {:error, reason}}
       end
@@ -559,9 +557,9 @@ defmodule Handin.Modules do
     end)
   end
 
-  defp ensure_user(email, university_id) do
+  defp ensure_user(email) do
     case Accounts.get_user_by_email(email) do
-      nil -> create_user(email, university_id)
+      nil -> create_user(email)
       user -> {:ok, user}
     end
   end
@@ -574,13 +572,12 @@ defmodule Handin.Modules do
     end
   end
 
-  defp create_user(email, university_id) do
+  defp create_user(email) do
     temporary_password = generate_temp_password()
 
     user_params = %{
       email: email,
       password: temporary_password,
-      university_id: university_id,
       role: :student,
       invited_at: NaiveDateTime.utc_now()
     }
@@ -619,15 +616,28 @@ defmodule Handin.Modules do
     |> Repo.all()
   end
 
-  @spec add_teaching_assistant(ModuleUsersParams.t()) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def add_teaching_assistant(%ModuleUsersParams{} = params) do
-    %ModulesUsers{}
-    |> ModulesUsers.changeset(Map.from_struct(params))
-    |> Repo.insert()
-    |> case do
-      {:ok, module_user} -> {:ok, module_user |> Repo.preload(:user) |> Map.get(:user)}
-      {:error, changeset} -> {:error, changeset}
+  @spec save_teaching_assistant(String.t(), Ecto.UUID.t()) ::
+          {:ok, User.t()} | {:error, String.t()}
+  def save_teaching_assistant(email, module_id) do
+    user = Accounts.get_user_by_email(email)
+
+    if user do
+      case ModulesUsers.changeset(%ModulesUsers{}, %{
+             module_id: module_id,
+             user_id: user.id,
+             role: :teaching_assistant
+           }) do
+        %Ecto.Changeset{valid?: true} -> {:ok, user}
+        {:ok, _} -> {:ok, user}
+        {:error, changeset} -> {:error, changeset}
+      end
+    else
+      changeset =
+        User.module_user_changeset(%User{}, %{email: email})
+        |> Ecto.Changeset.add_error(:email, "User not found in our system.")
+        |> Map.put(:action, :validate)
+
+      {:error, changeset}
     end
   end
 

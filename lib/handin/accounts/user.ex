@@ -1,8 +1,6 @@
 defmodule Handin.Accounts.User do
   use Handin.Schema
   import Ecto.Changeset
-  alias Handin.Universities
-  alias Handin.Universities.University
   alias Handin.Modules.ModulesUsers
   alias Handin.Modules.Module
   alias Handin.Assignments.{TestResult, RunScriptResult, Build, CustomAssignmentDate}
@@ -25,8 +23,6 @@ defmodule Handin.Accounts.User do
     field :role, Ecto.Enum,
       default: :student,
       values: [:student, :admin, :lecturer]
-
-    belongs_to :university, University
 
     has_many :test_results, TestResult
     has_many :run_script_results, RunScriptResult
@@ -63,21 +59,20 @@ defmodule Handin.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :university_id, :role, :invited_at])
-    |> maybe_validate_role()
-    |> validate_required([:university_id])
+    |> cast(attrs, [:email, :password, :role, :invited_at])
+    |> validate_role()
     |> validate_email(opts)
     |> password_changeset(attrs, opts)
   end
 
-  defp maybe_validate_role(changeset) do
+  defp validate_role(changeset) do
     changeset
     |> validate_inclusion(:role, [:student, :lecturer])
   end
 
   def edit_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :role, :university_id, :confirmed_at])
+    |> cast(attrs, [:email, :role, :confirmed_at])
     |> validate_email(opts)
   end
 
@@ -85,21 +80,24 @@ defmodule Handin.Accounts.User do
     changeset
     |> validate_required([:email])
     |> validate_length(:email, max: 160)
-    |> maybe_validate_email_format()
     |> maybe_validate_unique_email(opts)
+    |> validate_email_format()
   end
 
-  defp maybe_validate_email_format(changeset) do
-    case get_field(changeset, :university_id) do
-      nil ->
-        changeset
+  defp validate_email_format(changeset) do
+    role = get_field(changeset, :role)
 
-      university_id ->
-        university = Universities.get_university!(university_id)
-
+    case role do
+      :student ->
         changeset
-        |> validate_format(:email, ~r/#{university.student_email_regex}/,
-          message: "please use your university email address"
+        |> validate_format(:email, ~r/^\d+@studentmail\.ul\.ie$/,
+          message: "please use your student email address"
+        )
+
+      :lecturer ->
+        changeset
+        |> validate_format(:email, ~r/^[a-zA-Z0-9._-]+@ul\.ie$/,
+          message: "must be in the format username@ul.ie"
         )
     end
   end
@@ -215,11 +213,5 @@ defmodule Handin.Accounts.User do
     user
     |> cast(attrs, [:email])
     |> validate_required([:email])
-    |> validate_change(:email, fn :email, email ->
-      case Handin.Repo.get_by(__MODULE__, email: email) do
-        nil -> [{:email, "User with this email does not exist"}]
-        _ -> []
-      end
-    end)
   end
 end

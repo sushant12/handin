@@ -1,13 +1,10 @@
 defmodule HandinWeb.StudentsLive.FormComponent do
   use HandinWeb, :live_component
-  alias NimbleCSV.RFC4180, as: CSV
   alias Handin.Modules
   alias Handin.Modules.AddUserToModuleParams
   @impl true
   def mount(socket) do
-    {:ok,
-     socket
-     |> allow_upload(:csv_file_input, accept: ~w(.csv), max_entries: 1, max_file_size: 1_500_000)}
+    {:ok, socket}
   end
 
   @impl true
@@ -19,34 +16,9 @@ defmodule HandinWeb.StudentsLive.FormComponent do
           <%= @title %>
         </.header>
       </div>
-      <.simple_form
-        for={@form}
-        id="member-form"
-        phx-target={@myself}
-        phx-submit="save"
-        phx-change="validate"
-      >
+      <.simple_form for={@form} id="student-form" phx-target={@myself} phx-submit="save">
         <div class="grid gap-4 mb-4 sm:grid-cols-1">
           <.input field={@form[:email]} label="Email" type="text" />
-        </div>
-        <div class="inline-flex items-center justify-center w-full">
-          <hr class="w-64 h-px my-1 bg-gray-200 border-0 dark:bg-gray-700" />
-          <span class="absolute px-3 font-medium text-gray-900 -translate-x-1/2 bg-white left-1/2 dark:text-white dark:bg-gray-900">
-            or
-          </span>
-        </div>
-        <div class="grid gap-4 mb-4 sm:grid-cols-1">
-          <.label>Upload file</.label>
-          <.live_file_input
-            upload={@uploads.csv_file_input}
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-          />
-          <div class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="user_avatar_help">
-            Upload a CSV file
-          </div>
-          <.error :if={@form[:csv_file_input].errors != []}>
-            <%= @form[:csv_file_input].errors %>
-          </.error>
         </div>
         <:actions>
           <.button
@@ -76,22 +48,14 @@ defmodule HandinWeb.StudentsLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", _, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
   def handle_event("save", %{"user" => user_params}, socket) do
     email = user_params["email"]
-    csv_emails = process_csv_upload(socket)
 
-    emails = [email | csv_emails] |> Enum.reject(&is_nil/1) |> Enum.uniq()
     {:ok, module} = Modules.get_module(socket.assigns.module_id)
 
     params =
       %AddUserToModuleParams{
-        emails: emails,
-        university_id: socket.assigns.current_user.university.id,
+        emails: [email],
         module: module
       }
 
@@ -101,41 +65,23 @@ defmodule HandinWeb.StudentsLive.FormComponent do
 
         socket =
           socket
-          |> put_flash(:info, "Users added to module successfully")
+          |> put_flash(:info, "User added to module successfully")
           |> push_navigate(to: socket.assigns.patch)
 
         {:noreply, socket}
 
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign_form(socket, changeset)}
+
       {:error, failed_operation, _failed_value, _changes_so_far} ->
         socket =
           socket
-          |> put_flash(:error, "Failed to add users: #{inspect(failed_operation)}")
+          |> put_flash(:error, "Failed to add user: #{inspect(failed_operation)}")
           |> assign(form: to_form(%{email: email}, as: :user))
 
         {:noreply, socket}
     end
   end
-
-  defp process_csv_upload(socket) do
-    socket.assigns.uploads.csv_file_input.entries
-    |> Enum.flat_map(&process_csv_entry(socket, &1))
-    |> List.flatten()
-    |> Enum.reject(&is_nil/1)
-  end
-
-  defp process_csv_entry(socket, entry) do
-    consume_uploaded_entry(socket, entry, &parse_csv_file/1)
-  end
-
-  defp parse_csv_file(%{path: path}) do
-    path
-    |> File.read!()
-    |> CSV.parse_string()
-    |> Enum.map(&extract_email/1)
-  end
-
-  defp extract_email([email]), do: email
-  defp extract_email(_), do: nil
 
   defp assign_form(socket, changeset \\ %{}, opts \\ []) do
     assign(socket, :form, to_form(changeset, opts ++ [as: "user"]))

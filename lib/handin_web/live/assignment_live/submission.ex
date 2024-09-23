@@ -61,7 +61,7 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:col :let={{submission, _}} label="Submitted At">
         <%= Handin.DisplayHelper.format_date(
           submission.submitted_at,
-          @current_user.university.timezone
+          Handin.get_timezone()
         ) %>
       </:col>
       <:action :let={{submission, _}}>

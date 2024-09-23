@@ -16,7 +16,12 @@
 </.tabs>
 <.link :if={@module_user.role != :student} patch={~p"/modules/#{@module.id}/students/new"}>
   <.button class="float-right inline-flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-    Add Member
+    Add Student
+  </.button>
+</.link>
+<.link :if={@module_user.role != :student} patch={~p"/modules/#{@module.id}/students/bulk_add"}>
+  <.button class="float-right inline-flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+    Bulk Add Student
   </.button>
 </.link>
 <.table id="students" rows={@streams.students}>
@@ -45,12 +50,29 @@
 </.table>
 <.modal
   :if={@live_action == :new}
-  id="member-modal"
+  id="student-modal"
   show
   on_cancel={JS.patch(~p"/modules/#{@module.id}/students/")}
 >
   <.live_component
     module={HandinWeb.StudentsLive.FormComponent}
+    id={:new}
+    title={@page_title}
+    action={@live_action}
+    module_id={@module.id}
+    current_user={@current_user}
+    patch={~p"/modules/#{@module.id}/students"}
+  />
+</.modal>
+
+<.modal
+  :if={@live_action == :bulk_add}
+  id="student-modal"
+  show
+  on_cancel={JS.patch(~p"/modules/#{@module.id}/students/")}
+>
+  <.live_component
+    module={HandinWeb.StudentsLive.BulkAddFormComponent}
     id={:new}
     title={@page_title}
     action={@live_action}

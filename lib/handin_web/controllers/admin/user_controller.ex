@@ -3,7 +3,6 @@ defmodule HandinWeb.Admin.UserController do
 
   alias Handin.Accounts
   alias Handin.Accounts.User
-  alias Handin.Repo
 
   plug(:put_root_layout, {HandinWeb.Layouts, "torch.html"})
   plug(:put_layout, false)
@@ -11,8 +10,6 @@ defmodule HandinWeb.Admin.UserController do
   def index(conn, params) do
     case Accounts.paginate_users(params) do
       {:ok, %{users: users} = assigns} ->
-        users = Repo.preload(users, [:university])
-
         render(conn, :index, Map.put(assigns, :users, users))
 
       {:error, error} ->

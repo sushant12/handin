@@ -8,7 +8,8 @@
 import Config
 
 config :handin,
-  ecto_repos: [Handin.Repo]
+  ecto_repos: [Handin.Repo],
+  timezone: "Europe/Dublin"
 
 # Configures the endpoint
 config :handin, HandinWeb.Endpoint,

@@ -66,7 +66,7 @@ defmodule Handin.Accounts do
 
   """
   @spec get_user!(Ecto.UUID) :: User.t()
-  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload([:modules, :university])
+  def get_user!(id), do: Repo.get!(User, id) |> Repo.preload([:modules])
 
   def get_user(id), do: Repo.get(User, id) |> Repo.preload(builds: [:assignment])
 
@@ -86,7 +86,6 @@ defmodule Handin.Accounts do
   """
   def register_user(attrs) do
     %User{}
-    |> Repo.preload(:university)
     |> User.registration_changeset(attrs)
     |> Repo.insert()
   end
@@ -381,7 +380,7 @@ defmodule Handin.Accounts do
   def list_users(params) do
     case Flop.validate_and_run(User, params, for: User) do
       {:ok, {users, meta}} ->
-        %{users: users |> Repo.preload(:university), meta: meta}
+        %{users: users, meta: meta}
 
       {:error, meta} ->
         %{users: [], meta: meta}
@@ -390,7 +389,6 @@ defmodule Handin.Accounts do
 
   def edit_changeset(user, attrs \\ %{}) do
     user
-    |> Repo.preload(:university)
     |> User.edit_changeset(attrs)
   end
 
@@ -399,7 +397,7 @@ defmodule Handin.Accounts do
          |> edit_changeset(attrs)
          |> Repo.update() do
       {:ok, user} ->
-        {:ok, Repo.preload(user, :university, force: true)}
+        {:ok, user}
 
       error ->
         error
@@ -408,15 +406,6 @@ defmodule Handin.Accounts do
 
   def delete_user(user) do
     Repo.delete(user)
-  end
-
-  def valid_email?(email, university_id) do
-    %Ecto.Changeset{valid?: valid} =
-      User.edit_changeset(%User{}, %{"email" => email, "university_id" => university_id},
-        validate_email: false
-      )
-
-    valid
   end
 
   def change_user(%User{} = user, attrs \\ %{}) do

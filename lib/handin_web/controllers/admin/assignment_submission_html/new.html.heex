@@ -1,6 +1,8 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-    <.link href={~p"/admin/assignment_submissions"} class="torch-button"><%= Torch.I18n.message("Cancel") %></.link>
+    <.link href={~p"/admin/assignment_submissions"} class="torch-button">
+      <%= Torch.I18n.message("Cancel") %>
+    </.link>
   </div>
 </section>
 
@@ -9,6 +11,9 @@
     <div class="header">
       <h3>New Assignment submission</h3>
     </div>
-    <.assignment_submission_form changeset={@changeset} action={~p"/admin/assignment_submissions"} />
+    <.assignment_submission_form
+      changeset={@changeset}
+      action={~p"/admin/assignment_submissions"}
+    />
   </div>
 </section>

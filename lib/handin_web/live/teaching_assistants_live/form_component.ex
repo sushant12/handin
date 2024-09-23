@@ -1,9 +1,7 @@
 defmodule HandinWeb.TeachingAssistantsLive.FormComponent do
   use HandinWeb, :live_component
   alias Handin.Modules
-  alias Handin.Accounts
   alias Handin.Accounts.User
-  alias Handin.Modules.ModuleUsersParams
 
   @impl true
   def render(assigns) do
@@ -46,28 +44,9 @@ defmodule HandinWeb.TeachingAssistantsLive.FormComponent do
 
   @impl true
   def handle_event("save", %{"user" => %{"email" => email}}, socket) do
-    case Accounts.get_user_by_email(email) do
-      nil ->
-        changeset =
-          %User{}
-          |> User.module_user_changeset(%{email: email})
-          |> Map.put(:action, :validate)
+    module_id = socket.assigns.module_id
 
-        {:noreply, assign_form(socket, changeset)}
-
-      user ->
-        save_teaching_assistant(socket, user)
-    end
-  end
-
-  defp save_teaching_assistant(socket, user) do
-    params = %ModuleUsersParams{
-      module_id: socket.assigns.module_id,
-      user_id: user.id,
-      role: :teaching_assistant
-    }
-
-    case Modules.add_teaching_assistant(params) do
+    case Modules.save_teaching_assistant(email, module_id) do
       {:ok, teaching_assistant} ->
         notify_parent({:saved, teaching_assistant})
 

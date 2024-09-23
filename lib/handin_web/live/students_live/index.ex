@@ -31,7 +31,12 @@ defmodule HandinWeb.StudentsLive.Index do
 
   defp apply_action(socket, :new, _params) do
     socket
-    |> assign(:page_title, "New Member")
+    |> assign(:page_title, "New Student")
+  end
+
+  defp apply_action(socket, :bulk_add, _params) do
+    socket
+    |> assign(:page_title, "Bulk Add Students")
   end
 
   defp apply_action(socket, :index, _params) do
