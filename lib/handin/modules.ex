@@ -626,7 +626,8 @@ defmodule Handin.Modules do
              module_id: module_id,
              user_id: user.id,
              role: :teaching_assistant
-           }) do
+           })
+           |> Repo.insert() do
         %Ecto.Changeset{valid?: true} -> {:ok, user}
         {:ok, _} -> {:ok, user}
         {:error, changeset} -> {:error, changeset}
