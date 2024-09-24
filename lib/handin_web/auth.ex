@@ -63,5 +63,25 @@ defmodule HandinWeb.Auth do
     end
   end
 
+  def on_mount(
+        :lecturer_or_ta,
+        _params,
+        _session,
+        socket
+      ) do
+    current_user = socket.assigns.current_user
+
+    if current_user.role == :lecturer do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> Phoenix.LiveView.put_flash(:error, "You are not authorized to view this page")
+        |> Phoenix.LiveView.redirect(to: ~p"/")
+
+      {:halt, socket}
+    end
+  end
+
   defp admin?(user), do: user && user.role == :admin
 end
