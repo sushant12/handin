@@ -1,7 +1,7 @@
 defmodule HandinWeb.AssignmentLive.Submit do
   use HandinWeb, :live_view
 
-  alias Handin.{Modules, Assignments, Accounts}
+  alias Handin.{Modules, Assignments}
 
   @impl true
   def render(assigns) do
@@ -207,17 +207,20 @@ defmodule HandinWeb.AssignmentLive.Submit do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    with true <- Accounts.enrolled_module?(socket.assigns.current_user, id),
-         true <- Modules.assignment_exists?(id, assignment_id) do
-      assignment = Assignments.get_assignment!(assignment_id)
-      module = Modules.get_module!(id)
+    user = socket.assigns.current_user
 
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, module_user} <-
+           Modules.module_user(module, user),
+         {:ok, assignment} <- Assignments.get_assignment(assignment_id, module.id) do
       assignment_submission =
-        Assignments.get_submission(assignment_id, socket.assigns.current_user.id) ||
-          Assignments.create_submission(assignment_id, socket.assigns.current_user.id)
+        Assignments.get_submission(assignment_id, user.id) ||
+          Assignments.create_submission(assignment_id, user.id)
 
       if connected?(socket) do
-        HandinWeb.Endpoint.subscribe("build:assignment_submission:#{assignment_submission.id}")
+        HandinWeb.Endpoint.subscribe(
+          "assignment:#{assignment_id}:module_user:#{user.id}:role:#{module_user.role}"
+        )
       end
 
       {
@@ -237,7 +240,10 @@ defmodule HandinWeb.AssignmentLive.Submit do
         )
         |> assign(
           :build,
-          GenServer.whereis({:global, "build:assignment_submission:#{assignment_submission.id}"})
+          GenServer.whereis(
+            {:global,
+             "assignment:#{assignment_id}:module_user:#{user.id}:role:#{module_user.role}"}
+          )
         )
         |> assign(:assignment_submission, assignment_submission)
         |> assign(
@@ -250,10 +256,10 @@ defmodule HandinWeb.AssignmentLive.Submit do
         )
       }
     else
-      false ->
+      {:error, reason} ->
         {:ok,
-         push_navigate(socket, to: ~p"/modules")
-         |> put_flash(:error, "You are not authorized to view this page")}
+         push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+         |> put_flash(:error, reason)}
     end
   end
 
@@ -275,14 +281,13 @@ defmodule HandinWeb.AssignmentLive.Submit do
   def handle_event("submit_assignment", %{"assignment_id" => assignment_id}, socket) do
     if Assignments.submission_allowed?(socket.assigns.assignment_submission) do
       DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
-        id: Handin.BuildServer,
+        id: Handin.AssignmentSubmissionServer,
         start:
-          {Handin.BuildServer, :start_link,
+          {Handin.AssignmentSubmissionServer, :start_link,
            [
              %{
                assignment_id: assignment_id,
                assignment_submission_id: socket.assigns.assignment_submission.id,
-               type: "assignment_submission",
                image: socket.assigns.assignment.programming_language.docker_file_url,
                user_id: socket.assigns.current_user.id,
                role: socket.assigns.current_user.role

@@ -1,6 +1,4 @@
 defmodule Handin.AccountsFixtures do
-  import Handin.UniversitiesFixtures
-
   @moduledoc """
   This module defines test helpers for creating
   entities via the `Handin.Accounts` context.
@@ -10,12 +8,9 @@ defmodule Handin.AccountsFixtures do
   def valid_user_password, do: "password1234"
 
   def valid_user_attributes(attrs \\ %{}) do
-    university = if attrs[:university], do: attrs[:university], else: university_fixture().id
-
     Enum.into(attrs, %{
       email: unique_user_email(),
-      password: valid_user_password(),
-      university: university
+      password: valid_user_password()
     })
   end
 

@@ -3,9 +3,8 @@ defmodule Handin.Assignments.AssignmentTest do
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
-  # alias Handin.Assignments
   alias Handin.Assignments.{Assignment, Log, TestResult, AssignmentTest}
-
+  @type t :: %__MODULE__{}
   schema "assignment_tests" do
     field :name, :string
     field :points_on_pass, :float, default: 0.0
