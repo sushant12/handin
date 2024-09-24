@@ -76,14 +76,14 @@ defmodule Handin.Modules do
   end
 
   def get_students_without_custom_assignment_date(module_id, assignment_id) do
-    Module
-    |> where([m], m.id == ^module_id)
-    |> join(:inner, [m], u in assoc(m, :users), on: u.role == :student)
-    |> join(:left, [m, u], cad in assoc(u, :custom_assignment_dates),
+    ModulesUsers
+    |> where([mu], mu.module_id == ^module_id and mu.role == :student)
+    |> join(:inner, [mu], u in assoc(mu, :user))
+    |> join(:left, [mu, u], cad in assoc(u, :custom_assignment_dates),
       on: cad.user_id == u.id and cad.assignment_id == ^assignment_id
     )
-    |> where([m, u, cad], is_nil(cad.id))
-    |> select([m, u], u)
+    |> where([mu, u, cad], is_nil(cad.id))
+    |> select([mu, u], u)
     |> Repo.all()
   end
 

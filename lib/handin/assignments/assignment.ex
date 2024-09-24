@@ -1,6 +1,5 @@
 defmodule Handin.Assignments.Assignment do
   use Handin.Schema
-  use Timex
 
   import Ecto.Changeset
   alias Handin.Modules.Module

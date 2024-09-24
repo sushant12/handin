@@ -59,10 +59,7 @@ defmodule HandinWeb.AssignmentLive.Submission do
         <%= submission.total_points %> / <%= @assignment.total_marks %>
       </:col>
       <:col :let={{submission, _}} label="Submitted At">
-        <%= Handin.DisplayHelper.format_date(
-          submission.submitted_at,
-          Handin.get_timezone()
-        ) %>
+        <%= Handin.DisplayHelper.format_date(submission.submitted_at) %>
       </:col>
       <:action :let={{submission, _}}>
         <.link

@@ -1,6 +1,5 @@
 defmodule Handin.Assignments.CustomAssignmentDate do
   use Handin.Schema
-  use Timex
 
   import Ecto.Changeset
 
