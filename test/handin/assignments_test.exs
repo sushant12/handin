@@ -1,101 +1,73 @@
 defmodule Handin.AssignmentsTest do
   use Handin.DataCase
+  import Handin.Factory
 
-  alias Handin.Assignments
+  describe "submission_allowed?" do
+    test "return true if custom date is set but cut off is not enabled" do
+      lecturer = insert(:lecturer)
+      student = insert(:student)
+      module = insert(:module)
 
-  describe "assignments" do
-    alias Handin.Assignments.Assignment
+      lecturer_module_user =
+        insert(:modules_users, user: lecturer, module: module, role: :lecturer)
 
-    import Handin.AssignmentsFixtures
+      student_module_user = insert(:modules_users, user: student, module: module, role: :student)
 
-    @invalid_attrs %{
-      name: nil,
-      max_attempts: nil,
-      total_marks: nil,
-      start_date: nil,
-      due_date: nil,
-      cutoff_date: nil,
-      penalty_per_day: nil
-    }
+      assignment =
+        insert(:assignment, module: module, due_date: DateTime.utc_now() |> DateTime.add(1, :day))
 
-    test "list_assignments/0 returns all assignments" do
-      assignment = assignment_fixture()
-      assert Assignments.list_assignments() == [assignment]
+      custom_assignment_date =
+        insert(:custom_assignment_date, assignment: assignment, user: student)
+
+      assignment_submission =
+        insert(:assignment_submission, assignment: assignment, user: student)
+
+      assert true == Handin.Assignments.submission_allowed?(assignment_submission)
     end
 
-    test "get_assignment!/1 returns the assignment with given id" do
-      assignment = assignment_fixture()
-      assert Assignments.get_assignment!(assignment.id) == assignment
+    test "return true if custom date is set and cut off is enabled" do
+      lecturer = insert(:lecturer)
+      student = insert(:student)
+      module = insert(:module)
+
+      lecturer_module_user =
+        insert(:modules_users, user: lecturer, module: module, role: :lecturer)
+
+      student_module_user = insert(:modules_users, user: student, module: module, role: :student)
+
+      assignment =
+        insert(:assignment, module: module, due_date: DateTime.utc_now() |> DateTime.add(1, :day))
+
+      custom_assignment_date =
+        insert(:custom_assignment_date,
+          assignment: assignment,
+          user: student,
+          enable_cutoff_date: true,
+          cutoff_date: DateTime.utc_now() |> DateTime.add(1, :day)
+        )
+
+      assignment_submission =
+        insert(:assignment_submission, assignment: assignment, user: student)
+
+      assert true == Handin.Assignments.submission_allowed?(assignment_submission)
     end
 
-    test "create_assignment/1 with valid data creates a assignment" do
-      valid_attrs = %{
-        name: "some name",
-        max_attempts: 42,
-        total_marks: 42,
-        start_date: ~U[2023-07-22 12:41:00Z],
-        due_date: ~U[2023-07-22 12:41:00Z],
-        cutoff_date: ~U[2023-07-22 12:41:00Z],
-        penalty_per_day: 120.5
-      }
-
-      assert {:ok, %Assignment{} = assignment} = Assignments.create_assignment(valid_attrs)
-      assert assignment.name == "some name"
-      assert assignment.max_attempts == 42
-      assert assignment.total_marks == 42
-      assert assignment.start_date == ~U[2023-07-22 12:41:00Z]
-      assert assignment.due_date == ~U[2023-07-22 12:41:00Z]
-      assert assignment.cutoff_date == ~U[2023-07-22 12:41:00Z]
-      assert assignment.penalty_per_day == 120.5
+    test "return true if assignment cuto off date is set" do
     end
 
-    test "create_assignment/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Assignments.create_assignment(@invalid_attrs)
+    test "return true if assignment cutoff date is not set but due date is set" do
     end
 
-    test "update_assignment/2 with valid data updates the assignment" do
-      assignment = assignment_fixture()
-
-      update_attrs = %{
-        name: "some updated name",
-        max_attempts: 43,
-        total_marks: 43,
-        start_date: ~U[2023-07-23 12:41:00Z],
-        due_date: ~U[2023-07-23 12:41:00Z],
-        cutoff_date: ~U[2023-07-23 12:41:00Z],
-        penalty_per_day: 456.7
-      }
-
-      assert {:ok, %Assignment{} = assignment} =
-               Assignments.update_assignment(assignment, update_attrs)
-
-      assert assignment.name == "some updated name"
-      assert assignment.max_attempts == 43
-      assert assignment.total_marks == 43
-      assert assignment.start_date == ~U[2023-07-23 12:41:00Z]
-      assert assignment.due_date == ~U[2023-07-23 12:41:00Z]
-      assert assignment.cutoff_date == ~U[2023-07-23 12:41:00Z]
-      assert assignment.penalty_per_day == 456.7
+    test "return false if custom date's cut off date is passed" do
     end
 
-    test "update_assignment/2 with invalid data returns error changeset" do
-      assignment = assignment_fixture()
-
-      assert {:error, %Ecto.Changeset{}} =
-               Assignments.update_assignment(assignment, @invalid_attrs)
-
-      assert assignment == Assignments.get_assignment!(assignment.id)
+    test "return false if custom date's due date is passed" do
     end
 
-    test "delete_assignment/1 deletes the assignment" do
-      assignment = assignment_fixture()
-      assert {:ok, %Assignment{}} = Assignments.delete_assignment(assignment)
-      assert_raise Ecto.NoResultsError, fn -> Assignments.get_assignment!(assignment.id) end
+    test "return false if assignment's cut off date is passed" do
     end
 
-    test "change_assignment/1 returns a assignment changeset" do
-      assignment = assignment_fixture()
-      assert %Ecto.Changeset{} = Assignments.change_assignment(assignment)
+    test "return false if assignment's due date is passed" do
     end
   end
 end

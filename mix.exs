@@ -62,6 +62,8 @@ defmodule Handin.MixProject do
       {:timex, "~> 3.0"},
       {:sentry, "~> 10.7.0"},
       {:flop_phoenix, "~> 0.22.9"},
+      {:torch, "~> 5.3"},
+      {:ex_machina, "~> 2.8", only: :test},
       {:floki, ">= 0.36.2", only: :test},
       {:tailwind, "~> 0.2.3", runtime: Mix.env() == :dev},
       {:dialyxir, "~> 1.4.3", only: [:dev], runtime: false},
@@ -70,8 +72,7 @@ defmodule Handin.MixProject do
       {:phoenix_live_reload, "~> 1.5.3", only: :dev},
       {:ex_doc, "~> 0.34.2", only: :dev, runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
-      {:ecto_dev_logger, "~> 0.13", only: [:dev]},
-      {:torch, "~> 5.3"}
+      {:ecto_dev_logger, "~> 0.13", only: [:dev]}
     ]
   end
 

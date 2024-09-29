@@ -75,10 +75,12 @@ defmodule HandinWeb.AssignmentLive.Submission do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    if Modules.assignment_exists?(id, assignment_id) do
-      assignment = Assignments.get_assignment!(assignment_id)
-      module = Modules.get_module!(id)
+    user = socket.assigns.current_user
 
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, _module_user} <-
+           Modules.module_user(module, user),
+         {:ok, assignment} <- Assignments.get_assignment(assignment_id, module.id) do
       assignment_submissions =
         Assignments.get_submissions_for_assignment(assignment_id) |> Enum.with_index(1)
 
@@ -90,9 +92,10 @@ defmodule HandinWeb.AssignmentLive.Submission do
        |> assign(:assignment_submissions, assignment_submissions)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")}
     else
-      {:ok,
-       push_navigate(socket, to: ~p"/modules/#{id}/assignments")
-       |> put_flash(:error, "You are not authorized to view this page")}
+      {:error, reason} ->
+        {:ok,
+         push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+         |> put_flash(:error, reason)}
     end
   end
 end

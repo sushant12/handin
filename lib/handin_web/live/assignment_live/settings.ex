@@ -180,25 +180,28 @@ defmodule HandinWeb.AssignmentLive.Settings do
 
   @impl true
   def mount(%{"id" => id, "assignment_id" => assignment_id}, _session, socket) do
-    if Modules.assignment_exists?(id, assignment_id) do
-      assignment = Assignments.get_assignment!(assignment_id)
-      module = Modules.get_module!(id)
-      changeset = Assignments.change_assignment(assignment)
+    user = socket.assigns.current_user
 
-      custom_assignment_dates = Assignments.list_custom_assignment_dates(assignment_id)
-
+    with {:ok, module} <- Modules.get_module(id),
+         {:ok, _module_user} <-
+           Modules.module_user(module, user),
+         {:ok, assignment} <- Assignments.get_assignment(assignment_id, module.id) do
       {:ok,
        socket
        |> assign(current_page: :modules)
        |> assign(:page_title, "#{module.name} - #{assignment.name}")
        |> assign(:module, module)
        |> assign(:assignment, assignment)
-       |> stream(:custom_assignment_dates, custom_assignment_dates)
-       |> assign_form(changeset)}
+       |> stream(
+         :custom_assignment_dates,
+         Assignments.list_custom_assignment_dates(assignment_id)
+       )
+       |> assign_form(Assignments.change_assignment(assignment))}
     else
-      {:ok,
-       push_navigate(socket, to: ~p"/modules/#{id}/assignments")
-       |> put_flash(:error, "You are not authorized to view this page")}
+      {:error, reason} ->
+        {:ok,
+         push_navigate(socket, to: ~p"/modules/#{id}/assignments")
+         |> put_flash(:error, reason)}
     end
   end
 

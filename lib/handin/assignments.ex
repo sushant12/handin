@@ -7,9 +7,9 @@ defmodule Handin.Assignments do
     model: Handin.Assignments.Assignment,
     name: :assignments
 
-  alias Handin.Assignments
   use Timex
   import Ecto.Query, warn: false
+  alias Handin.Assignments
   alias Handin.Repo
 
   alias Handin.Assignments.{
@@ -597,39 +597,53 @@ defmodule Handin.Assignments do
   end
 
   defp submission_date_valid?(assignment_submission) do
-    custom_date =
-      Assignments.get_custom_assignment_date_by_user_and_assignment(
-        assignment_submission.user_id,
-        assignment_submission.assignment_id
-      )
+    custom_date = get_custom_date(assignment_submission)
+    now = DateTime.utc_now() |> DateTime.shift_zone!(Handin.get_timezone())
 
-    if custom_date do
-      if custom_date.enable_cutoff_date &&
-           custom_date.cutoff_date do
-        Timex.compare(
-          DateTime.shift_zone!(
-            DateTime.utc_now(),
-            Handin.get_timezone()
-          ),
-          custom_date.cutoff_date
-        ) < 0
-      else
-        true
-      end
-    else
-      if assignment_submission.assignment.enable_cutoff_date &&
-           assignment_submission.assignment.cutoff_date do
-        Timex.compare(
-          DateTime.shift_zone!(
-            DateTime.utc_now(),
-            Handin.get_timezone()
-          ),
-          assignment_submission.assignment.cutoff_date
-        ) < 0
-      else
-        true
-      end
+    cond do
+      custom_date_has_cutoff?(custom_date) ->
+        compare_dates(now, custom_date.cutoff_date)
+
+      custom_date_no_cutoff?(custom_date) ->
+        compare_dates(now, custom_date.due_date)
+
+      assignment_has_cutoff?(assignment_submission) ->
+        compare_dates(now, assignment_submission.assignment.cutoff_date)
+
+      assignment_no_cutoff?(assignment_submission) ->
+        compare_dates(now, assignment_submission.assignment.due_date)
+
+      true ->
+        false
     end
+  end
+
+  defp get_custom_date(assignment_submission) do
+    Assignments.get_custom_assignment_date_by_user_and_assignment(
+      assignment_submission.user_id,
+      assignment_submission.assignment_id
+    )
+  end
+
+  defp custom_date_has_cutoff?(custom_date) do
+    custom_date && custom_date.enable_cutoff_date && custom_date.cutoff_date
+  end
+
+  defp custom_date_no_cutoff?(custom_date) do
+    custom_date && !custom_date.enable_cutoff_date
+  end
+
+  defp assignment_has_cutoff?(assignment_submission) do
+    assignment_submission.assignment.enable_cutoff_date &&
+      assignment_submission.assignment.cutoff_date
+  end
+
+  defp assignment_no_cutoff?(assignment_submission) do
+    !assignment_submission.assignment.enable_cutoff_date
+  end
+
+  defp compare_dates(now, date) do
+    DateTime.compare(now, DateTime.from_naive!(date, Handin.get_timezone())) == :lt
   end
 
   defp attempts_valid?(assignment_submission) do
