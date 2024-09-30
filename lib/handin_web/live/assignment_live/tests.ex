@@ -432,7 +432,6 @@ defmodule HandinWeb.AssignmentLive.Tests do
          [
            %{
              assignment_id: assignment_id,
-             type: "assignment_tests",
              role: module_user.role,
              image: image,
              user_id: user.id

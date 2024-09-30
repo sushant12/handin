@@ -12,6 +12,8 @@ defmodule Handin.Accounts.User do
   }
 
   schema "users" do
+    field :first_name, :string
+    field :last_name, :string
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
@@ -59,7 +61,7 @@ defmodule Handin.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :role, :invited_at])
+    |> cast(attrs, [:first_name, :last_name, :email, :password, :role, :invited_at])
     |> validate_role()
     |> validate_email(opts)
     |> password_changeset(attrs, opts)

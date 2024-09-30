@@ -1,8 +1,6 @@
 defmodule HandinWeb.StudentsLive.BulkAddFormComponent do
   use HandinWeb, :live_component
   alias NimbleCSV.RFC4180, as: CSV
-  alias Handin.Modules
-  alias Handin.Modules.AddUserToModuleParams
   @impl true
   def mount(socket) do
     {:ok,
@@ -79,44 +77,49 @@ defmodule HandinWeb.StudentsLive.BulkAddFormComponent do
 
   @impl true
   def handle_event("save", _, socket) do
-    csv_emails = process_csv_upload(socket)
+    users = process_csv_upload(socket)
 
-    emails = csv_emails |> Enum.reject(&is_nil/1) |> Enum.uniq()
-    {:ok, module} = Modules.get_module(socket.assigns.module_id)
+    Enum.each(users, fn user ->
+      %{module_id: socket.assigns.module_id, user: user}
+      |> Handin.Worker.BulkStudentRegistrationWorker.new()
+      |> Oban.insert()
+    end)
 
-    params =
-      %AddUserToModuleParams{
-        emails: emails,
-        module: module
-      }
+    socket =
+      socket
+      |> put_flash(:info, "Users are sent to background for processing.")
+      |> push_navigate(to: socket.assigns.patch)
 
-    case Modules.add_users_to_module(params) do
-      {:ok, %{users: users}} ->
-        notify_parent({:saved, users})
+    {:noreply, socket}
 
-        socket =
-          socket
-          |> put_flash(:info, "Users added to module successfully")
-          |> push_navigate(to: socket.assigns.patch)
+    # case Modules.add_users_to_module(params) do
+    #   {:ok, %{users: users}} ->
+    #     notify_parent({:saved, users})
 
-        {:noreply, socket}
+    #     socket =
+    #       socket
+    #       |> put_flash(:info, "Users added to module successfully")
+    #       |> push_navigate(to: socket.assigns.patch)
 
-      # TODO: properly format the error
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply,
-         assign(socket, error_message: "Failed to add user: #{changeset.changes.email}")}
+    #     {:noreply, socket}
 
-      {:error, failed_operation, _failed_value, _changes_so_far} ->
-        {:noreply,
-         assign(socket, error_message: "Failed to add user: #{inspect(failed_operation)}")}
-    end
+    #   # TODO: properly format the error
+    #   {:error, %Ecto.Changeset{} = changeset} ->
+    #     {:noreply,
+    #      assign(socket, error_message: "Failed to add user: #{changeset.changes.email}")}
+
+    #   {:error, failed_operation, _failed_value, _changes_so_far} ->
+    #     {:noreply,
+    #      assign(socket, error_message: "Failed to add user: #{inspect(failed_operation)}")}
+    # end
   end
 
   defp process_csv_upload(socket) do
     socket.assigns.uploads.csv_file_input.entries
     |> Enum.flat_map(&process_csv_entry(socket, &1))
-    |> List.flatten()
-    |> Enum.reject(&is_nil/1)
+    |> Enum.map(fn [first_name, last_name, email] ->
+      %{first_name: first_name, last_name: last_name, email: email}
+    end)
   end
 
   defp process_csv_entry(socket, entry) do
@@ -124,21 +127,21 @@ defmodule HandinWeb.StudentsLive.BulkAddFormComponent do
   end
 
   defp parse_csv_file(%{path: path}) do
-    emails =
+    user =
       path
       |> File.read!()
       |> CSV.parse_string()
-      |> Enum.map(&extract_email/1)
+      |> Enum.map(&extract_record/1)
 
-    {:ok, emails}
+    {:ok, user}
   end
 
-  defp extract_email([email]), do: email
-  defp extract_email(_), do: nil
+  defp extract_record([first_name, last_name, email]), do: [first_name, last_name, email]
+  defp extract_record(_), do: nil
 
   defp assign_form(socket, changeset \\ %{}, opts \\ []) do
     assign(socket, :form, to_form(changeset, opts ++ [as: "user"]))
   end
 
-  defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+  # defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 end

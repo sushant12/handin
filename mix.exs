@@ -63,6 +63,7 @@ defmodule Handin.MixProject do
       {:sentry, "~> 10.7.0"},
       {:flop_phoenix, "~> 0.22.9"},
       {:torch, "~> 5.3"},
+      {:oban, "~> 2.17"},
       {:ex_machina, "~> 2.8", only: :test},
       {:floki, ">= 0.36.2", only: :test},
       {:tailwind, "~> 0.2.3", runtime: Mix.env() == :dev},

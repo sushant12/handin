@@ -26,6 +26,10 @@
 </.link>
 <.table id="students" rows={@streams.students}>
   <:col :let={{_, student}} label="Email"><%= student.email %></:col>
+  <:col :let={{_, student}} label="Name">
+    <%= student.first_name %> <%= student.last_name %>
+  </:col>
+
   <:col :let={{_id, student}} label="State">
     <%= if student.confirmed_at, do: "Accepted", else: "Pending" %>
   </:col>

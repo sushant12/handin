@@ -11,6 +11,11 @@ config :handin,
   ecto_repos: [Handin.Repo],
   timezone: "Europe/Dublin"
 
+config :handin, Oban,
+  engine: Oban.Engines.Basic,
+  queues: [default: 10],
+  repo: Handin.Repo
+
 # Configures the endpoint
 config :handin, HandinWeb.Endpoint,
   url: [host: "localhost"],

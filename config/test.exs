@@ -2,7 +2,7 @@ import Config
 
 # Only in tests, remove the complexity from the password hashing algorithm
 config :bcrypt_elixir, :log_rounds, 1
-
+config :handin, Oban, testing: :inline
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
@@ -12,6 +12,7 @@ config :handin, Handin.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
+  port: 5435,
   database: "handin_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10

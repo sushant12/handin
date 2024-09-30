@@ -181,7 +181,7 @@ defmodule Handin.BuildServer do
 
   defp build_all_scripts(state) do
     build_main_script(state.assignment) ++
-      build_file_download_script(state.assignment, state.type, state.user_id) ++
+      build_file_download_script(state.assignment) ++
       build_upload_script(state.assignment, state) ++
       build_check_script(state.assignment) ++
       build_tests_scripts(state.assignment)
@@ -264,7 +264,6 @@ defmodule Handin.BuildServer do
     Assignments.update_build(state.build, %{status: :completed})
     Assignments.get_logs(state.build.id)
     broadcast_build_completed(state)
-    handle_assignment_submission(state)
     upload_and_stop_machine(state)
   end
 
@@ -273,18 +272,6 @@ defmodule Handin.BuildServer do
       "assignment:#{state.assignment_id}:module_user:#{state.user_id}:role:#{state.role}"
 
     HandinWeb.Endpoint.broadcast!(channel, "build_completed", state.build.id)
-  end
-
-  defp handle_assignment_submission(state) do
-    if state.type != "assignment_tests" do
-      Assignments.submit_assignment(
-        state.assignment_submission_id,
-        state.assignment.enable_max_attempts
-      )
-
-      submission = Assignments.get_submission(state.assignment.id, state.user_id)
-      Assignments.evaluate_marks(submission.id, state.build.id)
-    end
   end
 
   defp upload_and_stop_machine(state) do
@@ -328,7 +315,7 @@ defmodule Handin.BuildServer do
     end)
   end
 
-  defp build_file_download_script(assignment, type, user_id) do
+  defp build_file_download_script(assignment) do
     template = """
     #!/bin/bash
     set -e
@@ -339,7 +326,7 @@ defmodule Handin.BuildServer do
     }
     """
 
-    assignment_files = get_assignment_files(assignment, type, user_id)
+    assignment_files = assignment.assignment_files
 
     download_commands =
       assignment_files
@@ -351,15 +338,6 @@ defmodule Handin.BuildServer do
         "raw_value" => Base.encode64(template <> download_commands)
       }
     ]
-  end
-
-  defp get_assignment_files(assignment, type, user_id) do
-    if type == "assignment_tests" do
-      assignment.assignment_files
-    else
-      Enum.filter(assignment.assignment_files, &(&1.file_type == :test_resource)) ++
-        Assignments.get_submission_files(assignment.id, user_id)
-    end
   end
 
   defp generate_download_command(assignment_file) do

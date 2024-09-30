@@ -18,6 +18,12 @@ defmodule HandinWeb.StudentsLive.FormComponent do
       </div>
       <.simple_form for={@form} id="student-form" phx-target={@myself} phx-submit="save">
         <div class="grid gap-4 mb-4 sm:grid-cols-1">
+          <.input field={@form[:first_name]} label="First Name" type="text" />
+        </div>
+        <div class="grid gap-4 mb-4 sm:grid-cols-1">
+          <.input field={@form[:last_name]} label="Last Name" type="text" />
+        </div>
+        <div class="grid gap-4 mb-4 sm:grid-cols-1">
           <.input field={@form[:email]} label="Email" type="text" />
         </div>
         <:actions>
@@ -49,13 +55,12 @@ defmodule HandinWeb.StudentsLive.FormComponent do
 
   @impl true
   def handle_event("save", %{"user" => user_params}, socket) do
-    email = user_params["email"]
-
     {:ok, module} = Modules.get_module(socket.assigns.module_id)
+    user_params = Enum.into(user_params, %{}, fn {k, v} -> {String.to_existing_atom(k), v} end)
 
     params =
       %AddUserToModuleParams{
-        emails: [email],
+        users: [user_params],
         module: module
       }
 
@@ -77,7 +82,7 @@ defmodule HandinWeb.StudentsLive.FormComponent do
         socket =
           socket
           |> put_flash(:error, "Failed to add user: #{inspect(failed_operation)}")
-          |> assign(form: to_form(%{email: email}, as: :user))
+          |> assign(form: to_form(user_params, as: :user))
 
         {:noreply, socket}
     end

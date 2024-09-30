@@ -7,8 +7,10 @@ config :handin, Handin.Repo,
   hostname: "localhost",
   database: "handin_dev",
   stacktrace: true,
+  port: 5435,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 10,
+  log: false
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -30,7 +32,7 @@ config :handin, HandinWeb.Endpoint,
   ]
 
 config :waffle,
-  storage: Waffle.Storage.S3,
+  storage: Waffle.Storage.Local,
   bucket: System.get_env("AWS_S3_BUCKET")
 
 config :ex_aws,
@@ -67,7 +69,6 @@ config :handin, HandinWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"priv/gettext/.*(po)$",
       ~r"lib/handin_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
@@ -91,4 +92,6 @@ config :swoosh, :api_client, false
 config :handin,
   fly_base_url: "https://api.machines.dev/v1/apps/",
   fly_auth_token: System.get_env("FLY_AUTH_TOKEN"),
-  machine_api_module: Handin.FakeMachineApi
+  machine_api_module: Handin.MachineApi
+
+config :phoenix_live_view, debug_heex_annotations: true

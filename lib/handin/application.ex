@@ -15,6 +15,7 @@ defmodule Handin.Application do
       HandinWeb.Telemetry,
       # Start the Ecto repository
       Handin.Repo,
+      {Oban, Application.fetch_env!(:handin, Oban)},
       # Start the PubSub system
       {Phoenix.PubSub, name: Handin.PubSub},
       # Start Finch

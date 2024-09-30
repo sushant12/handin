@@ -33,11 +33,17 @@ defmodule Handin.Modules do
   end
 
   defmodule AddUserToModuleParams do
-    defstruct [:module, :emails]
+    defstruct [:module, :users]
+
+    @type user :: %{
+            firstname: String.t(),
+            lastname: String.t(),
+            email: String.t()
+          }
 
     @type t :: %__MODULE__{
             module: Module.t(),
-            emails: list(String.t())
+            users: list(user)
           }
   end
 
@@ -506,13 +512,13 @@ defmodule Handin.Modules do
   @spec add_users_to_module(AddUserToModuleParams.t()) ::
           {:ok, any()} | {:error, any()}
   def add_users_to_module(%AddUserToModuleParams{
-        emails: emails,
+        users: users,
         module: module
       })
-      when is_list(emails) do
+      when is_list(users) do
     Multi.new()
     |> Multi.run(:users, fn _repo, _changes ->
-      process_users(emails)
+      process_users(users)
     end)
     |> Multi.run(:module_users, fn _repo, %{users: users} ->
       process_module_users(users, module.id)
@@ -538,10 +544,10 @@ defmodule Handin.Modules do
     Enum.filter(users, fn user -> MapSet.member?(user_ids_in_module, user.id) end)
   end
 
-  defp process_users(emails) do
-    Enum.reduce_while(emails, {:ok, []}, fn email, {:ok, acc} ->
-      case ensure_user(email) do
-        {:ok, user} -> {:cont, {:ok, [user | acc]}}
+  defp process_users(users) do
+    Enum.reduce_while(users, {:ok, []}, fn user, {:ok, acc} ->
+      case ensure_user(user) do
+        {:ok, student} -> {:cont, {:ok, [student | acc]}}
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
@@ -557,9 +563,9 @@ defmodule Handin.Modules do
     end)
   end
 
-  defp ensure_user(email) do
-    case Accounts.get_user_by_email(email) do
-      nil -> create_user(email)
+  defp ensure_user(user) do
+    case Accounts.get_user_by_email(user.email) do
+      nil -> create_user(user)
       user -> {:ok, user}
     end
   end
@@ -572,11 +578,13 @@ defmodule Handin.Modules do
     end
   end
 
-  defp create_user(email) do
+  defp create_user(user) do
     temporary_password = generate_temp_password()
 
     user_params = %{
-      email: email,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
       password: temporary_password,
       role: :student,
       invited_at: NaiveDateTime.utc_now()
