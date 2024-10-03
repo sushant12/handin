@@ -290,7 +290,8 @@ defmodule HandinWeb.AssignmentLive.Submit do
                assignment_submission_id: socket.assigns.assignment_submission.id,
                image: socket.assigns.assignment.programming_language.docker_file_url,
                user_id: socket.assigns.current_user.id,
-               role: socket.assigns.current_user.role
+               role: socket.assigns.current_user.role,
+               build_identifier: Ecto.UUID.generate()
              }
            ]},
         restart: :temporary

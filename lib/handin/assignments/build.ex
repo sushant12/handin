@@ -15,6 +15,7 @@ defmodule Handin.Assignments.Build do
   schema "builds" do
     field :machine_id, :string
     field :status, Ecto.Enum, values: [:running, :failed, :completed]
+    field :build_identifier, :binary_id
 
     belongs_to :assignment, Assignment
     belongs_to :user, User
@@ -27,7 +28,7 @@ defmodule Handin.Assignments.Build do
   @attrs [:machine_id, :assignment_id, :status, :user_id]
   def changeset(attrs) do
     %__MODULE__{}
-    |> cast(attrs, [:assignment_id, :status, :user_id])
+    |> cast(attrs, [:assignment_id, :status, :user_id, :build_identifier])
     |> validate_required([:assignment_id, :status, :user_id])
   end
 

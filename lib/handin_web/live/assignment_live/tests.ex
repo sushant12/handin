@@ -434,7 +434,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
              assignment_id: assignment_id,
              role: module_user.role,
              image: image,
-             user_id: user.id
+             user_id: user.id,
+             build_identifier: Ecto.UUID.generate()
            }
          ]},
       restart: :temporary
