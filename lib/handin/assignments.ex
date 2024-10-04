@@ -272,7 +272,8 @@ defmodule Handin.Assignments do
           attrs :: %{
             assignment_id: Ecto.UUID,
             status: :running | :failed | :completed,
-            user_id: Ecto.UUID
+            user_id: Ecto.UUID,
+            build_identifier: Ecto.UUID
           }
         ) ::
           {:ok, Build.t()}

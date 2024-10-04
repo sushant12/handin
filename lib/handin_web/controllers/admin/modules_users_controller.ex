@@ -3,6 +3,7 @@ defmodule HandinWeb.Admin.ModulesUsersController do
 
   alias Handin.Modules
   alias Handin.Modules.ModulesUsers
+  alias Handin.Accounts.User
 
   alias Handin.Modules.AddUserToModuleParams
 
@@ -21,7 +22,7 @@ defmodule HandinWeb.Admin.ModulesUsersController do
 
     params =
       %AddUserToModuleParams{
-        emails: [email],
+        users: [%User{email: email}],
         module: module
       }
 

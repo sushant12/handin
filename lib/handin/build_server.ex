@@ -18,7 +18,7 @@ defmodule Handin.BuildServer do
 
   @impl true
   def init(state) do
-    {:ok, build} = create_new_build(state.assignment_id, state.user_id)
+    {:ok, build} = create_new_build(state.assignment_id, state.user_id, state.build_identifier)
     assignment = Assignments.get_assignment!(state.assignment_id)
     state = Map.merge(state, %{assignment: assignment, build: build, machine_id: nil})
     {:ok, state, {:continue, :create_machine}}
@@ -143,11 +143,12 @@ defmodule Handin.BuildServer do
     )
   end
 
-  defp create_new_build(assignment_id, user_id) do
+  defp create_new_build(assignment_id, user_id, build_identifier) do
     Assignments.new_build(%{
       assignment_id: assignment_id,
       status: :running,
-      user_id: user_id
+      user_id: user_id,
+      build_identifier: build_identifier
     })
   end
 
