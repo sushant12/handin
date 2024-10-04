@@ -6,7 +6,11 @@
     <%= if @changeset.action do %>
       <p class="torch-form-error">Oops, something went wrong! Please check the errors below.</p>
     <% end %>
+    <.torch_input label="First Name" field={f[:first_name]} type="string" />
+    <.torch_input label="Last Name" field={f[:last_name]} type="string" />
     <.torch_input label="Email" field={f[:email]} type="string" />
+    <.torch_input label="Password" field={f[:password]} type="string" />
+
     <.torch_input label="Confirmed at" field={f[:confirmed_at]} type="datetime-local" />
     <.torch_input
       field={f[:role]}

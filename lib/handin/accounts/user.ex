@@ -59,9 +59,11 @@ defmodule Handin.Accounts.User do
       submitting the form), this option can be set to `false`.
       Defaults to `true`.
   """
+  @attrs [:first_name, :last_name, :email, :password, :role]
+
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:first_name, :last_name, :email, :password, :role, :invited_at])
+    |> cast(attrs, @attrs ++ [:invited_at])
     |> validate_role()
     |> validate_email(opts)
     |> password_changeset(attrs, opts)
@@ -74,8 +76,18 @@ defmodule Handin.Accounts.User do
 
   def edit_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :role, :confirmed_at])
+    |> cast(attrs, @attrs ++ [:confirmed_at])
     |> validate_email(opts)
+    |> maybe_validate_password(attrs, opts)
+  end
+
+  defp maybe_validate_password(changeset, attrs, opts) do
+    if get_change(changeset, :password) do
+      changeset
+      |> password_changeset(attrs, opts)
+    else
+      changeset
+    end
   end
 
   defp validate_email(changeset, opts) do
@@ -101,6 +113,9 @@ defmodule Handin.Accounts.User do
         |> validate_format(:email, ~r/^[a-zA-Z0-9._-]+@ul\.ie$/,
           message: "must be in the format username@ul.ie"
         )
+
+      :admin ->
+        changeset
     end
   end
 
