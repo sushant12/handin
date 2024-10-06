@@ -706,10 +706,7 @@ defmodule Handin.Assignments do
   @spec get_test(assignment_id :: Ecto.UUID.t(), test_id :: Ecto.UUID.t()) ::
           {:ok, AssignmentTest.t()} | {:error, String.t()}
   def get_test(assignment_id, test_id) do
-    from(at in AssignmentTest,
-      where: at.assignment_id == ^assignment_id and at.id == ^test_id,
-      preload: [:assignment]
-    )
+    from(at in AssignmentTest, where: at.assignment_id == ^assignment_id and at.id == ^test_id)
     |> Repo.one()
     |> case do
       nil -> {:error, "Test not found"}
