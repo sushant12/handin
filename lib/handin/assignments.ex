@@ -438,7 +438,6 @@ defmodule Handin.Assignments do
     |> where([as], as.assignment_id == ^assignment_id)
     |> where([as], as.user_id == ^user_id)
     |> order_by([as], desc: as.inserted_at)
-    |> limit(1)
     |> join(:inner, [as], asf in assoc(as, :assignment_submission_files))
     |> select([as, asf], asf)
     |> Repo.all()

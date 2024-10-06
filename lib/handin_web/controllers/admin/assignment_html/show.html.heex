@@ -89,6 +89,31 @@
         <div class="torch-show-label">Enable test output:</div>
         <div class="torch-show-data"><%= @assignment.enable_test_output %></div>
       </div>
+
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Test Resource Files:</div>
+        <div class="torch-show-data">
+          <span
+            :for={
+              file <- Enum.filter(@assignment.assignment_files, &(&1.file_type == :test_resource))
+            }
+            class="badge badge-primary"
+          >
+            <%= file.file.file_name %><br />
+          </span>
+        </div>
+      </div>
+      <div class="torch-show-attribute">
+        <div class="torch-show-label">Solution Files:</div>
+        <div class="torch-show-data">
+          <span
+            :for={file <- Enum.filter(@assignment.assignment_files, &(&1.file_type == :solution))}
+            class="badge badge-primary"
+          >
+            <%= file.file.file_name %><br />
+          </span>
+        </div>
+      </div>
     </section>
   </div>
   <section id="torch-toolbar" style="margin-top: 20px;">
