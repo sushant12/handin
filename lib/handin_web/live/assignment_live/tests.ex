@@ -367,8 +367,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
   end
 
   def handle_event("select_test", %{"id" => id}, socket) do
-    assignment_id = socket.assigns.assignment.id
-    {:ok, assignment_test} = Assignments.get_test(assignment_id, id)
+    assignment = socket.assigns.assignment
+    assignment_test = Enum.find(assignment.assignment_tests, &(&1.id == id))
 
     {:noreply,
      assign(socket, :selected_assignment_test, assignment_test)

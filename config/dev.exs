@@ -7,7 +7,7 @@ config :handin, Handin.Repo,
   hostname: "localhost",
   database: "handin_dev",
   stacktrace: true,
-  port: 5435,
+  port: System.get_env("DB_PORT") || 5432,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10,
   log: false

@@ -85,7 +85,7 @@ defmodule Handin.Assignments do
   def get_assignment(id, module_id) do
     from(a in Assignment, where: a.id == ^id and a.module_id == ^module_id)
     |> Repo.one()
-    |> Repo.preload([:assignment_files, :programming_language])
+    |> Repo.preload([:assignment_files, :programming_language, :assignment_tests])
     |> case do
       nil -> {:error, "Assignment not found"}
       assignment -> {:ok, assignment}
@@ -694,7 +694,11 @@ defmodule Handin.Assignments do
 
   @spec list_tests(id :: Ecto.UUID.t()) :: [AssignmentTest.t()]
   def list_tests(id) do
-    from(at in AssignmentTest, where: at.assignment_id == ^id, order_by: [asc: at.inserted_at])
+    from(at in AssignmentTest,
+      where: at.assignment_id == ^id,
+      order_by: [asc: at.inserted_at],
+      preload: [:assignment]
+    )
     |> Repo.all()
   end
 

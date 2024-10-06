@@ -65,4 +65,16 @@ defmodule Handin.Factory do
       user: build(:student)
     }
   end
+
+  def assignment_test_factory do
+    %Handin.Assignments.AssignmentTest{
+      name: "Test 1",
+      points_on_pass: 10,
+      points_on_fail: 0,
+      assignment: build(:assignment),
+      command: "g++ -o main main.cpp",
+      expected_output_type: :string,
+      expected_output_text: "Hello, World!"
+    }
+  end
 end
