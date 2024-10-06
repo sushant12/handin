@@ -87,7 +87,10 @@ defmodule Handin.Assignments.AssignmentTest do
         changeset
 
       points_on_pass ->
-        assignment = get_field(changeset, :assignment)
+        assignment =
+          changeset.data
+          |> Handin.Repo.preload(:assignment)
+          |> Map.get(:assignment)
 
         total_marks =
           AssignmentTest
@@ -121,7 +124,7 @@ defmodule Handin.Assignments.AssignmentTest do
         changeset
 
       points_on_fail ->
-        assignment = get_field(changeset, :assignment)
+        assignment = changeset.data |> Handin.Repo.preload(:assignment) |> Map.get(:assignment)
 
         total_marks =
           AssignmentTest
