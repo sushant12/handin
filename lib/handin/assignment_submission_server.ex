@@ -107,6 +107,7 @@ defmodule Handin.AssignmentSubmissionServer do
 
     case Jason.decode(response["stdout"]) do
       {:ok, decoded_response} ->
+        decoded_response = Base.decode64!(decoded_response)
         save_test_results(state, assignment_test, decoded_response)
         log_test_result(state, assignment_test, decoded_response)
 
