@@ -107,7 +107,6 @@ defmodule Handin.BuildServer do
 
     case Jason.decode(response["stdout"]) do
       {:ok, decoded_response} ->
-        decoded_response = Base.decode64!(decoded_response)
         save_test_results(state, assignment_test, decoded_response)
         log_test_result(state, assignment_test, decoded_response)
 
@@ -241,7 +240,7 @@ defmodule Handin.BuildServer do
       %{
         command: assignment_test.command,
         assignment_test_id: assignment_test.id,
-        output: response["output"],
+        output: Base.decode_64!(response["output"]),
         expected_output: response["expected_output"]
       },
       state
