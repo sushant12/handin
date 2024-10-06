@@ -60,6 +60,13 @@ defmodule Handin.AssignmentTests do
     %AssignmentTest{}
     |> AssignmentTest.new_changeset(attrs)
     |> Repo.insert()
+    |> case do
+      {:ok, assignment_test} ->
+        {:ok, assignment_test |> Repo.preload([:assignment])}
+
+      error ->
+        error
+    end
   end
 
   @doc """
