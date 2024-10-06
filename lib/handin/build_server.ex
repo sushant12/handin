@@ -240,7 +240,7 @@ defmodule Handin.BuildServer do
       %{
         command: assignment_test.command,
         assignment_test_id: assignment_test.id,
-        output: Base.decode_64!(response["output"]),
+        output: Base.decode64!(response["output"]),
         expected_output: response["expected_output"]
       },
       state
