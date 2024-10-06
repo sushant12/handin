@@ -12,7 +12,7 @@ config :handin, Handin.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  port: 5435,
+  port: System.get_env("DB_PORT") || 5432,
   database: "handin_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
