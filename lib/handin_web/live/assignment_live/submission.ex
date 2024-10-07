@@ -52,6 +52,9 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:col :let={{_, i}} label="id">
         <%= i %>
       </:col>
+      <:col :let={{submission, _}} label="full name">
+        <%= submission.user.first_name %> <%= submission.user.last_name %>
+      </:col>
       <:col :let={{submission, _}} label="email">
         <%= submission.user.email %>
       </:col>
