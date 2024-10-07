@@ -7,7 +7,7 @@ defmodule Handin.AssignmentSubmissions do
     name: :assignment_submissions
 
   alias Handin.Assignments.Assignment
-  alias Handin.Repo
+  alias Handin.{Repo, DisplayHelper}
   alias Handin.AssignmentSubmissions.AssignmentSubmission
   alias Handin.AssignmentSubmissions.AssignmentSubmissionFile
 
@@ -45,6 +45,7 @@ defmodule Handin.AssignmentSubmissions do
     total_points = get_total_points(assignment_submission)
 
     Map.merge(test_result_marks, %{
+      "full_name" => DisplayHelper.get_full_name(user),
       "email" => user.email,
       "attempt_marks" => attempt_marks,
       "total" => total_points
