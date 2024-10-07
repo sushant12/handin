@@ -28,9 +28,9 @@ defmodule HandinWeb.SubmissionController do
     test_headers =
       List.first(student_grades)
       |> Map.keys()
-      |> Enum.filter(&(&1 not in ["email", "attempt_marks", "total"]))
+      |> Enum.filter(&(&1 not in ["full_name", "email", "attempt_marks", "total"]))
 
-    ["email", "attempt_marks"] ++ test_headers ++ ["total"]
+    ["full_name", "email", "attempt_marks"] ++ test_headers ++ ["total"]
   end
 
   defp send_csv_data(conn, headers, student_grades) do

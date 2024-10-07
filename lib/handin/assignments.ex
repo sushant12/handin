@@ -428,7 +428,7 @@ defmodule Handin.Assignments do
     |> where([as], as.assignment_id == ^assignment_id)
     |> where([as], as.user_id == ^user_id)
     |> order_by([as], desc: as.inserted_at)
-    |> preload([:assignment_submission_files, :assignment])
+    |> preload([:assignment_submission_files, :assignment, :user])
     |> limit(1)
     |> Repo.one()
   end

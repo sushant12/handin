@@ -1,8 +1,7 @@
 defmodule HandinWeb.AssignmentLive.Submission do
   use HandinWeb, :live_view
 
-  alias Handin.Modules
-  alias Handin.Assignments
+  alias Handin.{Modules, Assignments, DisplayHelper}
 
   @impl true
   def render(assigns) do
@@ -52,6 +51,9 @@ defmodule HandinWeb.AssignmentLive.Submission do
       <:col :let={{_, i}} label="id">
         <%= i %>
       </:col>
+      <:col :let={{submission, _}} label="full name">
+        <%= DisplayHelper.get_full_name(submission.user) %>
+      </:col>
       <:col :let={{submission, _}} label="email">
         <%= submission.user.email %>
       </:col>
@@ -59,7 +61,7 @@ defmodule HandinWeb.AssignmentLive.Submission do
         <%= submission.total_points %> / <%= @assignment.total_marks %>
       </:col>
       <:col :let={{submission, _}} label="Submitted At">
-        <%= Handin.DisplayHelper.format_date(submission.submitted_at) %>
+        <%= DisplayHelper.format_date(submission.submitted_at) %>
       </:col>
       <:action :let={{submission, _}}>
         <.link
