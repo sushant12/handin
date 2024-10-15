@@ -264,8 +264,8 @@ defmodule Handin.AssignmentSubmissionServer do
   defp finalize_build(state) do
     Assignments.update_build(state.build, %{status: :completed})
     Assignments.get_logs(state.build.id)
-    broadcast_build_completed(state)
     handle_assignment_submission(state)
+    broadcast_build_completed(state)
     upload_and_stop_machine(state)
   end
 
