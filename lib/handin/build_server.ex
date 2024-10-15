@@ -9,6 +9,7 @@ defmodule Handin.BuildServer do
   alias Handin.Assignments.AssignmentFile
   alias Handin.AssignmentSubmissions.AssignmentSubmissionFile
   alias Handin.Repo
+  alias Handin.Assignments.Build
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
 
@@ -25,7 +26,7 @@ defmodule Handin.BuildServer do
     Ecto.Multi.new()
     |> Ecto.Multi.insert(
       :build,
-      Handin.Assignments.Build.changeset(%{
+      Build.changeset(%{
         assignment_id: state.assignment_id,
         status: :running,
         user_id: state.user_id,
@@ -36,29 +37,36 @@ defmodule Handin.BuildServer do
       from a in Assignment, where: a.id == ^state.assignment_id
     end)
     |> Repo.transaction()
-    |> IO.inspect()
     |> case do
       {:ok, %{build: build, assignment: assignment}} ->
         state = Map.merge(state, %{assignment: assignment, build: build, machine_id: nil})
         {:ok, state, {:continue, :create_machine}}
 
-      {:error, :build, changeset, _} ->
-        channel =
-          "assignment:#{state.assignment_id}:module_user:#{state.user_id}:role:#{state.role}"
-
-        HandinWeb.Endpoint.broadcast!(channel, "create_build", changeset)
+      {:error, :build, _changeset, _} ->
         {:stop, :error, state}
     end
   end
 
   @impl true
   def handle_continue(:create_machine, state) do
-    case create_and_start_machine(state) do
-      {:ok, machine_id, build} ->
-        state = %{state | machine_id: machine_id, build: build}
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:machine, fn _, _ ->
+      create_machine(state)
+    end)
+    |> Ecto.Multi.update(
+      :build,
+      fn %{machine: machine} ->
+        Build.update_changeset(state.build, %{machine: machine["id"]})
+      end
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{machine: machine, build: build}} ->
+        state = %{state | machine_id: machine["id"], build: build}
         {:noreply, state, {:continue, :process_build}}
 
-      {:error, reason} ->
+      {:error, :machine, reason, _} ->
+        # log the error and broadcast it
         Assignments.update_build(state.build, %{status: :failed})
         {:stop, reason, state}
     end
@@ -170,16 +178,6 @@ defmodule Handin.BuildServer do
     )
   end
 
-  defp create_and_start_machine(state) do
-    with {:ok, machine} <- create_machine(state),
-         {:ok, build} <- update_build_with_machine_id(state.build, machine["id"]),
-         {:ok, true} <- machine_started?(machine) do
-      {:ok, machine["id"], build}
-    else
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
   defp create_machine(state) do
     state
     |> build_machine_config()
@@ -204,32 +202,6 @@ defmodule Handin.BuildServer do
       build_upload_script(state.assignment, state) ++
       build_check_script(state.assignment) ++
       build_tests_scripts(state.assignment)
-  end
-
-  defp machine_started?(machine, attempts \\ 0) do
-    max_attempts = 5
-    # 2 seconds
-    interval = 2000
-
-    if attempts >= max_attempts do
-      {:error, :timeout}
-    else
-      case @machine_api.status(machine["id"]) do
-        {:ok, %{"state" => state}} when state in ["created", "starting"] ->
-          Process.sleep(interval)
-          machine_started?(machine, attempts + 1)
-
-        {:ok, %{"state" => "started"}} ->
-          {:ok, true}
-
-        {:error, reason} ->
-          {:error, reason}
-      end
-    end
-  end
-
-  defp update_build_with_machine_id(build, machine_id) do
-    Assignments.update_build(build, %{machine_id: machine_id})
   end
 
   defp save_run_script_results(state, script_state) do

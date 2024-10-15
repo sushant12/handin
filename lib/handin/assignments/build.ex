@@ -30,7 +30,6 @@ defmodule Handin.Assignments.Build do
     %__MODULE__{}
     |> cast(attrs, [:assignment_id, :status, :user_id, :build_identifier])
     |> validate_required([:assignment_id, :status, :user_id])
-    |> validate_inclusion(:status, [:failed])
   end
 
   def update_changeset(build, attrs \\ %{}) do
