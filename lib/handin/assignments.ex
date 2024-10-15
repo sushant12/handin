@@ -276,7 +276,7 @@ defmodule Handin.Assignments do
             build_identifier: Ecto.UUID
           }
         ) ::
-          {:ok, Build.t()}
+          {:ok, Build.t()} | {:error, Ecto.Changeset.t()}
   def new_build(attrs) do
     Build.changeset(attrs)
     |> Repo.insert()

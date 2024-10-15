@@ -1,10 +1,14 @@
 defmodule Handin.BuildServer do
   use GenServer
+
+  import Ecto.Query, only: [from: 2]
   alias Handin.Assignments
+  alias Handin.Assignments.Assignment
   alias Handin.AssignmentSubmissionFileUploader
   alias Handin.AssignmentFileUploader
   alias Handin.Assignments.AssignmentFile
   alias Handin.AssignmentSubmissions.AssignmentSubmissionFile
+  alias Handin.Repo
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
 
@@ -18,10 +22,33 @@ defmodule Handin.BuildServer do
 
   @impl true
   def init(state) do
-    {:ok, build} = create_new_build(state.assignment_id, state.user_id, state.build_identifier)
-    assignment = Assignments.get_assignment!(state.assignment_id)
-    state = Map.merge(state, %{assignment: assignment, build: build, machine_id: nil})
-    {:ok, state, {:continue, :create_machine}}
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(
+      :build,
+      Handin.Assignments.Build.changeset(%{
+        assignment_id: state.assignment_id,
+        status: :running,
+        user_id: state.user_id,
+        build_identifier: state.build_identifier
+      })
+    )
+    |> Ecto.Multi.one(:assignment, fn _ ->
+      from a in Assignment, where: a.id == ^state.assignment_id
+    end)
+    |> Repo.transaction()
+    |> IO.inspect()
+    |> case do
+      {:ok, %{build: build, assignment: assignment}} ->
+        state = Map.merge(state, %{assignment: assignment, build: build, machine_id: nil})
+        {:ok, state, {:continue, :create_machine}}
+
+      {:error, :build, changeset, _} ->
+        channel =
+          "assignment:#{state.assignment_id}:module_user:#{state.user_id}:role:#{state.role}"
+
+        HandinWeb.Endpoint.broadcast!(channel, "create_build", changeset)
+        {:stop, :error, state}
+    end
   end
 
   @impl true
@@ -141,15 +168,6 @@ defmodule Handin.BuildServer do
       },
       state
     )
-  end
-
-  defp create_new_build(assignment_id, user_id, build_identifier) do
-    Assignments.new_build(%{
-      assignment_id: assignment_id,
-      status: :running,
-      user_id: user_id,
-      build_identifier: build_identifier
-    })
   end
 
   defp create_and_start_machine(state) do
