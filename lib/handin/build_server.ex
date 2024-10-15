@@ -53,6 +53,7 @@ defmodule Handin.BuildServer do
         error_output = Enum.join(error_messages, "\n")
 
         handle_build_error(state, error_output)
+
         {:stop, :error, state}
     end
   end
