@@ -283,6 +283,7 @@ defmodule Handin.BuildServer do
   defp handle_build_error(state, reason) do
     Assignments.update_build(state.build, %{status: :failed})
     log_and_broadcast(state.build, %{command: "Build failed", output: inspect(reason)}, state)
+    @machine_api.stop(state.machine_id)
   end
 
   defp log_and_broadcast(build, log_map, state) do
