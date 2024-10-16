@@ -1,13 +1,15 @@
 defmodule Handin.MachineApi do
+  @success_status [200, 201, 202, 204]
   def create(params) do
-    case Finch.build(
-           :post,
-           "#{Application.get_env(:handin, :fly_base_url)}container/machines",
-           [{"authorization", "Bearer #{Application.get_env(:handin, :fly_auth_token)}"}],
-           params
-         )
-         |> Finch.request(Handin.Finch) do
-      {:ok, %Finch.Response{status: 200, body: body}} ->
+    Finch.build(
+      :post,
+      "#{Application.get_env(:handin, :fly_base_url)}container/machines",
+      [{"authorization", "Bearer #{Application.get_env(:handin, :fly_auth_token)}"}],
+      params
+    )
+    |> Finch.request(Handin.Finch)
+    |> case do
+      {:ok, %Finch.Response{status: status, body: body}} when status in @success_status ->
         {:ok, Jason.decode!(body)}
 
       {:ok, %Finch.Response{status: _, body: body}} ->

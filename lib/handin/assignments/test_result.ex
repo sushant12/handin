@@ -8,6 +8,7 @@ defmodule Handin.Assignments.TestResult do
 
   schema "test_results" do
     field :state, Ecto.Enum, values: [:pass, :fail]
+    field :output, :string
 
     belongs_to :assignment_test, AssignmentTest
     belongs_to :user, User
@@ -16,10 +17,12 @@ defmodule Handin.Assignments.TestResult do
     timestamps(type: :utc_datetime)
   end
 
-  @attrs [:state, :assignment_test_id, :user_id, :build_id]
+  @attrs [:state, :assignment_test_id, :user_id, :build_id, :output]
+
+  @req_attrs [:state, :assignment_test_id, :user_id, :build_id]
   def changeset(attrs) do
     %__MODULE__{}
     |> cast(attrs, @attrs)
-    |> validate_required(@attrs)
+    |> validate_required(@req_attrs)
   end
 end
