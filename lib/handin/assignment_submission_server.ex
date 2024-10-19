@@ -32,7 +32,7 @@ defmodule Handin.AssignmentSubmissionServer do
         {:noreply, state, {:continue, :process_build}}
 
       {:error, reason} ->
-        Assignments.update_build(state.build, %{status: :failed})
+        handle_build_error(state, reason)
         {:stop, reason, state}
     end
   end
@@ -158,7 +158,8 @@ defmodule Handin.AssignmentSubmissionServer do
          {:ok, true} <- machine_started?(machine) do
       {:ok, machine["id"], build}
     else
-      {:error, reason} -> {:error, reason}
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

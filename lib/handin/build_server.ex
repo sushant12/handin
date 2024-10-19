@@ -32,7 +32,7 @@ defmodule Handin.BuildServer do
         {:noreply, state, {:continue, :process_build}}
 
       {:error, reason} ->
-        Assignments.update_build(state.build, %{status: :failed})
+        handle_build_error(state, reason)
         {:stop, reason, state}
     end
   end
