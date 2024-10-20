@@ -246,6 +246,7 @@ defmodule Handin.BuildServer do
     log_map = %{output: inspect(reason), type: :runtime, build_id: state.build.id}
     Assignments.log(log_map)
     log_and_broadcast(state, "log")
+    @machine_api.stop(state.machine_id)
   end
 
   defp handle_build_error(state, reason) do

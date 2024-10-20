@@ -27,8 +27,8 @@ defmodule Handin.MachineApi do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
 
-      {:ok, %Finch.Response{status: _, body: body}} ->
-        {:error, Jason.decode!(body) |> Map.get("error")}
+      {:ok, %Finch.Response{status: status, body: body}} ->
+        {:error, %{status: status, body: body} |> Jason.encode!(body)}
     end
   end
 

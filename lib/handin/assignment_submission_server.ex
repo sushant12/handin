@@ -32,7 +32,7 @@ defmodule Handin.AssignmentSubmissionServer do
         {:noreply, state, {:continue, :process_build}}
 
       {:error, reason} ->
-        Assignments.update_build(state.build, %{status: :failed})
+        handle_build_error(state, reason)
         {:stop, reason, state}
     end
   end
@@ -158,7 +158,8 @@ defmodule Handin.AssignmentSubmissionServer do
          {:ok, true} <- machine_started?(machine) do
       {:ok, machine["id"], build}
     else
-      {:error, reason} -> {:error, reason}
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -294,6 +295,7 @@ defmodule Handin.AssignmentSubmissionServer do
   defp handle_build_error(state, reason) do
     Assignments.update_build(state.build, %{status: :failed})
     log_and_broadcast(state.build, %{command: "Build failed", output: inspect(reason)}, state)
+    @machine_api.stop(state.machine_id)
   end
 
   defp log_and_broadcast(build, log_map, state) do
