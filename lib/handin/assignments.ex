@@ -313,15 +313,32 @@ defmodule Handin.Assignments do
   end
 
   def get_recent_build_logs(assignment_id) do
-    assignment = get_assignment!(assignment_id)
-
     build =
-      assignment.builds
-      |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
-      |> List.first()
+      from(b in Build,
+        where: b.assignment_id == ^assignment_id,
+        order_by: [desc: b.inserted_at],
+        limit: 1
+      )
+      |> Repo.one()
+      |> Repo.preload([
+        :logs
+      ])
 
     if build do
-      build |> Map.get(:logs) |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
+      build
+      |> Map.get(:logs)
+      |> Enum.sort_by(& &1.inserted_at, {:desc, DateTime})
+      |> Enum.map(fn log ->
+        %{
+          type: "log",
+          state: :fail,
+          name: "Build error",
+          command: "",
+          output: log.output
+        }
+      end)
+      |> Enum.with_index(&{&2, &1})
+      |> IO.inspect(label: "LOL")
     else
       []
     end
@@ -361,23 +378,19 @@ defmodule Handin.Assignments do
       |> Repo.get!(build_id)
       |> Repo.preload([
         :run_script_result,
-        logs: [:assignment_test],
+        :logs,
         test_results: [:assignment_test]
       ])
 
     test_results =
       build.test_results
       |> Enum.map(fn test_result ->
-        log =
-          Enum.find(build.logs, %{}, &(&1.assignment_test_id == test_result.assignment_test_id))
-
         %{
           type: "test_result",
           state: test_result.state,
           name: test_result.assignment_test.name,
           command: test_result.assignment_test.command,
-          output: Map.get(log, :output),
-          expected_output: Map.get(log, :expected_output)
+          output: test_result.output
         }
       end)
 
@@ -389,11 +402,7 @@ defmodule Handin.Assignments do
             state: build.run_script_result.state,
             name: "Compiling files",
             command: "sh ./main.sh",
-            output:
-              build.logs
-              |> Enum.find(&is_nil(&1.assignment_test_id))
-              |> Map.get(:output),
-            expected_output: ""
+            output: build.run_script_result.output
           }
         ]
       else

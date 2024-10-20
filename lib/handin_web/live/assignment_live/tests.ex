@@ -215,7 +215,81 @@ defmodule HandinWeb.AssignmentLive.Tests do
           </button>
         </div>
 
-        <div id="accordion-open" data-accordion="open"></div>
+        <div id="accordion-open" data-accordion="open">
+          <%= for {index, log} <- @logs do %>
+            <h2 id={"accordion-open-heading-#{index}"}>
+              <button
+                type="button"
+                class={[
+                  "flex items-center justify-between w-full p-5 font-medium rtl:text-right border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3",
+                  log.state == :pass && "text-green-500",
+                  log.state == :fail && "text-red-600"
+                ]}
+                data-accordion-target={"#accordion-open-body-#{index}"}
+                aria-expanded="false"
+                aria-controls={"accordion-open-body-#{index}"}
+              >
+                <span class="flex items-center">
+                  <svg
+                    :if={log.state == :pass}
+                    class="w-6 h-6 text-green-500 dark:text-white"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                  </svg>
+                  <svg
+                    :if={log.state == :fail}
+                    class="w-6 h-6 text-red-600 dark:text-white"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m13 7-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                    />
+                  </svg>
+                  <%= log.name %>
+                </span>
+                <svg
+                  data-accordion-icon
+                  class="w-3 h-3 rotate-180 shrink-0"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 10 6"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5 5 1 1 5"
+                  />
+                </svg>
+              </button>
+            </h2>
+            <div
+              id={"accordion-open-body-#{index}"}
+              class="hidden"
+              aria-labelledby={"accordion-open-heading-#{index}"}
+            >
+              <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
+                <p class="font-semibold">Output:</p>
+                <p class="text-gray-500 dark:text-gray-400">
+                  <%= log.output %>
+                </p>
+              </div>
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
     """
@@ -238,6 +312,13 @@ defmodule HandinWeb.AssignmentLive.Tests do
       assignment_tests = Assignments.list_tests(assignment_id)
       selected_assignment_test = List.first(assignment_tests)
 
+      logs =
+        Assignments.get_recent_build_logs(assignment_id)
+        |> case do
+          [] -> Assignments.get_recent_build_logs(assignment_id)
+          logs -> logs
+        end
+
       {:ok,
        socket
        |> assign(current_page: :modules)
@@ -255,6 +336,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
          )
        )
        |> assign(:custom_test, selected_assignment_test && selected_assignment_test.custom_test)
+       |> assign(
+         :logs,
+         logs
+       )
        |> assign_form(
          AssignmentTests.change_assignment_test(
            selected_assignment_test || %AssignmentTest{assignment_id: assignment.id}
@@ -377,13 +462,14 @@ defmodule HandinWeb.AssignmentLive.Tests do
 
   @impl true
   def handle_info(
-        %Phoenix.Socket.Broadcast{event: event, payload: _build_id},
+        %Phoenix.Socket.Broadcast{event: event, payload: payload},
         socket
       ) do
     case event do
       "test_result" ->
         {:noreply,
          socket
+         |> assign(:logs, Assignments.get_test_results_for_build(payload))
          |> assign(
            :build,
            GenServer.whereis({:global, "build:assignment_tests:#{socket.assigns.assignment.id}"})
@@ -392,6 +478,29 @@ defmodule HandinWeb.AssignmentLive.Tests do
       "build_completed" ->
         {:noreply,
          socket
+         |> assign(:logs, Assignments.get_test_results_for_build(payload))
+         |> assign(
+           :build,
+           nil
+         )}
+
+      "build_failed" ->
+        {:noreply,
+         socket
+         |> assign(:logs, [
+           {0,
+            %{
+              type: "log",
+              state: :fail,
+              name: "Build failed",
+              output: payload
+            }}
+         ])}
+
+      "log" ->
+        {:noreply,
+         socket
+         |> assign(:logs, Assignments.get_recent_build_logs(socket.assigns.assignment.id))
          |> assign(
            :build,
            nil
