@@ -90,7 +90,7 @@ defmodule Handin.BuildServer do
   end
 
   defp run_single_test(state, assignment_test) do
-    case @machine_api.exec(state.machine_id, "sh ./#{assignment_test.id}.sh") do
+    case @machine_api.exec(state.machine_id, "./#{assignment_test.id}.sh") do
       {:ok, %{"exit_code" => 0} = response} ->
         handle_successful_test(state, assignment_test, response)
 
