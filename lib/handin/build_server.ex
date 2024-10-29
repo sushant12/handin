@@ -181,7 +181,6 @@ defmodule Handin.BuildServer do
   defp build_all_scripts(state) do
     build_main_script(state.assignment) ++
       build_file_download_script(state.assignment) ++
-      build_upload_script(state.assignment, state) ++
       build_check_script(state.assignment) ++
       build_tests_scripts(state.assignment)
   end
@@ -345,37 +344,37 @@ defmodule Handin.BuildServer do
     ]
   end
 
-  defp build_upload_script(assignment, state) do
-    config = ExAws.Config.new(:s3, Application.get_all_env(:ex_aws))
+  # defp build_upload_script(assignment, state) do
+  #   config = ExAws.Config.new(:s3, Application.get_all_env(:ex_aws))
 
-    template = """
-    #!/bin/bash
-    """
+  #   template = """
+  #   #!/bin/bash
+  #   """
 
-    curls =
-      assignment.assignment_tests
-      |> Enum.map(fn assignment_test ->
-        {:ok, presigned_url} =
-          ExAws.S3.presigned_url(
-            config,
-            :put,
-            "handin-dev",
-            "uploads/assignments/#{assignment.id}/users/#{state.user_id}/submission/#{assignment_test.id}.out",
-            expires_in: 6000
-          )
+  #   curls =
+  #     assignment.assignment_tests
+  #     |> Enum.map(fn assignment_test ->
+  #       {:ok, presigned_url} =
+  #         ExAws.S3.presigned_url(
+  #           config,
+  #           :put,
+  #           "handin-dev",
+  #           "uploads/assignments/#{assignment.id}/users/#{state.user_id}/submission/#{assignment_test.id}.out",
+  #           expires_in: 6000
+  #         )
 
-        "curl --request PUT --upload-file \"#{assignment_test.id}.out\" \"#{presigned_url}\""
-      end)
+  #       "curl --request PUT --upload-file \"#{assignment_test.id}.out\" \"#{presigned_url}\""
+  #     end)
 
-    template = template <> Enum.join(curls, "\n")
+  #   template = template <> Enum.join(curls, "\n")
 
-    [
-      %{
-        "guest_path" => "/upload.sh",
-        "raw_value" => Base.encode64(template)
-      }
-    ]
-  end
+  #   [
+  #     %{
+  #       "guest_path" => "/upload.sh",
+  #       "raw_value" => Base.encode64(template)
+  #     }
+  #   ]
+  # end
 
   defp build_tests_scripts(assignment) do
     assignment.assignment_tests
