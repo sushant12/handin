@@ -145,6 +145,7 @@ jobs:
     needs: [build, credo, unused_deps, unused_functions, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    environment: handin-production
     steps:
       - uses: actions/checkout@v3
       - name: Set up Fly
