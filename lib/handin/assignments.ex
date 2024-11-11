@@ -23,6 +23,7 @@ defmodule Handin.Assignments do
     CustomAssignmentDate
   }
 
+  alias Handin.AssignmentTests
   alias Handin.AssignmentSubmissions.{AssignmentSubmission, AssignmentSubmissionFile}
 
   # def s3_links(assignment_id) do
@@ -162,7 +163,7 @@ defmodule Handin.Assignments do
 
   def update_assignment_test(%AssignmentTest{} = assignment_test, attrs) do
     assignment_test
-    |> AssignmentTest.changeset(attrs)
+    |> AssignmentTests.change_assignment_test(attrs)
     |> Repo.update()
   end
 
