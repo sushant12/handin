@@ -123,4 +123,16 @@ defmodule Handin.AssignmentTests do
     |> where([at], at.assignment_id == ^id)
     |> Repo.all()
   end
+
+  @spec get_assignment_test(id :: Ecto.UUID.t()) ::
+          {:ok, AssignmentTest.t()} | {:error, String.t()}
+  def get_assignment_test(id) do
+    AssignmentTest
+    |> where([at], at.id == ^id)
+    |> Repo.one()
+    |> case do
+      nil -> {:error, "Assignment test not found"}
+      assignment_test -> {:ok, assignment_test}
+    end
+  end
 end
