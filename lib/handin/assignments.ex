@@ -693,7 +693,7 @@ defmodule Handin.Assignments do
   def delete_custom_assignment_date!(%CustomAssignmentDate{} = custom_assignment_date),
     do: Repo.delete!(custom_assignment_date)
 
-  @spec list_tests(id :: Ecto.UUID.t()) :: [AssignmentTest.t()]
+  @spec list_tests(id :: Ecto.UUID.t()) :: list(AssignmentTest.t())
   def list_tests(id) do
     from(at in AssignmentTest,
       where: at.assignment_id == ^id,

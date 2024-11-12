@@ -341,7 +341,8 @@ defmodule HandinWeb.AssignmentLive.Tests do
          AssignmentTests.change_assignment_test(
            selected_assignment_test || %AssignmentTest{assignment_id: assignment.id}
          )
-       )}
+       )
+       |> LiveMonacoEditor.set_value(selected_assignment_test.custom_test)}
     end
   end
 
@@ -367,13 +368,23 @@ defmodule HandinWeb.AssignmentLive.Tests do
   end
 
   def handle_event("select_test", %{"id" => id}, socket) do
-    assignment = socket.assigns.assignment
-    assignment_test = Enum.find(assignment.assignment_tests, &(&1.id == id))
+    case AssignmentTests.get_assignment_test(id) do
+      {:ok, assignment_test} ->
+        {:noreply,
+         assign(socket, :selected_assignment_test, assignment_test)
+         |> assign(:custom_test, assignment_test.custom_test)
+         |> assign_form(AssignmentTests.change_assignment_test(assignment_test))
+         |> then(fn socket ->
+           if assignment_test.enable_custom_test do
+             LiveMonacoEditor.set_value(socket, assignment_test.custom_test)
+           else
+             socket
+           end
+         end)}
 
-    {:noreply,
-     assign(socket, :selected_assignment_test, assignment_test)
-     |> assign(:custom_test, assignment_test.custom_test)
-     |> assign_form(AssignmentTests.change_assignment_test(assignment_test))}
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to select test")}
+    end
   end
 
   def handle_event("delete_test", %{"id" => id}, socket) do
