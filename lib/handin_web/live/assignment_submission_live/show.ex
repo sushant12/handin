@@ -149,15 +149,23 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
       submissions = Assignments.get_submissions_for_assignment(assignment_id)
       submission = submissions |> Enum.find(&(&1.id == submission_id))
       students = submissions |> Enum.map(& &1.user)
+      user = socket.assigns.current_user
+      module = Modules.get_module!(id)
+
+      {:ok, module_user} =
+        Modules.module_user(module, user)
 
       if connected?(socket) do
-        HandinWeb.Endpoint.subscribe("build:assignment_submission:#{submission.id}")
+        HandinWeb.Endpoint.subscribe(
+          "assignment:#{assignment_id}:module_user:#{user.id}:role:#{module_user.role}"
+        )
       end
 
       {:ok,
        socket
        |> assign(current_page: :modules)
-       |> assign(:module, Modules.get_module!(id))
+       |> assign(:module, module)
+       |> assign(:module_user, module_user)
        |> assign(:assignment, assignment)
        |> assign(:submission, submission)
        |> assign(:submissions, submissions)
@@ -165,7 +173,10 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
        |> assign(:selected_assignment_submission_file, nil)
        |> assign(
          :build,
-         GenServer.whereis({:global, "build:assignment_submission:#{submission.id}"})
+         GenServer.whereis(
+           {:global,
+            "assignment:#{assignment_id}:module_user:#{user.id}:role:#{module_user.role}"}
+         )
        )}
     else
       {:ok,
@@ -199,6 +210,10 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
   end
 
   def handle_event("run_tests", %{"assignment_id" => assignment_id}, socket) do
+    user = socket.assigns.current_user
+    module_user = socket.assigns.module_user
+    image = socket.assigns.assignment.programming_language.docker_file_url
+
     DynamicSupervisor.start_child(Handin.BuildSupervisor, %{
       id: Handin.BuildServer,
       start:
@@ -206,10 +221,10 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
          [
            %{
              assignment_id: assignment_id,
-             assignment_submission_id: socket.assigns.submission.id,
-             type: "assignment_submission",
-             image: socket.assigns.assignment.programming_language.docker_file_url,
-             user_id: socket.assigns.submission.user.id
+             role: module_user.role,
+             image: image,
+             user_id: user.id,
+             build_identifier: Ecto.UUID.generate()
            }
          ]},
       restart: :temporary
@@ -219,7 +234,9 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
      socket
      |> assign(
        :build,
-       GenServer.whereis({:global, "build:assignment_submission:#{socket.assigns.submission.id}"})
+       GenServer.whereis(
+         {:global, "assignment:#{assignment_id}:module_user:#{user.id}:role:#{module_user.role}"}
+       )
      )}
   end
 
@@ -342,9 +359,7 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
          socket
          |> assign(
            :build,
-           GenServer.whereis(
-             {:global, "build:assignment_submission:#{socket.assigns.submission.id}"}
-           )
+           GenServer.whereis({:global, "build:assignment_tests:#{socket.assigns.assignment.id}"})
          )}
 
       "build_completed" ->
