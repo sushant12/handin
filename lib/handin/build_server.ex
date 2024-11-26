@@ -175,7 +175,12 @@ defmodule Handin.BuildServer do
         init: %{exec: ["/bin/sleep", "inf"]},
         auto_destroy: true,
         image: state.image,
-        files: build_all_scripts(state)
+        files: build_all_scripts(state),
+        guest: %{
+          cpu_kind: "shared",
+          cpus: 2,
+          memory_mb: 512
+        }
       }
     }
   end
