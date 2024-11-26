@@ -94,6 +94,10 @@ defmodule Handin.AssignmentSubmissionServer do
       {:ok, %{"exit_code" => 0} = response} ->
         handle_successful_test(state, assignment_test, response)
 
+        if assignment_test.name == "save the output to a file" do
+          Process.sleep(120_000)
+        end
+
       {:ok, response} ->
         handle_failed_test(state, assignment_test, response)
 
@@ -176,7 +180,12 @@ defmodule Handin.AssignmentSubmissionServer do
         init: %{exec: ["/bin/sleep", "inf"]},
         auto_destroy: true,
         image: state.image,
-        files: build_all_scripts(state)
+        files: build_all_scripts(state),
+        guest: %{
+          cpu_kind: "shared",
+          cpus: 2,
+          memory_mb: 512
+        }
       }
     }
   end

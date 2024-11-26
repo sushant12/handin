@@ -94,6 +94,10 @@ defmodule Handin.BuildServer do
       {:ok, %{"exit_code" => 0} = response} ->
         handle_successful_test(state, assignment_test, response)
 
+        if assignment_test.name == "save the output to a file" do
+          Process.sleep(120_000)
+        end
+
       {:ok, response} ->
         handle_failed_test(state, assignment_test, response)
 
@@ -178,8 +182,8 @@ defmodule Handin.BuildServer do
         files: build_all_scripts(state),
         guest: %{
           cpu_kind: "shared",
-          cpus: 4,
-          memory_mb: 1000
+          cpus: 2,
+          memory_mb: 512
         }
       }
     }
