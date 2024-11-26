@@ -342,7 +342,9 @@ defmodule HandinWeb.AssignmentLive.Tests do
            selected_assignment_test || %AssignmentTest{assignment_id: assignment.id}
          )
        )
-       |> LiveMonacoEditor.set_value(selected_assignment_test.custom_test)}
+       |> LiveMonacoEditor.set_value(
+         (selected_assignment_test && selected_assignment_test.custom_test) || ""
+       )}
     end
   end
 
