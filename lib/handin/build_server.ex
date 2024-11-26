@@ -178,8 +178,8 @@ defmodule Handin.BuildServer do
         files: build_all_scripts(state),
         guest: %{
           cpu_kind: "shared",
-          cpus: 2,
-          memory_mb: 512
+          cpus: 4,
+          memory_mb: 1000
         }
       }
     }
