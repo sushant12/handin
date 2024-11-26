@@ -12,6 +12,9 @@ defmodule Handin.MachineApi do
 
       {:ok, %Finch.Response{status: _, body: body}} ->
         {:error, Jason.decode!(body) |> Map.get("error")}
+
+      {:error, %Mint.TransportError{reason: :timeout}} ->
+        {:error, %{error: "timeout"}}
     end
   end
 
@@ -27,6 +30,9 @@ defmodule Handin.MachineApi do
 
       {:ok, %Finch.Response{status: status, body: body}} ->
         {:error, %{status: status, body: body} |> Jason.encode!(body)}
+
+      {:error, %Mint.TransportError{reason: :timeout}} ->
+        {:error, %{error: "timeout"}}
     end
   end
 
@@ -42,6 +48,9 @@ defmodule Handin.MachineApi do
 
       {:ok, %Finch.Response{status: _, body: body}} ->
         {:error, Jason.decode!(body) |> Map.get("error")}
+
+      {:error, %Mint.TransportError{reason: :timeout}} ->
+        {:error, %{error: "timeout"}}
     end
   end
 
@@ -58,6 +67,9 @@ defmodule Handin.MachineApi do
 
       {:ok, %Finch.Response{status: _, body: body}} ->
         {:error, Jason.decode!(body) |> Map.get("error")}
+
+      {:error, %Mint.TransportError{reason: :timeout}} ->
+        {:error, %{error: "timeout"}}
     end
   end
 
@@ -74,6 +86,9 @@ defmodule Handin.MachineApi do
 
       {:ok, %Finch.Response{status: _, body: body}} ->
         {:error, Jason.decode!(body) |> Map.get("error")}
+
+      {:error, %Mint.TransportError{reason: :timeout}} ->
+        {:error, %{error: "timeout"}}
     end
   end
 end
