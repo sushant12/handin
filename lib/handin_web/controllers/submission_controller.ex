@@ -8,7 +8,9 @@ defmodule HandinWeb.SubmissionController do
     conn = prepare_conn_for_csv_download(conn, assignment.name)
 
     Repo.transaction(fn ->
-      student_grades = AssignmentSubmissions.get_student_grades_for_assignment(assignment_id)
+      student_grades =
+        AssignmentSubmissions.get_student_grades_for_assignment(assignment_id)
+
       headers = generate_headers(student_grades)
 
       send_csv_data(conn, headers, student_grades)
@@ -28,9 +30,9 @@ defmodule HandinWeb.SubmissionController do
     test_headers =
       List.first(student_grades)
       |> Map.keys()
-      |> Enum.filter(&(&1 not in ["full_name", "email", "attempt_marks", "total"]))
+      |> Enum.filter(&(&1 not in ["full_name", "id", "attempt_marks", "total"]))
 
-    ["full_name", "email", "attempt_marks"] ++ test_headers ++ ["total"]
+    ["full_name", "id", "attempt_marks"] ++ test_headers ++ ["total"]
   end
 
   defp send_csv_data(conn, headers, student_grades) do
