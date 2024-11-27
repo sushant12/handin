@@ -46,7 +46,7 @@ defmodule Handin.AssignmentSubmissions do
 
     Map.merge(test_result_marks, %{
       "full_name" => DisplayHelper.get_full_name(user),
-      "email" => user.email,
+      "id" => user.id,
       "attempt_marks" => attempt_marks,
       "total" => total_points
     })
@@ -68,7 +68,7 @@ defmodule Handin.AssignmentSubmissions do
   end
 
   defp calculate_test_result_marks(nil, assignment_tests) do
-    Enum.reduce(assignment_tests, %{}, &Map.put(&2, &1.command, 0))
+    Enum.reduce(assignment_tests, %{}, &Map.put(&2, &1.name, 0))
   end
 
   defp calculate_test_result_marks(build, _assignment_tests) do
@@ -76,7 +76,7 @@ defmodule Handin.AssignmentSubmissions do
       test_marks =
         if test_result.state == :pass, do: test_result.assignment_test.points_on_pass, else: 0
 
-      Map.put(acc, test_result.assignment_test.command, test_marks)
+      Map.put(acc, test_result.assignment_test.name, test_marks)
     end)
   end
 
