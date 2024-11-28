@@ -46,7 +46,7 @@ defmodule Handin.AssignmentSubmissions do
 
     Map.merge(test_result_marks, %{
       "full_name" => DisplayHelper.get_full_name(user),
-      "id" => user.id,
+      "email" => user.email,
       "attempt_marks" => attempt_marks,
       "total" => total_points
     })
