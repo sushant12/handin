@@ -282,11 +282,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               aria-labelledby={"accordion-open-heading-#{index}"}
             >
               <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
-                <p class="font-semibold">Expected Output:</p>
-                <p class="mb-2 text-gray-500 dark:text-gray-400">
-                  <%= log.expected_output %>
-                </p>
-                <p class="font-semibold">Got:</p>
+                <p class="font-semibold">Output:</p>
                 <p class="text-gray-500 dark:text-gray-400">
                   <%= log.output %>
                 </p>
@@ -316,6 +312,13 @@ defmodule HandinWeb.AssignmentLive.Tests do
       assignment_tests = Assignments.list_tests(assignment_id)
       selected_assignment_test = List.first(assignment_tests)
 
+      logs =
+        Assignments.get_recent_build_logs(assignment_id)
+        |> case do
+          [] -> Assignments.get_recent_build_logs(assignment_id)
+          logs -> logs
+        end
+
       {:ok,
        socket
        |> assign(current_page: :modules)
@@ -326,10 +329,6 @@ defmodule HandinWeb.AssignmentLive.Tests do
        |> assign(:selected_assignment_test, selected_assignment_test)
        |> assign(:assignment_tests, assignment_tests)
        |> assign(
-         :logs,
-         Assignments.build_recent_test_results(assignment_id, user.id)
-       )
-       |> assign(
          :build,
          GenServer.whereis(
            {:global,
@@ -337,6 +336,10 @@ defmodule HandinWeb.AssignmentLive.Tests do
          )
        )
        |> assign(:custom_test, selected_assignment_test && selected_assignment_test.custom_test)
+       |> assign(
+         :logs,
+         logs
+       )
        |> assign_form(
          AssignmentTests.change_assignment_test(
            selected_assignment_test || %AssignmentTest{assignment_id: assignment.id}
@@ -455,11 +458,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
     })
 
     {:noreply,
-     assign(
-       socket,
-       :logs,
-       Assignments.build_recent_test_results(assignment_id, socket.assigns.current_user.id)
-     )
+     socket
      |> assign(
        :build,
        GenServer.whereis(
@@ -476,13 +475,14 @@ defmodule HandinWeb.AssignmentLive.Tests do
 
   @impl true
   def handle_info(
-        %Phoenix.Socket.Broadcast{event: event, payload: build_id},
+        %Phoenix.Socket.Broadcast{event: event, payload: payload},
         socket
       ) do
     case event do
       "test_result" ->
         {:noreply,
-         assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
+         socket
+         |> assign(:logs, Assignments.get_test_results_for_build(payload))
          |> assign(
            :build,
            GenServer.whereis({:global, "build:assignment_tests:#{socket.assigns.assignment.id}"})
@@ -490,7 +490,30 @@ defmodule HandinWeb.AssignmentLive.Tests do
 
       "build_completed" ->
         {:noreply,
-         assign(socket, :logs, Assignments.get_test_results_for_build(build_id))
+         socket
+         |> assign(:logs, Assignments.get_test_results_for_build(payload))
+         |> assign(
+           :build,
+           nil
+         )}
+
+      "build_failed" ->
+        {:noreply,
+         socket
+         |> assign(:logs, [
+           {0,
+            %{
+              type: "log",
+              state: :fail,
+              name: "Build failed",
+              output: payload
+            }}
+         ])}
+
+      "log" ->
+        {:noreply,
+         socket
+         |> assign(:logs, Assignments.get_recent_build_logs(socket.assigns.assignment.id))
          |> assign(
            :build,
            nil

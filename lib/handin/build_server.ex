@@ -1,10 +1,15 @@
 defmodule Handin.BuildServer do
   use GenServer
+
+  import Ecto.Query, only: [from: 2]
   alias Handin.Assignments
+  alias Handin.Assignments.Assignment
   alias Handin.AssignmentSubmissionFileUploader
   alias Handin.AssignmentFileUploader
   alias Handin.Assignments.AssignmentFile
   alias Handin.AssignmentSubmissions.AssignmentSubmissionFile
+  alias Handin.Repo
+  alias Handin.Assignments.Build
 
   @machine_api Application.compile_env(:handin, :machine_api_module)
 
@@ -18,20 +23,59 @@ defmodule Handin.BuildServer do
 
   @impl true
   def init(state) do
-    {:ok, build} = create_new_build(state.assignment_id, state.user_id, state.build_identifier)
-    assignment = Assignments.get_assignment!(state.assignment_id)
-    state = Map.merge(state, %{assignment: assignment, build: build, machine_id: nil})
-    {:ok, state, {:continue, :create_machine}}
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(
+      :build,
+      Build.changeset(%{
+        assignment_id: state.assignment_id,
+        status: :running,
+        user_id: state.user_id,
+        build_identifier: state.build_identifier
+      })
+    )
+    |> Ecto.Multi.one(:assignment, fn _ ->
+      from a in Assignment,
+        where: a.id == ^state.assignment_id,
+        preload: [:assignment_files, :assignment_tests]
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{build: build, assignment: assignment}} ->
+        state = Map.merge(state, %{assignment: assignment, build: build, machine_id: nil})
+        {:ok, state, {:continue, :create_machine}}
+
+      {:error, :build, %{errors: errors} = _changeset, _} ->
+        error_messages =
+          Enum.map(errors, fn {field, {message, _}} ->
+            "#{field}: #{message}"
+          end)
+
+        error_output = Enum.join(error_messages, "\n")
+
+        handle_build_error(state, error_output)
+        {:stop, :error, state}
+    end
   end
 
   @impl true
   def handle_continue(:create_machine, state) do
-    case create_and_start_machine(state) do
-      {:ok, machine_id, build} ->
-        state = %{state | machine_id: machine_id, build: build}
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:machine, fn _, _ ->
+      create_machine(state)
+    end)
+    |> Ecto.Multi.update(
+      :build,
+      fn %{machine: machine} ->
+        Build.update_changeset(state.build, %{machine: machine["id"]})
+      end
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{machine: machine, build: build}} ->
+        state = %{state | machine_id: machine["id"], build: build}
         {:noreply, state, {:continue, :process_build}}
 
-      {:error, reason} ->
+      {:error, :machine, reason, _} ->
         handle_build_error(state, reason)
         {:stop, reason, state}
     end
@@ -61,24 +105,12 @@ defmodule Handin.BuildServer do
   defp run_main_script(state) do
     case @machine_api.exec(state.machine_id, "sh ./main.sh") do
       {:ok, %{"exit_code" => 0} = response} ->
-        save_run_script_results(state, :pass)
-
-        log_and_broadcast(
-          state.build,
-          %{command: "sh ./main.sh", output: response["stdout"]},
-          state
-        )
+        handle_run_script_results(state, %{output: response["stdout"], script_state: :pass})
 
         :ok
 
       {:ok, reason} ->
-        save_run_script_results(state, :fail)
-
-        log_and_broadcast(
-          state.build,
-          %{command: "sh ./main.sh", output: reason["stderr"]},
-          state
-        )
+        handle_run_script_results(state, %{output: reason["stderr"], script_state: :fail})
 
         {:error, :main_script_failed}
     end
@@ -112,7 +144,6 @@ defmodule Handin.BuildServer do
     case Jason.decode(response["stdout"]) do
       {:ok, decoded_response} ->
         save_test_results(state, assignment_test, decoded_response)
-        log_test_result(state, assignment_test, decoded_response)
 
       {:error, _} ->
         handle_json_parse_error(state, assignment_test, response["stdout"])
@@ -120,50 +151,17 @@ defmodule Handin.BuildServer do
   end
 
   defp handle_failed_test(state, assignment_test, response) do
-    save_test_results(state, assignment_test, %{"state" => "fail"})
-
-    log_and_broadcast(
-      state.build,
-      %{
-        command: assignment_test.command,
-        assignment_test_id: assignment_test.id,
-        output: response["stderr"]
-      },
-      state
-    )
-  end
-
-  defp handle_error_test(state, assignment_test, reason) do
-    save_test_results(state, assignment_test, %{"state" => "fail"})
-
-    log_and_broadcast(
-      state.build,
-      %{
-        command: assignment_test.command,
-        assignment_test_id: assignment_test.id,
-        output: reason
-      },
-      state
-    )
-  end
-
-  defp create_new_build(assignment_id, user_id, build_identifier) do
-    Assignments.new_build(%{
-      assignment_id: assignment_id,
-      status: :running,
-      user_id: user_id,
-      build_identifier: build_identifier
+    save_test_results(state, assignment_test, %{
+      "state" => "fail",
+      "output" => response["stderr"]
     })
   end
 
-  defp create_and_start_machine(state) do
-    with {:ok, machine} <- create_machine(state),
-         {:ok, build} <- update_build_with_machine_id(state.build, machine["id"]),
-         {:ok, true} <- machine_started?(machine) do
-      {:ok, machine["id"], build}
-    else
-      {:error, reason} -> {:error, reason}
-    end
+  defp handle_error_test(state, assignment_test, reason) do
+    save_test_results(state, assignment_test, %{
+      "state" => "fail",
+      "output" => reason
+    })
   end
 
   defp create_machine(state) do
@@ -196,77 +194,40 @@ defmodule Handin.BuildServer do
       build_tests_scripts(state.assignment)
   end
 
-  defp machine_started?(machine, attempts \\ 0) do
-    max_attempts = 5
-    # 2 seconds
-    interval = 2000
-
-    if attempts >= max_attempts do
-      {:error, :timeout}
-    else
-      case @machine_api.status(machine["id"]) do
-        {:ok, %{"state" => state}} when state in ["created", "starting"] ->
-          Process.sleep(interval)
-          machine_started?(machine, attempts + 1)
-
-        {:ok, %{"state" => "started"}} ->
-          {:ok, true}
-
-        {:error, reason} ->
-          {:error, reason}
-      end
-    end
-  end
-
-  defp update_build_with_machine_id(build, machine_id) do
-    Assignments.update_build(build, %{machine_id: machine_id})
-  end
-
-  defp save_run_script_results(state, script_state) do
+  defp handle_run_script_results(state, %{script_state: script_state, output: output}) do
     Assignments.save_run_script_results(%{
       assignment_id: state.assignment.id,
       state: script_state,
       build_id: state.build.id,
-      user_id: state.user_id
+      user_id: state.user_id,
+      output: output
     })
+
+    log_and_broadcast(state, "test_result")
   end
 
   defp save_test_results(state, assignment_test, response) do
     test_state = if response["state"] == "pass", do: :pass, else: :fail
 
+    output =
+      if test_state == :pass, do: response["output"], else: response["output"]
+
     Assignments.save_test_results(%{
       assignment_test_id: assignment_test.id,
       state: test_state,
       build_id: state.build.id,
-      user_id: state.user_id
+      user_id: state.user_id,
+      output: output
     })
-  end
 
-  defp log_test_result(state, assignment_test, response) do
-    log_and_broadcast(
-      state.build,
-      %{
-        command: assignment_test.command,
-        assignment_test_id: assignment_test.id,
-        output: Base.decode64!(response["output"]),
-        expected_output: response["expected_output"]
-      },
-      state
-    )
+    log_and_broadcast(state, "test_result")
   end
 
   defp handle_json_parse_error(state, assignment_test, data) do
-    save_test_results(state, assignment_test, %{"state" => "fail"})
-
-    log_and_broadcast(
-      state.build,
-      %{
-        command: assignment_test.command,
-        assignment_test_id: assignment_test.id,
-        output: "Error parsing json: #{data}"
-      },
-      state
-    )
+    save_test_results(state, assignment_test, %{
+      "state" => "fail",
+      "output" => "Error parsing json: #{data}"
+    })
   end
 
   defp finalize_build(state) do
@@ -288,20 +249,35 @@ defmodule Handin.BuildServer do
     @machine_api.stop(state.machine_id)
   end
 
-  defp handle_build_error(state, reason) do
+  defp handle_build_error(%{build: _} = state, reason) do
     Assignments.update_build(state.build, %{status: :failed})
-    log_and_broadcast(state.build, %{command: "Build failed", output: inspect(reason)}, state)
+    log_map = %{output: inspect(reason), type: :runtime, build_id: state.build.id}
+    Assignments.log(log_map)
+    log_and_broadcast(state, "log")
     @machine_api.stop(state.machine_id)
   end
 
-  defp log_and_broadcast(build, log_map, state) do
-    log_map = Map.put(log_map, :build_id, build.id)
-    Assignments.log(log_map)
+  defp handle_build_error(state, reason) do
+    state
+    |> Map.put(:message, inspect(reason))
+    |> log_and_broadcast("log")
+  end
 
+  defp log_and_broadcast(
+         %{build: build} = state,
+         result_type
+       ) do
     channel =
       "assignment:#{state.assignment_id}:module_user:#{state.user_id}:role:#{state.role}"
 
-    HandinWeb.Endpoint.broadcast!(channel, "test_result", build.id)
+    HandinWeb.Endpoint.broadcast!(channel, result_type, build.id)
+  end
+
+  defp log_and_broadcast(state, "log") do
+    channel =
+      "assignment:#{state.assignment_id}:module_user:#{state.user_id}:role:#{state.role}"
+
+    HandinWeb.Endpoint.broadcast!(channel, "build_failed", state.message)
   end
 
   defp build_check_script(assignment) do

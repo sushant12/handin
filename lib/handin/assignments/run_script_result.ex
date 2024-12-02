@@ -8,6 +8,7 @@ defmodule Handin.Assignments.RunScriptResult do
 
   schema "run_script_results" do
     field :state, Ecto.Enum, values: [:pass, :fail]
+    field :output, :string
 
     belongs_to :assignment, Assignment
     belongs_to :user, User
@@ -16,7 +17,7 @@ defmodule Handin.Assignments.RunScriptResult do
     timestamps(type: :utc_datetime)
   end
 
-  @attrs [:state, :assignment_id, :user_id, :build_id]
+  @attrs [:state, :assignment_id, :user_id, :build_id, :output]
   def changeset(attrs) do
     %__MODULE__{}
     |> cast(attrs, @attrs)
