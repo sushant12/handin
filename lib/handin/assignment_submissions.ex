@@ -63,8 +63,12 @@ defmodule Handin.AssignmentSubmissions do
     Enum.find(submissions, &(&1.user_id == user_id))
   end
 
+  defp calculate_attempt_marks(nil, _attempt_marks), do: 0
+
   defp calculate_attempt_marks(build, attempt_marks) do
-    if build && build.run_script_result.state == :pass, do: attempt_marks, else: 0
+    if build.run_script_result && build.run_script_result.state == :pass,
+      do: attempt_marks,
+      else: 0
   end
 
   defp calculate_test_result_marks(nil, assignment_tests) do
