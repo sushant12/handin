@@ -32,6 +32,8 @@ defmodule Handin.Assignments.Assignment do
     field :enable_attempt_marks, :boolean, default: false
     field :attempt_marks, :integer
     field :enable_test_output, :boolean, default: false
+    field :cpu, :integer, default: 1
+    field :memory, :integer, default: 256
 
     belongs_to :module, Module
     belongs_to :programming_language, ProgrammingLanguage, on_replace: :nilify
@@ -73,7 +75,9 @@ defmodule Handin.Assignments.Assignment do
     :enable_penalty_per_day,
     :enable_max_attempts,
     :enable_total_marks,
-    :enable_test_output
+    :enable_test_output,
+    :cpu,
+    :memory
   ]
 
   @doc false

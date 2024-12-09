@@ -183,8 +183,8 @@ defmodule Handin.AssignmentSubmissionServer do
         files: build_all_scripts(state),
         guest: %{
           cpu_kind: "shared",
-          cpus: 2,
-          memory_mb: 512
+          cpus: state.assignment.cpu,
+          memory_mb: state.assignment.memory
         }
       }
     }
