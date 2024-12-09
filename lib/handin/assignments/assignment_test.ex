@@ -17,6 +17,8 @@ defmodule Handin.Assignments.AssignmentTest do
     field :ttl, :integer, default: 60
     field :enable_custom_test, :boolean, default: false
     field :custom_test, :string
+    field :enable_test_sleep, :boolean, default: false
+    field :test_sleep_duration, :integer
 
     belongs_to :assignment, Assignment
 
@@ -42,7 +44,9 @@ defmodule Handin.Assignments.AssignmentTest do
              :expected_output_file_content,
              :ttl,
              :enable_custom_test,
-             :custom_test
+             :custom_test,
+             :enable_test_sleep,
+             :test_sleep_duration
            ]
 
   @doc false
@@ -54,6 +58,7 @@ defmodule Handin.Assignments.AssignmentTest do
     |> maybe_validate_expected_output_type()
     |> maybe_validate_points_on_pass()
     |> maybe_validate_points_on_fail()
+    |> maybe_validate_test_sleep_duration()
   end
 
   def new_changeset(assignment_test, attrs) do
@@ -149,6 +154,16 @@ defmodule Handin.Assignments.AssignmentTest do
       validate_required(changeset, :custom_test)
     else
       validate_required(changeset, [:command, :expected_output_type])
+    end
+  end
+
+  defp maybe_validate_test_sleep_duration(changeset) do
+    if get_field(changeset, :enable_test_sleep) do
+      changeset
+      |> validate_required(:test_sleep_duration)
+      |> validate_number(:test_sleep_duration, greater_than: 0, message: "must be greater than 0")
+    else
+      changeset
     end
   end
 end
