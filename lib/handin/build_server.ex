@@ -198,8 +198,7 @@ defmodule Handin.BuildServer do
 
   defp machine_started?(machine, attempts \\ 0) do
     max_attempts = 5
-    # 2 seconds
-    interval = 2000
+    interval = 5000
 
     if attempts >= max_attempts do
       {:error, :timeout}
