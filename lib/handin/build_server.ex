@@ -90,13 +90,13 @@ defmodule Handin.BuildServer do
   end
 
   defp run_single_test(state, assignment_test) do
+    if assignment_test.enable_test_sleep do
+      Process.sleep(assignment_test.test_sleep_duration * 60 * 1000)
+    end
+
     case @machine_api.exec(state.machine_id, "./#{assignment_test.id}.sh") do
       {:ok, %{"exit_code" => 0} = response} ->
         handle_successful_test(state, assignment_test, response)
-
-        if assignment_test.name == "save the output to a file" do
-          Process.sleep(120_000)
-        end
 
       {:ok, response} ->
         handle_failed_test(state, assignment_test, response)
@@ -198,11 +198,13 @@ defmodule Handin.BuildServer do
 
   defp machine_started?(machine, attempts \\ 0) do
     max_attempts = 5
-    interval = 5000
+    interval = 10_000
 
     if attempts >= max_attempts do
       {:error, :timeout}
     else
+      Process.sleep(1000)
+
       case @machine_api.status(machine["id"]) do
         {:ok, %{"state" => state}} when state in ["created", "starting"] ->
           Process.sleep(interval)

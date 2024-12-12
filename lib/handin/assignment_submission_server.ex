@@ -199,12 +199,13 @@ defmodule Handin.AssignmentSubmissionServer do
 
   defp machine_started?(machine, attempts \\ 0) do
     max_attempts = 5
-    # 2 seconds
-    interval = 2000
+    interval = 10_000
 
     if attempts >= max_attempts do
       {:error, :timeout}
     else
+      Process.sleep(1000)
+
       case @machine_api.status(machine["id"]) do
         {:ok, %{"state" => state}} when state in ["created", "starting"] ->
           Process.sleep(interval)
