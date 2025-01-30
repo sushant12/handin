@@ -20,7 +20,8 @@ defmodule Handin.Assignments do
     Log,
     RunScriptResult,
     TestResult,
-    CustomAssignmentDate
+    CustomAssignmentDate,
+    AssignmentTestOutputFile
   }
 
   alias Handin.AssignmentTests
@@ -717,5 +718,34 @@ defmodule Handin.Assignments do
   def change_build(%Build{} = build, attrs \\ %{}) do
     build
     |> Build.update_changeset(attrs)
+  end
+
+  def create_assignment_test_output_file(attrs \\ %{}) do
+    %AssignmentTestOutputFile{}
+    |> AssignmentTestOutputFile.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def upload_assignment_test_output_file(assignment_test_output_file, attrs \\ %{}) do
+    assignment_test_output_file
+    |> AssignmentTestOutputFile.file_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def update_assignment_test_output_file(
+        %AssignmentTestOutputFile{} = assignment_test_output_file,
+        attrs
+      ) do
+    assignment_test_output_file
+    |> AssignmentTestOutputFile.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def get_assignment_test_output_file!(id), do: Repo.get!(AssignmentTestOutputFile, id)
+
+  def delete_assignment_test_output_file(
+        %AssignmentTestOutputFile{} = assignment_test_output_file
+      ) do
+    Repo.delete(assignment_test_output_file)
   end
 end
