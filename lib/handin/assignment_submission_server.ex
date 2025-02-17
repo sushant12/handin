@@ -100,14 +100,18 @@ defmodule Handin.AssignmentSubmissionServer do
 
       {:ok, response} ->
         if assignment_test.always_pass_test do
-          handle_successful_test(state, assignment_test, response)
+          handle_successful_test(state, assignment_test, %{
+            "stdout" => ~s({"state": "pass", "output": "", "expected_output": ""})
+          })
         else
           handle_failed_test(state, assignment_test, response)
         end
 
       {:error, reason} ->
         if assignment_test.always_pass_test do
-          handle_successful_test(state, assignment_test, %{"stdout" => ""})
+          handle_successful_test(state, assignment_test, %{
+            "stdout" => ~s({"state": "pass", "output": "", "expected_output": ""})
+          })
         else
           handle_error_test(state, assignment_test, reason)
         end
