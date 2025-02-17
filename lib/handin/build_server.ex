@@ -1,5 +1,7 @@
 defmodule Handin.BuildServer do
   use GenServer
+  require Logger
+
   alias Handin.Assignments
   alias Handin.AssignmentSubmissionFileUploader
   alias Handin.AssignmentFileUploader
@@ -99,10 +101,18 @@ defmodule Handin.BuildServer do
         handle_successful_test(state, assignment_test, response)
 
       {:ok, response} ->
-        handle_failed_test(state, assignment_test, response)
+        if assignment_test.always_pass_test do
+          handle_successful_test(state, assignment_test, response)
+        else
+          handle_failed_test(state, assignment_test, response)
+        end
 
       {:error, reason} ->
-        handle_error_test(state, assignment_test, reason)
+        if assignment_test.always_pass_test do
+          handle_successful_test(state, assignment_test, %{"stdout" => ""})
+        else
+          handle_error_test(state, assignment_test, reason)
+        end
     end
   end
 

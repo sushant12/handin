@@ -19,6 +19,7 @@ defmodule Handin.Assignments.AssignmentTest do
     field :custom_test, :string
     field :enable_test_sleep, :boolean, default: false
     field :test_sleep_duration, :integer
+    field :always_pass_test, :boolean, default: false
 
     belongs_to :assignment, Assignment
 
@@ -46,7 +47,8 @@ defmodule Handin.Assignments.AssignmentTest do
              :enable_custom_test,
              :custom_test,
              :enable_test_sleep,
-             :test_sleep_duration
+             :test_sleep_duration,
+             :always_pass_test
            ]
 
   @doc false
