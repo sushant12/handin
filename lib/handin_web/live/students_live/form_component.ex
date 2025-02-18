@@ -13,7 +13,7 @@ defmodule HandinWeb.StudentsLive.FormComponent do
     <div>
       <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
         <.header>
-          <%= @title %>
+          {@title}
         </.header>
       </div>
       <.simple_form for={@form} id="student-form" phx-target={@myself} phx-submit="save">
@@ -78,7 +78,7 @@ defmodule HandinWeb.StudentsLive.FormComponent do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
 
-      {:error, failed_operation, _failed_value, _changes_so_far} ->
+      {:error, failed_operation} ->
         socket =
           socket
           |> put_flash(:error, "Failed to add user: #{inspect(failed_operation)}")

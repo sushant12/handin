@@ -223,9 +223,7 @@ defmodule Handin.Assignments do
       DateTime.compare(assignment.cutoff_date, now) == :gt
   end
 
-  def create_or_update_submission(
-        %{user_id: user_id, assignment_id: assignment_id} = attrs \\ %{}
-      ) do
+  def create_or_update_submission(%{user_id: user_id, assignment_id: assignment_id} = attrs) do
     if submission = get_submission(assignment_id, user_id) do
       submission
     else
