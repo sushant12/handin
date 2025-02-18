@@ -6,10 +6,10 @@
   Add Module
 </.link>
 <.table id="modules" rows={@streams.modules}>
-  <:col :let={{_, module}} label="Module"><%= "#{module.name} (#{module.code})" %></:col>
-  <:col :let={{_, module}} label="Term"><%= module.term %></:col>
-  <:col :let={{_, module}} label="Students"><%= module.students_count %></:col>
-  <:col :let={{_, module}} label="Assignments"><%= module.assignments_count %></:col>
+  <:col :let={{_, module}} label="Module">{"#{module.name} (#{module.code})"}</:col>
+  <:col :let={{_, module}} label="Term">{module.term}</:col>
+  <:col :let={{_, module}} label="Students">{module.students_count}</:col>
+  <:col :let={{_, module}} label="Assignments">{module.assignments_count}</:col>
   <:action :let={{_, module}}>
     <.link
       navigate={~p"/modules/#{module.id}/assignments"}

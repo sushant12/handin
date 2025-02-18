@@ -12,13 +12,13 @@ defmodule HandinWeb.Admin.UserListLive.Index do
       path={~p"/admin/users"}
     >
       <:col :let={{_id, user}} label="">
-        <%= user.index %>
+        {user.index}
       </:col>
       <:col :let={{_id, user}} field={:email} label="Email">
-        <%= user.email %>
+        {user.email}
       </:col>
       <:col :let={{_id, user}} field={:role} label="Role">
-        <%= user.role %>
+        {user.role}
       </:col>
       <:action :let={{id, user}}>
         <.link

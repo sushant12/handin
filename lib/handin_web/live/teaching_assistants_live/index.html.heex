@@ -26,7 +26,7 @@
   </.button>
 </.link>
 <.table id="teaching_assistants" rows={@streams.teaching_assistants}>
-  <:col :let={{_, teaching_assistant}} label="Email"><%= teaching_assistant.email %></:col>
+  <:col :let={{_, teaching_assistant}} label="Email">{teaching_assistant.email}</:col>
   <:action :let={{id, teaching_assistant}} :if={@module_user.role == :lecturer}>
     <.link
       class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"

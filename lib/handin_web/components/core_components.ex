@@ -58,7 +58,7 @@ defmodule HandinWeb.CoreComponents do
       <div class="m-auto mt-[7%] p-4 w-full max-w-2xl h-full md:h-auto">
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
           <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
-            <%= render_slot(@inner_block) %>
+            {render_slot(@inner_block)}
           </div>
         </div>
       </div>
@@ -101,9 +101,9 @@ defmodule HandinWeb.CoreComponents do
       <p :if={@title} class="flex items-center gap-1.5 text-sm font-semibold leading-6">
         <.icon :if={@kind == :info} name="hero-information-circle-mini" class="h-4 w-4" />
         <.icon :if={@kind == :error} name="hero-exclamation-circle-mini" class="h-4 w-4" />
-        <%= @title %>
+        {@title}
       </p>
-      <p class="mt-2 text-sm leading-5"><%= msg %></p>
+      <p class="mt-2 text-sm leading-5">{msg}</p>
       <button type="button" class="group absolute top-1 right-1 p-2" aria-label="close">
         <.icon name="hero-x-mark-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
       </button>
@@ -134,7 +134,7 @@ defmodule HandinWeb.CoreComponents do
         phx-connected={hide("#client-error")}
         hidden
       >
-        <%= "Attempting to reconnect" %>
+        {"Attempting to reconnect"}
         <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
       </.flash>
 
@@ -146,7 +146,7 @@ defmodule HandinWeb.CoreComponents do
         phx-connected={hide("#server-error")}
         hidden
       >
-        <%= "Hang in there while we get back on track" %>
+        {"Hang in there while we get back on track"}
         <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
       </.flash>
     </div>
@@ -180,12 +180,12 @@ defmodule HandinWeb.CoreComponents do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
       <div class="space-y-8 bg-white">
-        <%= render_slot(@inner_block, f) %>
+        {render_slot(@inner_block, f)}
         <div
           :for={action <- @actions}
           class="text-sm text-gray-500 dark:text-gray-300 flex justify-between"
         >
-          <%= render_slot(action, f) %>
+          {render_slot(action, f)}
         </div>
       </div>
     </.form>
@@ -209,7 +209,7 @@ defmodule HandinWeb.CoreComponents do
   def button(assigns) do
     ~H"""
     <button type={@type} class={@class} {@rest}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </button>
     """
 
@@ -276,9 +276,9 @@ defmodule HandinWeb.CoreComponents do
       <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
         <input type="hidden" name={@name} value="false" />
         <input type="checkbox" id={@id} name={@name} value="true" checked={@checked} {@rest} />
-        <%= @label %>
+        {@label}
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -288,7 +288,7 @@ defmodule HandinWeb.CoreComponents do
     <div phx-feedback-for={@name}>
       <div>
         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          <%= @label %>
+          {@label}
         </label>
         <select
           id={@id}
@@ -297,10 +297,10 @@ defmodule HandinWeb.CoreComponents do
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           {@rest}
         >
-          <option :if={@prompt} value="" disabled selected><%= @prompt %></option>
-          <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
+          <option :if={@prompt} value="" disabled selected>{@prompt}</option>
+          {Phoenix.HTML.Form.options_for_select(@options, @value)}
         </select>
-        <.error :for={msg <- @errors}><%= msg %></.error>
+        <.error :for={msg <- @errors}>{msg}</.error>
       </div>
     </div>
     """
@@ -320,7 +320,7 @@ defmodule HandinWeb.CoreComponents do
         ]}
         {@rest}
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -335,7 +335,7 @@ defmodule HandinWeb.CoreComponents do
     <div phx-feedback-for={@name}>
       <div>
         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          <%= @label %>
+          {@label}
         </label>
         <input
           type={@type}
@@ -349,7 +349,7 @@ defmodule HandinWeb.CoreComponents do
           ]}
           {@rest}
         />
-        <.error :for={msg <- @errors}><%= msg %></.error>
+        <.error :for={msg <- @errors}>{msg}</.error>
       </div>
     </div>
     """
@@ -361,7 +361,7 @@ defmodule HandinWeb.CoreComponents do
     <div phx-feedback-for={@name}>
       <div>
         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-          <%= @label %>
+          {@label}
         </label>
         <input
           type={@type}
@@ -374,7 +374,7 @@ defmodule HandinWeb.CoreComponents do
           ]}
           {@rest}
         />
-        <.error :for={msg <- @errors}><%= msg %></.error>
+        <.error :for={msg <- @errors}>{msg}</.error>
       </div>
     </div>
     """
@@ -402,7 +402,7 @@ defmodule HandinWeb.CoreComponents do
   def label(assigns) do
     ~H"""
     <label for={@for} class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </label>
     """
   end
@@ -418,7 +418,7 @@ defmodule HandinWeb.CoreComponents do
     ~H"""
     <p class={["mt-3 flex gap-3 text-sm leading-6 text-rose-600 phx-no-feedback:hidden", @class]}>
       <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end
@@ -441,13 +441,13 @@ defmodule HandinWeb.CoreComponents do
     ]}>
       <div>
         <h1 class="text-lg font-semibold leading-8 text-zinc-800">
-          <%= render_slot(@inner_block) %>
+          {render_slot(@inner_block)}
         </h1>
         <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
-          <%= render_slot(@subtitle) %>
+          {render_slot(@subtitle)}
         </p>
       </div>
-      <div class="flex-none"><%= render_slot(@actions) %></div>
+      <div class="flex-none">{render_slot(@actions)}</div>
     </header>
     """
   end
@@ -487,7 +487,7 @@ defmodule HandinWeb.CoreComponents do
     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
       <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         <tr>
-          <th :for={col <- @col} scope="col" class="px-6 py-3"><%= col[:label] %></th>
+          <th :for={col <- @col} scope="col" class="px-6 py-3">{col[:label]}</th>
           <th :if={@action != []} scope="col" class="px-6 py-3">
             Actions
           </th>
@@ -505,7 +505,7 @@ defmodule HandinWeb.CoreComponents do
             scope="row"
             class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
           >
-            <%= render_slot(col, @row_item.(row)) %>
+            {render_slot(col, @row_item.(row))}
           </td>
           <td
             :if={@action != []}
@@ -517,7 +517,7 @@ defmodule HandinWeb.CoreComponents do
                 :for={action <- @action}
                 class=" ml-4 font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
               >
-                <%= render_slot(action, @row_item.(row)) %>
+                {render_slot(action, @row_item.(row))}
               </span>
             </div>
           </td>
@@ -546,8 +546,8 @@ defmodule HandinWeb.CoreComponents do
     <div class="mt-4">
       <dl class="divide-y divide-zinc-100">
         <div :for={item <- @item} class="flex gap-4 pt-3 pb-4 text-sm leading-6 sm:gap-8">
-          <dt class="w-1/4 flex-none text-zinc-500"><%= item.title %></dt>
-          <dd class="text-zinc-700"><%= render_slot(item) %></dd>
+          <dt class="w-1/4 flex-none text-zinc-500">{item.title}</dt>
+          <dd class="text-zinc-700">{render_slot(item)}</dd>
         </div>
       </dl>
     </div>
@@ -572,7 +572,7 @@ defmodule HandinWeb.CoreComponents do
         class="text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
       >
         <.icon name="hero-arrow-left-solid" class="h-3 w-3" />
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </.link>
     </div>
     """
@@ -648,7 +648,7 @@ defmodule HandinWeb.CoreComponents do
         navigate={@href}
         class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
       >
-        <%= @text %>
+        {@text}
       </.link>
     </li>
     """
@@ -662,7 +662,7 @@ defmodule HandinWeb.CoreComponents do
         aria-current="page"
         class="inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500"
       >
-        <%= @text %>
+        {@text}
       </.link>
     </li>
     """
@@ -727,7 +727,7 @@ defmodule HandinWeb.CoreComponents do
         >
           <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
         </svg>
-        <%= @text %>
+        {@text}
       </.link>
     </li>
     """
@@ -753,7 +753,7 @@ defmodule HandinWeb.CoreComponents do
           />
         </svg>
         <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400">
-          <%= @text %>
+          {@text}
         </span>
       </div>
     </li>
@@ -783,7 +783,7 @@ defmodule HandinWeb.CoreComponents do
           navigate={@href}
           class="ms-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ms-2 dark:text-gray-400 dark:hover:text-white"
         >
-          <%= @text %>
+          {@text}
         </.link>
       </div>
     </li>

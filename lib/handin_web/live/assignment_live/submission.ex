@@ -49,19 +49,19 @@ defmodule HandinWeb.AssignmentLive.Submission do
 
     <.table id="submitted_assignment_submissions" rows={@assignment_submissions}>
       <:col :let={{_, i}} label="id">
-        <%= i %>
+        {i}
       </:col>
       <:col :let={{submission, _}} label="full name">
-        <%= DisplayHelper.get_full_name(submission.user) %>
+        {DisplayHelper.get_full_name(submission.user)}
       </:col>
       <:col :let={{submission, _}} label="email">
-        <%= submission.user.email %>
+        {submission.user.email}
       </:col>
       <:col :let={{submission, _}} :if={@assignment.enable_total_marks} label="Total marks">
-        <%= submission.total_points %> / <%= @assignment.total_marks %>
+        {submission.total_points} / {@assignment.total_marks}
       </:col>
       <:col :let={{submission, _}} label="Submitted At">
-        <%= DisplayHelper.format_date(submission.submitted_at) %>
+        {DisplayHelper.format_date(submission.submitted_at)}
       </:col>
       <:action :let={{submission, _}}>
         <.link

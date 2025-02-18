@@ -18,9 +18,9 @@
     end
   }
 >
-  <:col :let={{_id, programming_language}} label="Name"><%= programming_language.name %></:col>
+  <:col :let={{_id, programming_language}} label="Name">{programming_language.name}</:col>
   <:col :let={{_id, programming_language}} label="Docker file url">
-    <%= programming_language.docker_file_url %>
+    {programming_language.docker_file_url}
   </:col>
   <:action :let={{_id, programming_language}}>
     <div class="sr-only">

@@ -15,7 +15,7 @@ defmodule HandinWeb.StudentsLive.BulkAddFormComponent do
     <div>
       <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
         <.header>
-          <%= @title %>
+          {@title}
         </.header>
       </div>
       <.simple_form
@@ -35,12 +35,12 @@ defmodule HandinWeb.StudentsLive.BulkAddFormComponent do
             Upload a CSV file
           </div>
           <.error :if={@form[:csv_file_input].errors != []}>
-            <%= @form[:csv_file_input].errors %>
+            {@form[:csv_file_input].errors}
           </.error>
         </div>
         <%= if @error_message do %>
           <div class="mb-4 text-sm text-red-600 dark:text-red-500">
-            <%= @error_message %>
+            {@error_message}
           </div>
         <% end %>
         <:actions>

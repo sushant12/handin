@@ -12,16 +12,16 @@ defmodule HandinWeb.Admin.BuildLive.Index do
       path={~p"/admin/builds"}
     >
       <:col :let={{_id, build}} label="">
-        <%= build.index %>
+        {build.index}
       </:col>
       <:col :let={{_id, build}} label="ID">
-        <%= build.id %>
+        {build.id}
       </:col>
       <:col :let={{_id, build}} field={:machine_id} label="Machine ID">
-        <%= build.machine_id %>
+        {build.machine_id}
       </:col>
       <:col :let={{_id, build}} field={:status} label="Status">
-        <%= build.status %>
+        {build.status}
       </:col>
 
       <:action :let={{id, build}}>

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <%= PhoenixHTMLHelpers.Tag.csrf_meta_tag() %>
+    {PhoenixHTMLHelpers.Tag.csrf_meta_tag()}
     <title>Handin Admin</title>
     <!-- Uncomment to just use the bare bones torch styles rather than the theme -->
     <!--<link phx-track-static rel="stylesheet" href={Phoenix.VerifiedRoutes.static_path(@conn, "/torch/base.css")}>-->
@@ -52,7 +52,7 @@
     </header>
 
     <Torch.Component.flash_messages flash={@conn.assigns.flash} />
-    <%= @inner_content %>
+    {@inner_content}
     <script defer src={Phoenix.VerifiedRoutes.static_path(@conn, "/torch/torch.js")}>
     </script>
   </body>

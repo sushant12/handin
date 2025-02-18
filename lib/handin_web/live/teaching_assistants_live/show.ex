@@ -22,12 +22,12 @@ defmodule HandinWeb.TeachingAssistantLive.Show do
           <h2 class="text-xl font-medium mb-4">Student Details</h2>
           <div class="flex items-center mb-4">
             <span class="text-gray-700 font-medium mr-2">Email:</span>
-            <span class="text-gray-900"><%= @student.email %></span>
+            <span class="text-gray-900">{@student.email}</span>
           </div>
           <div class="flex items-center mb-5">
             <span class="text-gray-700 font-medium">Confirmed At:</span>
             <span class="text-gray-900 mx-2">
-              <%= @student.confirmed_at || "Not confirmed yet" %>
+              {@student.confirmed_at || "Not confirmed yet"}
             </span>
             <button
               :if={!@student.confirmed_at}
@@ -43,7 +43,7 @@ defmodule HandinWeb.TeachingAssistantLive.Show do
           <h3 class="text-lg font-medium mb-2">Builds</h3>
           <div class="divide-y">
             <div :for={build <- @student.builds} class="text-gray-700 flex p-4">
-              <div>Machine ID: <%= build.machine_id %></div>
+              <div>Machine ID: {build.machine_id}</div>
               <div class="whitespace-nowrap ml-4">
                 Status:
                 <span class={[
@@ -51,7 +51,7 @@ defmodule HandinWeb.TeachingAssistantLive.Show do
                   build.status == :completed && "text-green-500",
                   build.status == :failed && "text-red-500"
                 ]}>
-                  <%= build.status %>
+                  {build.status}
                 </span>
               </div>
             </div>

@@ -25,13 +25,13 @@
   </.button>
 </.link>
 <.table id="students" rows={@streams.students}>
-  <:col :let={{_, student}} label="Email"><%= student.email %></:col>
+  <:col :let={{_, student}} label="Email">{student.email}</:col>
   <:col :let={{_, student}} label="Name">
-    <%= Handin.DisplayHelper.get_full_name(student) %>
+    {Handin.DisplayHelper.get_full_name(student)}
   </:col>
 
   <:col :let={{_id, student}} label="State">
-    <%= if student.confirmed_at, do: "Accepted", else: "Pending" %>
+    {if student.confirmed_at, do: "Accepted", else: "Pending"}
   </:col>
   <:action :let={{id, student}} :if={@module_user.role != :student}>
     <.link

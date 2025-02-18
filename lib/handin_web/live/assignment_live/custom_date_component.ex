@@ -8,7 +8,7 @@ defmodule HandinWeb.AssignmentLive.CustomDateComponent do
     ~H"""
     <div>
       <.header>
-        <%= @title %>
+        {@title}
       </.header>
 
       <.simple_form

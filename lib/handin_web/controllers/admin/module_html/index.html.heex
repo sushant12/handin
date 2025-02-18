@@ -10,46 +10,46 @@
       <%= form_tag @conn.request_path, method: :get, id: "torch-filters-form" do %>
         <div class="field">
           <label>Name</label>
-          <%= filter_select(:module, :name, @conn.params) %>
-          <%= filter_string_input(:module, :name, @conn.params) %>
+          {filter_select(:module, :name, @conn.params)}
+          {filter_string_input(:module, :name, @conn.params)}
         </div>
 
         <div class="field">
           <label>Code</label>
-          <%= filter_select(:module, :code, @conn.params) %>
-          <%= filter_string_input(:module, :code, @conn.params) %>
+          {filter_select(:module, :code, @conn.params)}
+          {filter_string_input(:module, :code, @conn.params)}
         </div>
 
         <div class="field">
           <label>Term</label>
-          <%= filter_select(:module, :term, @conn.params) %>
-          <%= filter_string_input(:module, :term, @conn.params) %>
+          {filter_select(:module, :term, @conn.params)}
+          {filter_string_input(:module, :term, @conn.params)}
         </div>
 
         <div class="field">
           <label>Archived</label>
-          <%= filter_boolean_input(:module, :archived, @conn.params) %>
+          {filter_boolean_input(:module, :archived, @conn.params)}
         </div>
 
         <div class="field">
           <label>Deleted at</label>
-          <%= filter_date_input(:module, :deleted_at, @conn.params) %>
+          {filter_date_input(:module, :deleted_at, @conn.params)}
         </div>
 
         <div class="field">
           <label>Assignments count</label>
-          <%= number_filter_select(:module, :assignments_count, @conn.params) %>
-          <%= filter_number_input(:module, :assignments_count, @conn.params) %>
+          {number_filter_select(:module, :assignments_count, @conn.params)}
+          {filter_number_input(:module, :assignments_count, @conn.params)}
         </div>
 
         <div class="field">
           <label>Students count</label>
-          <%= number_filter_select(:module, :students_count, @conn.params) %>
-          <%= filter_number_input(:module, :students_count, @conn.params) %>
+          {number_filter_select(:module, :students_count, @conn.params)}
+          {filter_number_input(:module, :students_count, @conn.params)}
         </div>
 
         <button type="submit" class="torch-button">Search</button>
-        <%= link("Clear Filters", to: ~p"/admin/modules") %>
+        {link("Clear Filters", to: ~p"/admin/modules")}
       <% end %>
     </section>
 
@@ -58,9 +58,9 @@
         <table>
           <thead>
             <tr>
-              <th><%= table_link(@conn, "Name", :name) %></th>
+              <th>{table_link(@conn, "Name", :name)}</th>
 
-              <th><%= table_link(@conn, "Term", :term) %></th>
+              <th>{table_link(@conn, "Term", :term)}</th>
 
               <th>Archived</th>
 
@@ -70,21 +70,21 @@
           <tbody>
             <%= for module <- @modules do %>
               <tr>
-                <td><%= module.name %><%= "(#{module.code})" %></td>
+                <td>{module.name}{"(#{module.code})"}</td>
 
-                <td><%= module.term %></td>
+                <td>{module.term}</td>
 
-                <td><%= module.archived %></td>
+                <td>{module.archived}</td>
 
                 <td class="torch-actions">
                   <span>
                     <.link href={~p"/admin/modules/#{module}"}>
-                      <%= Torch.I18n.message("Show") %>
+                      {Torch.I18n.message("Show")}
                     </.link>
                   </span>
                   <span>
                     <.link href={~p"/admin/modules/#{module}/edit"}>
-                      <%= Torch.I18n.message("Edit") %>
+                      {Torch.I18n.message("Edit")}
                     </.link>
                   </span>
                   <span>
@@ -93,7 +93,7 @@
                       method="delete"
                       data-confirm={Torch.I18n.message("Are you sure?")}
                     >
-                      <%= Torch.I18n.message("Delete") %>
+                      {Torch.I18n.message("Delete")}
                     </.link>
                   </span>
                 </td>
@@ -101,7 +101,7 @@
             <% end %>
           </tbody>
         </table>
-        <%= Torch.PaginationView.pagination(@conn) %>
+        {Torch.PaginationView.pagination(@conn)}
       <% else %>
         <p class="torch-no-data">No Modules match your search.</p>
       <% end %>

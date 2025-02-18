@@ -21,10 +21,10 @@ defmodule HandinWeb.AssignmentLive.Grade do
 
     <.table id="assignment_submissions" rows={@streams.assignment_submissions}>
       <:col :let={{_id, assignment_submission}} label="Name">
-        <%= assignment_submission.assignment.name %>
+        {assignment_submission.assignment.name}
       </:col>
       <:col :let={{_id, assignment_submission}} label="Total marks">
-        <%= assignment_submission.total_points %> / <%= assignment_submission.assignment.total_marks %>
+        {assignment_submission.total_points} / {assignment_submission.assignment.total_marks}
       </:col>
     </.table>
     """
