@@ -65,7 +65,7 @@ defmodule HandinWeb.ModulesLive.ConfirmationComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Module cloned successfully.")
-         |> push_patch(to: socket.assigns.patch)}
+         |> push_navigate(to: socket.assigns.patch)}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Module could not be cloned successfully.")}
@@ -80,7 +80,7 @@ defmodule HandinWeb.ModulesLive.ConfirmationComponent do
       {:noreply,
        socket
        |> put_flash(:info, "Module archived successfully.")
-       |> push_patch(to: socket.assigns.patch)}
+       |> push_navigate(to: socket.assigns.patch)}
     else
       _ ->
         {:noreply, put_flash(socket, :error, "Failed to archive module")}
