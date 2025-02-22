@@ -134,9 +134,8 @@ defmodule Handin.Modules do
       where: m.id == ^module_id,
       left_join: a in assoc(m, :assignments),
       left_join: at in assoc(a, :assignment_tests),
-      left_join: sf in assoc(a, :support_files),
-      left_join: solf in assoc(a, :solution_files),
-      preload: [assignments: {a, assignment_tests: at, support_files: sf, solution_files: solf}]
+      left_join: af in assoc(a, :assignment_files),
+      preload: [assignments: {a, assignment_tests: at, assignment_files: af}]
     )
   end
 

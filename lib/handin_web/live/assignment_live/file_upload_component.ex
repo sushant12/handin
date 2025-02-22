@@ -7,7 +7,7 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
   def render(assigns) do
     ~H"""
     <div>
-      <.header><%= @title %></.header>
+      <.header>{@title}</.header>
       <.simple_form
         for={@form}
         id="assignment_files-form"
@@ -43,7 +43,7 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
                     </path>
                   </g>
                 </svg>
-                <figcaption><%= entry.client_name %></figcaption>&nbsp;
+                <figcaption>{entry.client_name}</figcaption>&nbsp;
               </figure>
               <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
                 <div
@@ -51,16 +51,16 @@ defmodule HandinWeb.AssignmentLive.FileUploadComponent do
                   value={entry.progress}
                   style={"width: #{entry.progress}%"}
                 >
-                  <%= entry.progress %>%
+                  {entry.progress}%
                 </div>
               </div>
               <.error :for={err <- upload_errors(@uploads.assignment_file, entry)} class="!mt-0">
-                <%= error_to_string(err) %>
+                {error_to_string(err)}
               </.error>
             </article>
           <% end %>
           <.error :for={err <- upload_errors(@uploads.assignment_file)}>
-            <%= error_to_string(err) %>
+            {error_to_string(err)}
           </.error>
         </div>
         <:actions>

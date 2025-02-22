@@ -5,7 +5,7 @@ defmodule Handin.MixProject do
     [
       app: :handin,
       version: "0.1.0",
-      elixir: "~> 1.17.0",
+      elixir: "~> 1.18.2",
       elixirc_paths: elixirc_paths(Mix.env()),
       elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
@@ -30,20 +30,19 @@ defmodule Handin.MixProject do
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
-
   # Specifies your project dependencies.
   #
   # Type `mix help deps` for examples and options.
   defp deps do
     [
       {:bcrypt_elixir, "~> 3.1.0"},
-      {:phoenix, "~> 1.7.14"},
+      {:phoenix, "~> 1.7"},
       {:phoenix_ecto, "~> 4.6.2"},
       {:ecto_sql, "~> 3.12.0"},
       {:postgrex, ">= 0.19.1"},
       {:phoenix_html, "~> 4.0"},
-      {:phoenix_live_view, "~> 0.20.17"},
-      {:phoenix_live_dashboard, "~> 0.8.4"},
+      {:phoenix_live_view, "~> 1.0"},
+      {:phoenix_live_dashboard, "~> 0.8.6"},
       {:swoosh, "~> 1.16.9"},
       {:finch, "~> 0.18"},
       {:telemetry_metrics, "~> 1.0.0"},
@@ -58,10 +57,10 @@ defmodule Handin.MixProject do
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.6"},
       {:gen_smtp, "~> 1.0"},
-      {:live_monaco_editor, "~> 0.1.8"},
+      {:live_monaco_editor, "~> 0.2.0"},
       {:timex, "~> 3.0"},
-      {:sentry, "~> 10.7.0"},
-      {:flop_phoenix, "~> 0.22.9"},
+      {:sentry, "~> 10.8"},
+      {:flop_phoenix, "~> 0.24.1"},
       {:torch, "~> 5.3"},
       {:oban, "~> 2.17"},
       {:ex_machina, "~> 2.8", only: :test},

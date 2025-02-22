@@ -25,17 +25,17 @@
   />
 </.tabs>
 <.header>
-  <%= @assignment.name %>
+  {@assignment.name}
   <:subtitle>
-    Start/Due Date: (<%= @assignment.start_date %>) - (<%= @assignment.due_date %>)
+    Start/Due Date: ({@assignment.start_date}) - ({@assignment.due_date})
   </:subtitle>
 </.header>
 
 <.list>
-  <:item title="Total marks"><%= @assignment.total_marks %></:item>
-  <:item title="Cutoff date"><%= @assignment.cutoff_date %></:item>
-  <:item title="Max attempts"><%= @assignment.max_attempts %></:item>
-  <:item title="Penalty per day"><%= @assignment.penalty_per_day %></:item>
+  <:item title="Total marks">{@assignment.total_marks}</:item>
+  <:item title="Cutoff date">{@assignment.cutoff_date}</:item>
+  <:item title="Max attempts">{@assignment.max_attempts}</:item>
+  <:item title="Penalty per day">{@assignment.penalty_per_day}</:item>
 </.list>
 
 <div :if={@module_user.role != :student} class="grid grid-cols-12 gap-4">
@@ -66,7 +66,7 @@
         phx-click="assignment_test_selected"
         phx-value-assignment_test_id={assignment_test.id}
       >
-        <%= assignment_test.name %>
+        {assignment_test.name}
       </button>
     </div>
   </div>
@@ -95,8 +95,8 @@
             </:actions>
           </.header>
           <.list>
-            <:item title="Name"><%= assignment_test.name %></:item>
-            <:item title="Marks"><%= assignment_test.marks %></:item>
+            <:item title="Name">{assignment_test.name}</:item>
+            <:item title="Marks">{assignment_test.marks}</:item>
           </.list>
           <div :if={Enum.count(assignment_test.test_support_files) > 0} class="">
             <h2 class="text-lg">Test support files</h2>
@@ -129,7 +129,7 @@
                       </g>
                     </svg>
                   </button>
-                  <%= test_support_file.file.file_name %>
+                  {test_support_file.file.file_name}
                 </div>
               </li>
             </ol>
@@ -165,7 +165,7 @@
                       </g>
                     </svg>
                   </button>
-                  <%= solution_file.file.file_name %>
+                  {solution_file.file.file_name}
                 </div>
               </li>
             </ol>
@@ -220,7 +220,7 @@
 
             <div class="bg-gray-900 text-white">
               <%= for logs <- @logs do %>
-                <%= logs.description %> <br />
+                {logs.description} <br />
               <% end %>
             </div>
           </div>
@@ -277,7 +277,7 @@
                 </g>
               </svg>
             </button>
-            <%= assignment_submission_file.file.file_name %>
+            {assignment_submission_file.file.file_name}
           </li>
         </ol>
       </div>
@@ -333,7 +333,7 @@
 
         <div class="bg-gray-900 text-white">
           <%= for logs <- @logs do %>
-            <%= logs.description %> <br />
+            {logs.description} <br />
           <% end %>
         </div>
       </div>
@@ -346,10 +346,10 @@
   </.header>
   <.table id="submitted_assignment_submissions" rows={@submitted_assignment_submissions}>
     <:col :let={{_, i}} label="id">
-      <%= i %>
+      {i}
     </:col>
     <:col :let={{submitted_assignment_submission, _}} label="email">
-      <%= submitted_assignment_submission.user.email %>
+      {submitted_assignment_submission.user.email}
     </:col>
     <:action :let={{submitted_assignment_submission, _}}>
       <.link

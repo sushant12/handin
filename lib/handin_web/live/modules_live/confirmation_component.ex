@@ -23,7 +23,7 @@ defmodule HandinWeb.ModulesLive.ConfirmationComponent do
           d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
         />
       </svg>
-      <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"><%= @message %></h3>
+      <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">{@message}</h3>
       <.button
         class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center"
         phx-click={@confirm_event}
@@ -65,7 +65,7 @@ defmodule HandinWeb.ModulesLive.ConfirmationComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Module cloned successfully.")
-         |> push_patch(to: socket.assigns.patch)}
+         |> push_navigate(to: socket.assigns.patch)}
 
       {:error, _} ->
         {:noreply, put_flash(socket, :error, "Module could not be cloned successfully.")}
@@ -80,7 +80,7 @@ defmodule HandinWeb.ModulesLive.ConfirmationComponent do
       {:noreply,
        socket
        |> put_flash(:info, "Module archived successfully.")
-       |> push_patch(to: socket.assigns.patch)}
+       |> push_navigate(to: socket.assigns.patch)}
     else
       _ ->
         {:noreply, put_flash(socket, :error, "Failed to archive module")}
