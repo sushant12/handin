@@ -64,7 +64,7 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-24 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
               value={@submission.total_points}
               phx-blur="change_submission_grade"
-            /> <span class="mx-2 whitespace-nowrap mr-8">/ <%= @assignment.total_marks %></span>
+            /> <span class="mx-2 whitespace-nowrap mr-8">/ {@assignment.total_marks}</span>
           <% end %>
           <%= if @assignment.enable_max_attempts do %>
             <span class="mr-2"> Attempts: </span>
@@ -75,7 +75,7 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
               value={@submission.retries}
               phx-blur="change_submission_attempts"
               step="1"
-            /> <span class="mx-2 whitespace-nowrap mr-8">/ <%= @assignment.max_attempts %></span>
+            /> <span class="mx-2 whitespace-nowrap mr-8">/ {@assignment.max_attempts}</span>
           <% end %>
         </div>
       </div>
@@ -108,7 +108,7 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
                 </svg>
               </span>
               <span class="truncate" title={submission_file.file.file_name}>
-                <%= submission_file.file.file_name %>
+                {submission_file.file.file_name}
               </span>
             </li>
           </ul>
@@ -128,7 +128,7 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
             phx-click="run_tests"
             phx-value-assignment_id={@assignment.id}
           >
-            <%= if @build, do: "Running...", else: "Run All Tests" %>
+            {if @build, do: "Running...", else: "Run All Tests"}
           </button>
         </div>
 
@@ -173,7 +173,7 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
                       d="m13 7-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                     />
                   </svg>
-                  <%= log.name %>
+                  {log.name}
                 </span>
                 <svg
                   data-accordion-icon
@@ -201,11 +201,11 @@ defmodule HandinWeb.AssignmentSubmissionsLive.Show do
               <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
                 <p class="font-semibold">Expected Output:</p>
                 <p class="mb-2 text-gray-500 dark:text-gray-400">
-                  <%= log.expected_output %>
+                  {log.expected_output}
                 </p>
                 <p class="font-semibold">Got:</p>
                 <p class="text-gray-500 dark:text-gray-400">
-                  <%= log.output %>
+                  {log.output}
                 </p>
               </div>
             </div>

@@ -8,12 +8,12 @@
       <%= form_tag @conn.request_path, method: :get, id: "torch-filters-form" do %>
         <div class="field">
           <label>Machine</label>
-          <%= filter_select(:build, :machine_id, @conn.params) %>
-          <%= filter_string_input(:build, :machine_id, @conn.params) %>
+          {filter_select(:build, :machine_id, @conn.params)}
+          {filter_string_input(:build, :machine_id, @conn.params)}
         </div>
 
         <button type="submit" class="torch-button">Search</button>
-        <%= link("Clear Filters", to: ~p"/admin/builds") %>
+        {link("Clear Filters", to: ~p"/admin/builds")}
       <% end %>
     </section>
 
@@ -22,9 +22,9 @@
         <table>
           <thead>
             <tr>
-              <th><%= table_link(@conn, "Machine", :machine_id) %></th>
+              <th>{table_link(@conn, "Machine", :machine_id)}</th>
 
-              <th><%= table_link(@conn, "Status", :status) %></th>
+              <th>{table_link(@conn, "Status", :status)}</th>
 
               <th><span>Actions</span></th>
             </tr>
@@ -32,19 +32,19 @@
           <tbody>
             <%= for build <- @builds do %>
               <tr>
-                <td><%= build.machine_id %></td>
+                <td>{build.machine_id}</td>
 
-                <td><%= build.status %></td>
+                <td>{build.status}</td>
 
                 <td class="torch-actions">
                   <span>
                     <.link href={~p"/admin/builds/#{build}"}>
-                      <%= Torch.I18n.message("Show") %>
+                      {Torch.I18n.message("Show")}
                     </.link>
                   </span>
                   <span>
                     <.link href={~p"/admin/builds/#{build}/edit"}>
-                      <%= Torch.I18n.message("Edit") %>
+                      {Torch.I18n.message("Edit")}
                     </.link>
                   </span>
                   <span>
@@ -53,7 +53,7 @@
                       method="delete"
                       data-confirm={Torch.I18n.message("Are you sure?")}
                     >
-                      <%= Torch.I18n.message("Delete") %>
+                      {Torch.I18n.message("Delete")}
                     </.link>
                   </span>
                 </td>
@@ -61,7 +61,7 @@
             <% end %>
           </tbody>
         </table>
-        <%= Torch.PaginationView.pagination(@conn) %>
+        {Torch.PaginationView.pagination(@conn)}
       <% else %>
         <p class="torch-no-data">No Builds match your search.</p>
       <% end %>

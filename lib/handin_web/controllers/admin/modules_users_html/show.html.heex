@@ -4,10 +4,10 @@
       href={~p"/admin/modules/#{@module_id}/modules_users/#{@modules_users}/edit"}
       class="torch-button"
     >
-      <%= Torch.I18n.message("Edit") %>
+      {Torch.I18n.message("Edit")}
     </.link>
     <.link href={~p"/admin/modules/#{@module_id}/"} class="torch-button">
-      <%= Torch.I18n.message("Back") %>
+      {Torch.I18n.message("Back")}
     </.link>
   </div>
 </section>
@@ -20,17 +20,17 @@
     <section class="torch-show-details">
       <div class="torch-show-attribute">
         <div class="torch-show-label">Role:</div>
-        <div class="torch-show-data"><%= @modules_users.role %></div>
+        <div class="torch-show-data">{@modules_users.role}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Module:</div>
-        <div class="torch-show-data"><%= @modules_users.module.name %></div>
+        <div class="torch-show-data">{@modules_users.module.name}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">User:</div>
-        <div class="torch-show-data"><%= @modules_users.user.email %></div>
+        <div class="torch-show-data">{@modules_users.user.email}</div>
       </div>
     </section>
   </div>

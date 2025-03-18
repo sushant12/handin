@@ -30,7 +30,7 @@ defmodule HandinWeb.UserLoginLive do
             class="space-y-4 md:space-y-6"
           >
             <.error :if={@flash["error"]}>
-              <%= @flash["error"] %>
+              {@flash["error"]}
             </.error>
             <div>
               <.input

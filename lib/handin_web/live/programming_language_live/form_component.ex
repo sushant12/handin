@@ -8,7 +8,7 @@ defmodule HandinWeb.Admin.ProgrammingLanguageLive.FormComponent do
     ~H"""
     <div>
       <.header>
-        <%= @title %>
+        {@title}
         <:subtitle>Use this form to manage programming_language records in your database.</:subtitle>
       </.header>
 

@@ -9,7 +9,7 @@ defmodule HandinWeb.TeachingAssistantsLive.FormComponent do
     <div>
       <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
         <.header>
-          <%= @title %>
+          {@title}
         </.header>
       </div>
       <.simple_form for={@form} id="teaching-assistant-form" phx-target={@myself} phx-submit="save">

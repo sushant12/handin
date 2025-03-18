@@ -1,5 +1,5 @@
 <.header>
-  Programming language <%= @programming_language.id %>
+  Programming language {@programming_language.id}
   <:subtitle>This is a programming_language record from your database.</:subtitle>
   <:actions>
     <.link
@@ -14,8 +14,8 @@
 </.header>
 
 <.list>
-  <:item title="Name"><%= @programming_language.name %></:item>
-  <:item title="Docker file url"><%= @programming_language.docker_file_url %></:item>
+  <:item title="Name">{@programming_language.name}</:item>
+  <:item title="Docker file url">{@programming_language.docker_file_url}</:item>
 </.list>
 
 <.back navigate={~p"/admin/programming_languages"}>Back to programming_languages</.back>

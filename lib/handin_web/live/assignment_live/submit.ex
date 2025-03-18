@@ -28,10 +28,10 @@ defmodule HandinWeb.AssignmentLive.Submit do
 
     <div class="flex justify-between items-center w-1/2">
       <span :if={@assignment.enable_max_attempts} class="whitespace-nowrap">
-        Attempts remaining: <%= @assignment.max_attempts - @assignment_submission.retries %>
+        Attempts remaining: {@assignment.max_attempts - @assignment_submission.retries}
       </span>
       <span :if={@assignment.enable_total_marks} class="whitespace-nowrap">
-        Grade: <%= @assignment_submission.total_points %> / <%= @assignment.total_marks %>
+        Grade: {@assignment_submission.total_points} / {@assignment.total_marks}
       </span>
     </div>
 
@@ -47,7 +47,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
     </.link>
     <div class="w-1/2">
       <.table id="helper-files" rows={@assignment_submission_files}>
-        <:col :let={file} label="name"><%= file.file.file_name %></:col>
+        <:col :let={file} label="name">{file.file.file_name}</:col>
         <:action :let={file}>
           <.link
             :if={Assignments.submission_allowed?(@assignment_submission)}
@@ -67,7 +67,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
       phx-click="submit_assignment"
       phx-value-assignment_id={@assignment.id}
     >
-      <%= if @build, do: "Submitting...", else: "Submit Assignment" %>
+      {if @build, do: "Submitting...", else: "Submit Assignment"}
     </.button>
 
     <div :if={@assignment.enable_test_output} class="w-1/2" id="accordion-open" data-accordion="open">
@@ -111,7 +111,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
                   d="m13 7-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                 />
               </svg>
-              <%= log.name %>
+              {log.name}
             </span>
             <svg
               data-accordion-icon
@@ -139,11 +139,11 @@ defmodule HandinWeb.AssignmentLive.Submit do
           <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
             <p class="font-semibold">Expected Output:</p>
             <p class="mb-2 text-gray-500 dark:text-gray-400">
-              <%= log.expected_output %>
+              {log.expected_output}
             </p>
             <p class="font-semibold">Got:</p>
             <p class="text-gray-500 dark:text-gray-400">
-              <%= log.output %>
+              {log.output}
             </p>
           </div>
         </div>
@@ -180,7 +180,7 @@ defmodule HandinWeb.AssignmentLive.Submit do
                 d="M6 18L18 6M6 6l12 12"
               />
             </svg>
-            <%= log.name %>
+            {log.name}
           </li>
         <% end %>
       </ul>

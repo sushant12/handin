@@ -10,81 +10,81 @@
       <%= form_tag @conn.request_path, method: :get, id: "torch-filters-form" do %>
         <div class="field">
           <label>Name</label>
-          <%= filter_select(:assignment, :name, @conn.params) %>
-          <%= filter_string_input(:assignment, :name, @conn.params) %>
+          {filter_select(:assignment, :name, @conn.params)}
+          {filter_string_input(:assignment, :name, @conn.params)}
         </div>
 
         <div class="field">
           <label>Run script</label>
-          <%= filter_select(:assignment, :run_script, @conn.params) %>
-          <%= filter_string_input(:assignment, :run_script, @conn.params) %>
+          {filter_select(:assignment, :run_script, @conn.params)}
+          {filter_string_input(:assignment, :run_script, @conn.params)}
         </div>
 
         <div class="field">
           <label>Enable max attempts</label>
-          <%= filter_boolean_input(:assignment, :enable_max_attempts, @conn.params) %>
+          {filter_boolean_input(:assignment, :enable_max_attempts, @conn.params)}
         </div>
 
         <div class="field">
           <label>Enable total marks</label>
-          <%= filter_boolean_input(:assignment, :enable_total_marks, @conn.params) %>
+          {filter_boolean_input(:assignment, :enable_total_marks, @conn.params)}
         </div>
 
         <div class="field">
           <label>Enable cutoff date</label>
-          <%= filter_boolean_input(:assignment, :enable_cutoff_date, @conn.params) %>
+          {filter_boolean_input(:assignment, :enable_cutoff_date, @conn.params)}
         </div>
 
         <div class="field">
           <label>Enable penalty per day</label>
-          <%= filter_boolean_input(:assignment, :enable_penalty_per_day, @conn.params) %>
+          {filter_boolean_input(:assignment, :enable_penalty_per_day, @conn.params)}
         </div>
 
         <div class="field">
           <label>Enable attempt marks</label>
-          <%= filter_boolean_input(:assignment, :enable_attempt_marks, @conn.params) %>
+          {filter_boolean_input(:assignment, :enable_attempt_marks, @conn.params)}
         </div>
 
         <div class="field">
           <label>Enable test output</label>
-          <%= filter_boolean_input(:assignment, :enable_test_output, @conn.params) %>
+          {filter_boolean_input(:assignment, :enable_test_output, @conn.params)}
         </div>
 
         <div class="field">
           <label>Start date</label>
-          <%= filter_date_input(:assignment, :start_date, @conn.params) %>
+          {filter_date_input(:assignment, :start_date, @conn.params)}
         </div>
 
         <div class="field">
           <label>Due date</label>
-          <%= filter_date_input(:assignment, :due_date, @conn.params) %>
+          {filter_date_input(:assignment, :due_date, @conn.params)}
         </div>
 
         <div class="field">
           <label>Cutoff date</label>
-          <%= filter_date_input(:assignment, :cutoff_date, @conn.params) %>
+          {filter_date_input(:assignment, :cutoff_date, @conn.params)}
         </div>
 
         <div class="field">
           <label>Max attempts</label>
-          <%= number_filter_select(:assignment, :max_attempts, @conn.params) %>
-          <%= filter_number_input(:assignment, :max_attempts, @conn.params) %>
+          {number_filter_select(:assignment, :max_attempts, @conn.params)}
+          {filter_number_input(:assignment, :max_attempts, @conn.params)}
         </div>
 
         <div class="field">
           <label>Total marks</label>
-          <%= number_filter_select(:assignment, :total_marks, @conn.params) %>
-          <%= filter_number_input(:assignment, :total_marks, @conn.params) %>
+          {number_filter_select(:assignment, :total_marks, @conn.params)}
+          {filter_number_input(:assignment, :total_marks, @conn.params)}
         </div>
 
         <div class="field">
           <label>Attempt marks</label>
-          <%= number_filter_select(:assignment, :attempt_marks, @conn.params) %>
-          <%= filter_number_input(:assignment, :attempt_marks, @conn.params) %>
+          {number_filter_select(:assignment, :attempt_marks, @conn.params)}
+          {filter_number_input(:assignment, :attempt_marks, @conn.params)}
         </div>
 
         <button type="submit" class="torch-button">Search</button>
-        <%= link("Clear Filters", to: ~p"/admin/assignments") %>
+        {link("Clear Filters", to: ~p"/admin/assignments")}
       <% end %>
     </section>
 
@@ -93,37 +93,37 @@
         <table>
           <thead>
             <tr>
-              <th><%= table_link(@conn, "Name", :name) %></th>
+              <th>{table_link(@conn, "Name", :name)}</th>
 
-              <th><%= table_link(@conn, "Module", :module_id) %></th>
+              <th>{table_link(@conn, "Module", :module_id)}</th>
 
-              <th><%= table_link(@conn, "Start date", :start_date) %></th>
+              <th>{table_link(@conn, "Start date", :start_date)}</th>
 
-              <th><%= table_link(@conn, "Due date", :due_date) %></th>
+              <th>{table_link(@conn, "Due date", :due_date)}</th>
 
-              <th><%= table_link(@conn, "Run script", :run_script) %></th>
+              <th>{table_link(@conn, "Run script", :run_script)}</th>
 
-              <th><%= table_link(@conn, "Enable max attempts", :enable_max_attempts) %></th>
+              <th>{table_link(@conn, "Enable max attempts", :enable_max_attempts)}</th>
 
-              <th><%= table_link(@conn, "Max attempts", :max_attempts) %></th>
+              <th>{table_link(@conn, "Max attempts", :max_attempts)}</th>
 
-              <th><%= table_link(@conn, "Enable total marks", :enable_total_marks) %></th>
+              <th>{table_link(@conn, "Enable total marks", :enable_total_marks)}</th>
 
-              <th><%= table_link(@conn, "Total marks", :total_marks) %></th>
+              <th>{table_link(@conn, "Total marks", :total_marks)}</th>
 
-              <th><%= table_link(@conn, "Enable cutoff date", :enable_cutoff_date) %></th>
+              <th>{table_link(@conn, "Enable cutoff date", :enable_cutoff_date)}</th>
 
-              <th><%= table_link(@conn, "Cutoff date", :cutoff_date) %></th>
+              <th>{table_link(@conn, "Cutoff date", :cutoff_date)}</th>
 
-              <th><%= table_link(@conn, "Enable penalty per day", :enable_penalty_per_day) %></th>
+              <th>{table_link(@conn, "Enable penalty per day", :enable_penalty_per_day)}</th>
 
-              <th><%= table_link(@conn, "Penalty per day", :penalty_per_day) %></th>
+              <th>{table_link(@conn, "Penalty per day", :penalty_per_day)}</th>
 
-              <th><%= table_link(@conn, "Enable attempt marks", :enable_attempt_marks) %></th>
+              <th>{table_link(@conn, "Enable attempt marks", :enable_attempt_marks)}</th>
 
-              <th><%= table_link(@conn, "Attempt marks", :attempt_marks) %></th>
+              <th>{table_link(@conn, "Attempt marks", :attempt_marks)}</th>
 
-              <th><%= table_link(@conn, "Enable test output", :enable_test_output) %></th>
+              <th>{table_link(@conn, "Enable test output", :enable_test_output)}</th>
 
               <th><span>Actions</span></th>
             </tr>
@@ -131,47 +131,47 @@
           <tbody>
             <%= for assignment <- @assignments do %>
               <tr>
-                <td><%= assignment.name || "-" %></td>
+                <td>{assignment.name || "-"}</td>
 
-                <td><%= assignment.module.name || "-" %></td>
+                <td>{assignment.module.name || "-"}</td>
 
-                <td><%= assignment.start_date || "-" %></td>
+                <td>{assignment.start_date || "-"}</td>
 
-                <td><%= assignment.due_date || "-" %></td>
+                <td>{assignment.due_date || "-"}</td>
 
-                <td><%= assignment.run_script || "-" %></td>
+                <td>{assignment.run_script || "-"}</td>
 
-                <td><%= assignment.enable_max_attempts %></td>
+                <td>{assignment.enable_max_attempts}</td>
 
-                <td><%= assignment.max_attempts || "-" %></td>
+                <td>{assignment.max_attempts || "-"}</td>
 
-                <td><%= assignment.enable_total_marks %></td>
+                <td>{assignment.enable_total_marks}</td>
 
-                <td><%= assignment.total_marks || "-" %></td>
+                <td>{assignment.total_marks || "-"}</td>
 
-                <td><%= assignment.enable_cutoff_date %></td>
+                <td>{assignment.enable_cutoff_date}</td>
 
-                <td><%= assignment.cutoff_date || "-" %></td>
+                <td>{assignment.cutoff_date || "-"}</td>
 
-                <td><%= assignment.enable_penalty_per_day %></td>
+                <td>{assignment.enable_penalty_per_day}</td>
 
-                <td><%= assignment.penalty_per_day || "-" %></td>
+                <td>{assignment.penalty_per_day || "-"}</td>
 
-                <td><%= assignment.enable_attempt_marks %></td>
+                <td>{assignment.enable_attempt_marks}</td>
 
-                <td><%= assignment.attempt_marks || "-" %></td>
+                <td>{assignment.attempt_marks || "-"}</td>
 
-                <td><%= assignment.enable_test_output %></td>
+                <td>{assignment.enable_test_output}</td>
 
                 <td class="torch-actions">
                   <span>
                     <.link href={~p"/admin/assignments/#{assignment}"}>
-                      <%= Torch.I18n.message("Show") %>
+                      {Torch.I18n.message("Show")}
                     </.link>
                   </span>
                   <span>
                     <.link href={~p"/admin/assignments/#{assignment}/edit"}>
-                      <%= Torch.I18n.message("Edit") %>
+                      {Torch.I18n.message("Edit")}
                     </.link>
                   </span>
                   <span>
@@ -180,7 +180,7 @@
                       method="delete"
                       data-confirm={Torch.I18n.message("Are you sure?")}
                     >
-                      <%= Torch.I18n.message("Delete") %>
+                      {Torch.I18n.message("Delete")}
                     </.link>
                   </span>
                 </td>
@@ -188,7 +188,7 @@
             <% end %>
           </tbody>
         </table>
-        <%= Torch.PaginationView.pagination(@conn) %>
+        {Torch.PaginationView.pagination(@conn)}
       <% else %>
         <p class="torch-no-data">No Assignments match your search.</p>
       <% end %>

@@ -1,10 +1,10 @@
 <section id="torch-toolbar">
   <div class="torch-container">
     <.link href={~p"/admin/assignments/#{@assignment}/edit"} class="torch-button">
-      <%= Torch.I18n.message("Edit") %>
+      {Torch.I18n.message("Edit")}
     </.link>
     <.link href={~p"/admin/assignments"} class="torch-button">
-      <%= Torch.I18n.message("Back") %>
+      {Torch.I18n.message("Back")}
     </.link>
   </div>
 </section>
@@ -17,77 +17,77 @@
     <section class="torch-show-details">
       <div class="torch-show-attribute">
         <div class="torch-show-label">Name:</div>
-        <div class="torch-show-data"><%= @assignment.name %></div>
+        <div class="torch-show-data">{@assignment.name}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Start date:</div>
-        <div class="torch-show-data"><%= @assignment.start_date %></div>
+        <div class="torch-show-data">{@assignment.start_date}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Due date:</div>
-        <div class="torch-show-data"><%= @assignment.due_date %></div>
+        <div class="torch-show-data">{@assignment.due_date}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Run script:</div>
-        <div class="torch-show-data"><%= @assignment.run_script %></div>
+        <div class="torch-show-data">{@assignment.run_script}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Enable max attempts:</div>
-        <div class="torch-show-data"><%= @assignment.enable_max_attempts %></div>
+        <div class="torch-show-data">{@assignment.enable_max_attempts}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Max attempts:</div>
-        <div class="torch-show-data"><%= @assignment.max_attempts %></div>
+        <div class="torch-show-data">{@assignment.max_attempts}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Enable total marks:</div>
-        <div class="torch-show-data"><%= @assignment.enable_total_marks %></div>
+        <div class="torch-show-data">{@assignment.enable_total_marks}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Total marks:</div>
-        <div class="torch-show-data"><%= @assignment.total_marks %></div>
+        <div class="torch-show-data">{@assignment.total_marks}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Enable cutoff date:</div>
-        <div class="torch-show-data"><%= @assignment.enable_cutoff_date %></div>
+        <div class="torch-show-data">{@assignment.enable_cutoff_date}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Cutoff date:</div>
-        <div class="torch-show-data"><%= @assignment.cutoff_date %></div>
+        <div class="torch-show-data">{@assignment.cutoff_date}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Enable penalty per day:</div>
-        <div class="torch-show-data"><%= @assignment.enable_penalty_per_day %></div>
+        <div class="torch-show-data">{@assignment.enable_penalty_per_day}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Penalty per day:</div>
-        <div class="torch-show-data"><%= @assignment.penalty_per_day %></div>
+        <div class="torch-show-data">{@assignment.penalty_per_day}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Enable attempt marks:</div>
-        <div class="torch-show-data"><%= @assignment.enable_attempt_marks %></div>
+        <div class="torch-show-data">{@assignment.enable_attempt_marks}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Attempt marks:</div>
-        <div class="torch-show-data"><%= @assignment.attempt_marks %></div>
+        <div class="torch-show-data">{@assignment.attempt_marks}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Enable test output:</div>
-        <div class="torch-show-data"><%= @assignment.enable_test_output %></div>
+        <div class="torch-show-data">{@assignment.enable_test_output}</div>
       </div>
 
       <div class="torch-show-attribute">
@@ -99,7 +99,7 @@
             }
             class="badge badge-primary"
           >
-            <%= file.file.file_name %><br />
+            {file.file.file_name}<br />
           </span>
         </div>
       </div>
@@ -110,7 +110,7 @@
             :for={file <- Enum.filter(@assignment.assignment_files, &(&1.file_type == :solution))}
             class="badge badge-primary"
           >
-            <%= file.file.file_name %><br />
+            {file.file.file_name}<br />
           </span>
         </div>
       </div>
@@ -161,41 +161,41 @@
             <tbody>
               <%= for assignment_test <- @assignment.assignment_tests do %>
                 <tr>
-                  <td><%= assignment_test.name %></td>
+                  <td>{assignment_test.name}</td>
 
-                  <td><%= assignment_test.points_on_pass %></td>
+                  <td>{assignment_test.points_on_pass}</td>
 
-                  <td><%= assignment_test.points_on_fail %></td>
+                  <td>{assignment_test.points_on_fail}</td>
 
-                  <td><%= assignment_test.command %></td>
+                  <td>{assignment_test.command}</td>
 
-                  <td><%= assignment_test.expected_output_type %></td>
+                  <td>{assignment_test.expected_output_type}</td>
 
-                  <td><%= assignment_test.expected_output_text %></td>
+                  <td>{assignment_test.expected_output_text}</td>
 
-                  <td><%= assignment_test.expected_output_file %></td>
+                  <td>{assignment_test.expected_output_file}</td>
 
-                  <td><%= assignment_test.expected_output_file_content %></td>
+                  <td>{assignment_test.expected_output_file_content}</td>
 
-                  <td><%= assignment_test.ttl %></td>
+                  <td>{assignment_test.ttl}</td>
 
-                  <td><%= assignment_test.enable_custom_test %></td>
+                  <td>{assignment_test.enable_custom_test}</td>
 
-                  <td><%= assignment_test.custom_test %></td>
+                  <td>{assignment_test.custom_test}</td>
 
                   <td class="torch-actions">
                     <span>
                       <.link href={
                         ~p"/admin/assignments/#{@assignment}/assignment_tests/#{assignment_test}"
                       }>
-                        <%= Torch.I18n.message("Show") %>
+                        {Torch.I18n.message("Show")}
                       </.link>
                     </span>
                     <span>
                       <.link href={
                         ~p"/admin/assignments/#{@assignment}/assignment_tests/#{assignment_test}/edit"
                       }>
-                        <%= Torch.I18n.message("Edit") %>
+                        {Torch.I18n.message("Edit")}
                       </.link>
                     </span>
                     <span>
@@ -206,7 +206,7 @@
                         method="delete"
                         data-confirm={Torch.I18n.message("Are you sure?")}
                       >
-                        <%= Torch.I18n.message("Delete") %>
+                        {Torch.I18n.message("Delete")}
                       </.link>
                     </span>
                   </td>

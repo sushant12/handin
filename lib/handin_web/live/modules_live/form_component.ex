@@ -8,7 +8,7 @@ defmodule HandinWeb.ModulesLive.FormComponent do
     <div>
       <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
         <.header>
-          <%= @title %>
+          {@title}
         </.header>
       </div>
       <.simple_form
@@ -84,7 +84,7 @@ defmodule HandinWeb.ModulesLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Module updated successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> push_navigate(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
@@ -99,7 +99,7 @@ defmodule HandinWeb.ModulesLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Module created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+         |> push_navigate(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}

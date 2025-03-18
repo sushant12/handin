@@ -1,10 +1,10 @@
 <section id="torch-toolbar">
   <div class="torch-container">
     <.link href={~p"/admin/modules/#{@module}/edit"} class="torch-button">
-      <%= Torch.I18n.message("Edit") %>
+      {Torch.I18n.message("Edit")}
     </.link>
     <.link href={~p"/admin/modules"} class="torch-button">
-      <%= Torch.I18n.message("Back") %>
+      {Torch.I18n.message("Back")}
     </.link>
   </div>
 </section>
@@ -17,27 +17,27 @@
     <section class="torch-show-details">
       <div class="torch-show-attribute">
         <div class="torch-show-label">Name:</div>
-        <div class="torch-show-data"><%= @module.name %></div>
+        <div class="torch-show-data">{@module.name}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Code:</div>
-        <div class="torch-show-data"><%= @module.code %></div>
+        <div class="torch-show-data">{@module.code}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Term:</div>
-        <div class="torch-show-data"><%= @module.term %></div>
+        <div class="torch-show-data">{@module.term}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Archived:</div>
-        <div class="torch-show-data"><%= @module.archived %></div>
+        <div class="torch-show-data">{@module.archived}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Deleted at:</div>
-        <div class="torch-show-data"><%= @module.deleted_at || "-" %></div>
+        <div class="torch-show-data">{@module.deleted_at || "-"}</div>
       </div>
     </section>
   </div>
@@ -64,21 +64,21 @@
             <tbody>
               <%= for modules_users <- @modules_users do %>
                 <tr>
-                  <td><%= modules_users.user.email %></td>
+                  <td>{modules_users.user.email}</td>
 
-                  <td><%= modules_users.role %></td>
+                  <td>{modules_users.role}</td>
 
                   <td class="torch-actions">
                     <span>
                       <.link href={~p"/admin/modules/#{@module}/modules_users/#{modules_users}"}>
-                        <%= Torch.I18n.message("Show") %>
+                        {Torch.I18n.message("Show")}
                       </.link>
                     </span>
                     <span>
                       <.link href={
                         ~p"/admin/modules/#{@module}/modules_users/#{modules_users}/edit"
                       }>
-                        <%= Torch.I18n.message("Edit") %>
+                        {Torch.I18n.message("Edit")}
                       </.link>
                     </span>
                     <span>
@@ -87,7 +87,7 @@
                         method="delete"
                         data-confirm={Torch.I18n.message("Are you sure?")}
                       >
-                        <%= Torch.I18n.message("Delete") %>
+                        {Torch.I18n.message("Delete")}
                       </.link>
                     </span>
                   </td>

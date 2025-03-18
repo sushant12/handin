@@ -61,7 +61,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                 </svg>
               </span>
               <span class="truncate" title={assignment_file.file.file_name}>
-                <%= assignment_file.file.file_name %>
+                {assignment_file.file.file_name}
               </span>
             </li>
             <li
@@ -85,7 +85,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
               </span>
 
               <span class="truncate" title={assignment_file.file.file_name}>
-                <%= assignment_file.file.file_name %>
+                {assignment_file.file.file_name}
               </span>
             </li>
           </ul>
@@ -114,7 +114,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   class="truncate"
                   title={test.name}
                 >
-                  <%= test.name %>
+                  {test.name}
                 </.link>
 
                 <span class="delete-icon">
@@ -219,7 +219,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
             phx-click="run_tests"
             phx-value-assignment_id={@assignment.id}
           >
-            <%= if @build, do: "Running...", else: "Run All Tests" %>
+            {if @build, do: "Running...", else: "Run All Tests"}
           </button>
         </div>
 
@@ -264,7 +264,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
                       d="m13 7-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                     />
                   </svg>
-                  <%= log.name %>
+                  {log.name}
                 </span>
                 <svg
                   data-accordion-icon
@@ -292,11 +292,11 @@ defmodule HandinWeb.AssignmentLive.Tests do
               <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
                 <p class="font-semibold">Expected Output:</p>
                 <p class="mb-2 text-gray-500 dark:text-gray-400">
-                  <%= log.expected_output %>
+                  {log.expected_output}
                 </p>
                 <p class="font-semibold">Got:</p>
                 <p class="text-gray-500 dark:text-gray-400">
-                  <%= log.output %>
+                  {log.output}
                 </p>
               </div>
             </div>

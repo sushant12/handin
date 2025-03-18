@@ -4,10 +4,10 @@
       href={~p"/admin/assignment_submissions/#{@assignment_submission}/edit"}
       class="torch-button"
     >
-      <%= Torch.I18n.message("Edit") %>
+      {Torch.I18n.message("Edit")}
     </.link>
     <.link href={~p"/admin/assignment_submissions"} class="torch-button">
-      <%= Torch.I18n.message("Back") %>
+      {Torch.I18n.message("Back")}
     </.link>
   </div>
 </section>
@@ -20,27 +20,27 @@
     <section class="torch-show-details">
       <div class="torch-show-attribute">
         <div class="torch-show-label">Submitted at:</div>
-        <div class="torch-show-data"><%= @assignment_submission.submitted_at %></div>
+        <div class="torch-show-data">{@assignment_submission.submitted_at}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Retries:</div>
-        <div class="torch-show-data"><%= @assignment_submission.retries %></div>
+        <div class="torch-show-data">{@assignment_submission.retries}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Total points:</div>
-        <div class="torch-show-data"><%= @assignment_submission.total_points %></div>
+        <div class="torch-show-data">{@assignment_submission.total_points}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">User:</div>
-        <div class="torch-show-data"><%= @assignment_submission.user.email %></div>
+        <div class="torch-show-data">{@assignment_submission.user.email}</div>
       </div>
 
       <div class="torch-show-attribute">
         <div class="torch-show-label">Assignment:</div>
-        <div class="torch-show-data"><%= @assignment_submission.assignment.name %></div>
+        <div class="torch-show-data">{@assignment_submission.assignment.name}</div>
       </div>
     </section>
   </div>
