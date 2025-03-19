@@ -170,4 +170,8 @@ defmodule HandinWeb.Router do
       live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
   end
+
+  scope "/api", HandinWeb do
+    post "/:assignment_id/test_output", AssignmentTestOutputController, :upload_file
+  end
 end
