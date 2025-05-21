@@ -17,6 +17,15 @@ defmodule Handin.Factory do
     }
   end
 
+  def admin_factory do
+    %User{
+      hashed_password: Bcrypt.hash_pwd_salt("123456"),
+      email: "admin@example.com",
+      role: :admin,
+      confirmed_at: DateTime.utc_now()
+    }
+  end
+
   def lecturer_factory do
     %User{
       hashed_password: Bcrypt.hash_pwd_salt("123456"),
