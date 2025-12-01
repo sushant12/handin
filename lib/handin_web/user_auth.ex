@@ -44,7 +44,12 @@ defmodule HandinWeb.UserAuth do
         |> redirect(to: ~p"/users/reset_password/#{user.id}")
 
       true ->
-        redirect(conn, to: ~p"/users/log_in")
+        conn
+        |> put_flash(
+          :error,
+          "Please confirm your account before logging in. Check your email for the confirmation link."
+        )
+        |> redirect(to: ~p"/users/log_in")
     end
   end
 
