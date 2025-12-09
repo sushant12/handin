@@ -4,6 +4,7 @@ defmodule HandinWeb.AssignmentLive.Tests do
   alias Handin.Modules
   alias Handin.{Assignments, AssignmentTests}
   alias Handin.Assignments.AssignmentTest
+  alias Handin.AssignmentFileUploader
 
   @impl true
   def render(assigns) do
@@ -60,9 +61,18 @@ defmodule HandinWeb.AssignmentLive.Tests do
                   />
                 </svg>
               </span>
-              <span class="truncate" title={assignment_file.file.file_name}>
+              <a
+                href={
+                  AssignmentFileUploader.url({assignment_file.file.file_name, assignment_file},
+                    signed: true
+                  )
+                }
+                download={assignment_file.file.file_name}
+                class="truncate hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                title={assignment_file.file.file_name}
+              >
                 {assignment_file.file.file_name}
-              </span>
+              </a>
             </li>
             <li
               :for={assignment_file <- @assignment.assignment_files}
